@@ -470,11 +470,33 @@ class Renderer3D {
     engine.purples.forEach((r, i) => addRug(r, 'purples', i, 0x8a4fd8));
     (engine.oranges || []).forEach((r, i) => addRug(r, 'oranges', i, 0xe08a1e));
     (engine.cyans || []).forEach((r, i) => addRug(r, 'cyans', i, 0x22b8d4));
-    // wet puddles (penalty zone)
+    // wet puddles: a spilled SPLASH of water — wavy outline, glassy sheen,
+    // flush with the floor — not another rectangle that reads as a rug
     for (const p of engine.puddles) {
-      const m = new THREE.Mesh(new THREE.BoxGeometry((p.x2 - p.x1) * 0.96, 0.018, (p.y2 - p.y1) * 0.96),
-        new THREE.MeshStandardMaterial({ color: 0x2f7fc4, roughness: 0.06, metalness: 0.4, transparent: true, opacity: 0.85, emissive: 0x0e3350, emissiveIntensity: 0.6 }));
-      m.position.set(ox + (p.x1 + p.x2) / 2, 0.065, oz + (p.y1 + p.y2) / 2); this.dyn.add(m);
+      const w2 = (p.x2 - p.x1) / 2, d2 = (p.y2 - p.y1) / 2;
+      const shape = new THREE.Shape();
+      const LOBES = 7;
+      for (let k = 0; k <= 40; k++) {
+        const a = (k / 40) * Math.PI * 2;
+        const rr = 0.82 + 0.16 * Math.sin(a * LOBES + p.x1 * 3.1) + 0.06 * Math.sin(a * 3 + p.y1 * 2.7);
+        const px2 = Math.cos(a) * w2 * rr, py2 = Math.sin(a) * d2 * rr;
+        if (k === 0) shape.moveTo(px2, py2); else shape.lineTo(px2, py2);
+      }
+      const geo = new THREE.ShapeGeometry(shape, 24);
+      geo.rotateX(-Math.PI / 2);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+        color: 0x3d9fe0, roughness: 0.02, metalness: 0.55,
+        transparent: true, opacity: 0.62, emissive: 0x114a72, emissiveIntensity: 0.5,
+        depthWrite: false,
+      }));
+      m.position.set(ox + (p.x1 + p.x2) / 2, 0.052, oz + (p.y1 + p.y2) / 2);
+      this.dyn.add(m);
+      // the light catching the surface: a small off-centre gloss
+      const hl = new THREE.Mesh(new THREE.CircleGeometry(Math.min(w2, d2) * 0.35, 20),
+        new THREE.MeshBasicMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.28, depthWrite: false }));
+      hl.rotation.x = -Math.PI / 2;
+      hl.position.set(ox + (p.x1 + p.x2) / 2 - w2 * 0.25, 0.056, oz + (p.y1 + p.y2) / 2 - d2 * 0.2);
+      this.dyn.add(hl);
     }
 
     let fIdx = 0;

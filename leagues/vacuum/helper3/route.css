@@ -160,3 +160,8 @@ pre#code {
   border: 1px solid var(--line); border-radius: 7px; padding: 3px 7px;
   font: 700 12.5px Vazirmatn, Tahoma, sans-serif; background: var(--card); color: var(--text);
 }
+
+/* per-point battery estimate + the spawn note */
+.wpbatt { font-size: 11px; font-weight: 800; color: var(--muted); margin-inline-start: 6px; white-space: nowrap; }
+.wpbatt.low { color: #e5484d; }
+.spinfo { font-size: 11px; color: var(--muted); margin-inline-start: 8px; }

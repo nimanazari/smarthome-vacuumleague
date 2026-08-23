@@ -1,3 +1,22 @@
+## 2026-08-23 (j) — smaller menu icons, a scrolling menu, 1-8x speed, the U19 route helper grows up
+
+- The burger menu: icon tiles shrank (38 -> 26 px), rows tightened, and the
+  menu CAPS at the viewport and SCROLLS — no row can fall off the screen.
+- Game speed cycles 1x -> 2x -> 4x -> 8x (physics measured at ~0.02 ms/step,
+  so even 8x costs a fraction of a frame). Official-lock still freezes it.
+- Route helper (U19): asks WHICH robot you are (red/blue), shows that spawn
+  on the photo with a START badge and its cm coordinates, and plans the
+  FIRST leg from the spawn with the same A* as every other leg (the loop
+  returns to point 1, never back through the spawn approach). Every
+  waypoint row now carries an ESTIMATED battery %% on arrival (~2.83 %%/m),
+  with the guard's recharge folded in and a 🔌 mark where it would charge.
+- U19 never shows doorway marker rugs — the filter now also applies to a
+  ★-saved custom map, in the game AND in the helper's planner.
+- The wet puddle finally looks like WATER: a wavy glassy splash flush with
+  the floor plus a light catch, instead of a blue rug rectangle.
+- (user) new SVG icon set: assets/ui-icons.{svg,css,js} wired into the
+  menus, tutorial and helper pages.
+
 ## 2026-08-23 (i) — ready-made robots everywhere, U19 dump paused
 
 - The robot builder is OFF in every division (`builder: false`): teams drive

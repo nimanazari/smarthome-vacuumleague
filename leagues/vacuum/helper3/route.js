@@ -28,16 +28,21 @@
   const MAP = (() => {
     try {
       const j = JSON.parse(localStorage.getItem('shl_defmap_' + LEAGUE) || 'null');
-      if (j && j.cols) return j;
+      if (j && j.cols) {
+        // U19 has no doorway markers - drop them from a custom map too
+        if (j.rugs) j.rugs = j.rugs.filter((r) => r.kind === 'green' || r.kind === 'wet');
+        return j;
+      }
     } catch (e) { /* private mode */ }
     return (self.VacuumMaps && (self.VacuumMaps.GROWN_ROOMS || self.VacuumMaps.ROOMS)) || null;
   })();
   const W = MAP ? MAP.cols * MAP.tileSize : 13.75;
   const H = MAP ? MAP.rows * MAP.tileSize : 13.75;
   const DOCK = MAP ? (MAP.objects.filter((o) => o.t === 'dock')[0] || null) : null;
+  const SPAWNS = (MAP && MAP.spawns) || null;   // where each robot STARTS
 
   /* ---- the route ---- */
-  let ROUTE = { wps: [], loop: true, low: 35, full: 90, batt: true, stay: 'pct', staySecs: 5 };
+  let ROUTE = { wps: [], loop: true, low: 35, full: 90, batt: true, stay: 'pct', staySecs: 5, team: 'red' };
   try {
     const j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (j && Array.isArray(j.wps)) ROUTE = Object.assign(ROUTE, j);
@@ -160,7 +165,15 @@
       return { x: fx, y: fy };
     });
     if (!wps.length) return [];
-    const out = [{ x: wps[0].x, y: wps[0].y, target: 1, n: 1 }];
+    const out = [];
+    // the robot STARTS at its spawn - plan that leg like any other
+    const sp = SPAWNS && SPAWNS[ROUTE.team || 'red'];
+    if (sp) {
+      const [sx, sy] = nearestFree(sp.x, sp.y);
+      const p0 = smooth(astar(sx, sy, wps[0].x, wps[0].y));
+      if (p0 && p0.length > 2) for (let k = 1; k < p0.length - 1; k++) out.push({ x: p0[k][0], y: p0[k][1], target: 0 });
+    }
+    out.push({ x: wps[0].x, y: wps[0].y, target: 1, n: 1 });
     const legs = [];
     for (let i = 0; i + 1 < wps.length; i++) legs.push([wps[i], wps[i + 1], i + 2]);
     if (ROUTE.loop && wps.length > 1) legs.push([wps[wps.length - 1], wps[0], 1]);
@@ -257,7 +270,8 @@
     P('');
     pts.forEach((w, i) => {
       const last = i === pts.length - 1;
-      const nxt = last ? (ROUTE.loop ? 0 : i + 1) : i + 1;
+      const firstMain = pts.findIndex((q) => q.target);
+      const nxt = last ? (ROUTE.loop ? firstMain : i + 1) : i + 1;
       const nw = pts[nxt];
       const label = w.target ? 'MY point ' + w.n : 'via a doorway';
       P(cmt('elif wp == ' + i + ':', label));
@@ -406,6 +420,15 @@
     // walls
     cx.fillStyle = '#8ea0bf';
     (MAP.walls || []).forEach((wl) => cx.fillRect(X(wl.x - wl.w / 2), Y(wl.y + wl.d / 2), wl.w * S, wl.d * S));
+    // the SPAWN - where this team's robot starts
+    const sp0 = SPAWNS && SPAWNS[ROUTE.team || 'red'];
+    if (sp0) {
+      cx.beginPath(); cx.arc(X(sp0.x), Y(sp0.y), 9, 0, Math.PI * 2);
+      cx.fillStyle = (ROUTE.team === 'blue') ? 'rgba(80,130,255,.9)' : 'rgba(255,80,70,.9)';
+      cx.fill(); cx.strokeStyle = '#fff'; cx.lineWidth = 2; cx.stroke();
+      cx.fillStyle = '#fff'; cx.font = '700 9px Vazirmatn, sans-serif'; cx.textAlign = 'center';
+      cx.fillText('START', X(sp0.x), Y(sp0.y) - 12); cx.textAlign = 'left';
+    }
     // the PLANNED route — the very polyline the Python will drive,
     // doorway via-points included; vias draw as small dots
     const pts = expandRoute();
@@ -559,6 +582,29 @@
     i.onchange = () => { const v = parseInt(i.value, 10); if (isFinite(v)) set(v); refresh(); };
     return i;
   }
+  // estimated battery at each MAIN point: distance x 2.83 %/m from the
+  // spawn, with the guard's recharge folded in when it would trigger
+  function batteryEstimates() {
+    const pts = expandRoute();
+    if (!pts.length) return {};
+    const RATE = 2.83;
+    const sp = SPAWNS && SPAWNS[ROUTE.team || 'red'];
+    let px = sp ? sp.x : pts[0].x, py = sp ? sp.y : pts[0].y;
+    let b = 100;
+    const est = {};
+    for (const w of pts) {
+      b -= Math.hypot(w.x - px, w.y - py) * RATE;
+      px = w.x; py = w.y;
+      if (ROUTE.batt !== false && b < ROUTE.low) {
+        b = ROUTE.stay === 'secs' ? Math.min(100, ROUTE.low + ROUTE.staySecs * 8) : ROUTE.full;
+        if (w.target) est[w.n] = { b: Math.max(0, Math.round(b)), chg: true };
+        continue;
+      }
+      if (w.target && est[w.n] === undefined) est[w.n] = { b: Math.max(0, Math.round(b)), chg: false };
+    }
+    return est;
+  }
+
   function drawList() {
     const box = $('wpList');
     box.innerHTML = '';
@@ -566,6 +612,7 @@
       box.innerHTML = '<div class="wpempty">هنوز نقطه‌ای نگذاشته‌ای — روی نقشه بزن. مختصات به سانتی‌متر است؛ گوشه‌ی پایین-چپ (0,0) است.</div>';
       return;
     }
+    drawList._est = batteryEstimates();
     ROUTE.wps.forEach((w, i) => {
       const row = document.createElement('div');
       row.className = 'wprow';
@@ -576,6 +623,14 @@
       row.appendChild(document.createTextNode(' y'));
       row.appendChild(numIn(w.y, (v) => { w.y = clamp(v, 0, Math.round(H * 100)); }));
       row.appendChild(document.createTextNode(' cm'));
+      const eb = drawList._est && drawList._est[i + 1];
+      if (eb) {
+        const bs = document.createElement('span');
+        bs.className = 'wpbatt' + (eb.b <= ROUTE.low ? ' low' : '');
+        bs.textContent = '🔋≈' + eb.b + '%' + (eb.chg ? ' 🔌' : '');
+        bs.title = eb.chg ? 'قبل از این نقطه یک بار شارژ می‌کند' : 'باتری تقریبی وقتی به این نقطه می‌رسد';
+        row.appendChild(bs);
+      }
       const x = document.createElement('button');
       x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = 'حذف این نقطه';
       x.onclick = () => { ROUTE.wps.splice(i, 1); refresh(); };
@@ -617,6 +672,15 @@
 
   $('loopChk').checked = !!ROUTE.loop;
   $('loopChk').onchange = refresh;
+  const spawnInfo = () => {
+    const sp = SPAWNS && SPAWNS[ROUTE.team || 'red'];
+    $('spawnInfo').textContent = sp
+      ? 'شروع از (' + Math.round(sp.x * 100) + ', ' + Math.round(sp.y * 100) + ') cm'
+      : 'این نقشه نقطه‌ی شروع ثبت‌شده ندارد';
+  };
+  $('teamSel').value = ROUTE.team || 'red';
+  $('teamSel').onchange = () => { ROUTE.team = $('teamSel').value; spawnInfo(); refresh(); };
+  spawnInfo();
   $('battChk').checked = ROUTE.batt !== false;
   $('battChk').onchange = () => {
     ROUTE.batt = $('battChk').checked;
