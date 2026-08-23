@@ -1,3 +1,15 @@
+## 2026-08-23 (h) — the report speaks one language, the chart gets axes, ⏺ films the official view
+
+- The whole match report follows the app language: Persian UI → all-Persian
+  report; English UI → all-English (title, captions, stat rows, room rows,
+  events table, coaching tips).
+- Score-over-time chart: real axes — 0 at the BOTTOM-LEFT, score climbs up,
+  time runs left→right with 0:00 / mid / end ticks; the canvas is pinned
+  LTR so RTL pages can never mirror it.
+- ⏺ Recording is now the OFFICIAL film: starting it snaps the camera to the
+  fixed TOP view and LOCKS the view button until the whistle — every
+  protest is judged from the same evidence.
+
 ## 2026-08-23 (g) — five fixes + the Route helper's settings, 🎬 Cinematic, ⏺ recording
 
 - FIXES: rugs are DRAG-EDITABLE in the 🛠 house edit (move lands in the map
