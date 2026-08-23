@@ -1,9 +1,10 @@
 (function () {
   'use strict';
   const ICONS = {
-    menuTutorial: 'learn', menuRules: 'book', menuMatch: 'play', menuBook: 'chart',
+    menuTut: 'learn', menuRules: 'book', menuMatch: 'play', menuBook: 'chart',
     menuHelper1: 'bot', menuHelper2: 'blocks', menuGear: 'settings', menuView: 'camera',
-    menuRecord: 'record', menuTech: 'trophy', menuDivision: 'home', menuLang: 'globe'
+    menuRec: 'record', menuTech: 'trophy', menuDivision: 'home', menuLang: 'globe',
+    menuRobot: 'bot'
   };
   function svg(name) {
     const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

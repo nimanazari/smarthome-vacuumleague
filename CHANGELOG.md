@@ -1,3 +1,16 @@
+## 2026-08-23 (k) — helper code runs BY ITSELF, per-team power switch, a referee-only in-match menu
+
+- ▶ in ANY helper now lands in the game and the match STARTS ITSELF — no
+  hunting for buttons (verified for FS, U14 and the full U19 route file:
+  three auto-started matches, all three robots driving).
+- Each team card grew a ⏻ ON/OFF switch beside "Load robot .py": an OFF
+  robot spawns but never moves, so one team can test alone on the real
+  floor (verified: blue frozen, red scoring).
+- The burger menu DURING a match is the referee's menu only: camera,
+  record, speed, sensors, guide, base code, relocations, stop/restart/end,
+  official lock. Tutorial/rules/helpers/settings/change-division live only
+  in the lobby. All labels follow the app language; menu icon tiles are
+  smaller and every row wears the same tile style.
 ## 2026-08-23 (j) — smaller menu icons, a scrolling menu, 1-8x speed, the U19 route helper grows up
 
 - The burger menu: icon tiles shrank (38 -> 26 px), rows tightened, and the

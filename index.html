@@ -21,6 +21,8 @@
   body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
   #scene { position: fixed; inset: 0; }
   .ic { width: 1.05em; height: 1.05em; vertical-align: -2px; flex: none; }
+  /* in the menu, the old inline icons wear the same small tile as ui-icons */
+  .mitem .ic { width: 13px; height: 13px; padding: 5px; border-radius: 8px; background: rgba(255,255,255,.06); box-sizing: content-box; }
 
   /* ---------- scoreboard ---------- */
   #scoreboard { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 22px; z-index: 5; }
@@ -390,6 +392,8 @@
   .leaguebar button { margin-left: auto; flex-shrink: 0; }
   @media (max-width: 760px) { .lgrid { grid-template-columns: 1fr; } #leaguePanel .card { width: 94vw; } }
 
+  .ton { opacity: .55; }
+  .ton.on { opacity: 1; border-color: #2f7d4a; color: #7ee7b4; }
   /* ---------- robot builder ---------- */
   #buildPanel { position: fixed; inset: 0; z-index: 11; display: none; align-items: center; justify-content: center; background: radial-gradient(1200px 700px at 50% -10%, rgba(77,139,255,.14), transparent 60%), rgba(7,9,13,.72); backdrop-filter: blur(6px); }
   .bcard { width: 1120px; max-width: 96vw; }
@@ -1457,7 +1461,7 @@
     <button class="hb-act done" id="hbDone" type="button">Done &#10003;</button>
   </div>
   <div id="burgerMenu">
-    <button class="mitem" id="mainMenuBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Main menu</button>
+    <button class="mitem" id="mainMenuBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span id="mainMenuLbl">Main menu</span></button>
     <!-- the league's own tools, straight from the menu: the map maker and
          whichever helpers THIS division declares (helper: / helper2:) -->
     <div class="mhead" id="mhLearn"></div>
@@ -2140,6 +2144,7 @@ else:                          # turn AND drive toward them
           <div class="cstatus" id="statusRed">sample code</div>
           <select class="codesel" id="selRed" title="Pick a ready-made robot brain"></select>
           <button class="smallbtn" id="loadRed">Load robot .py</button>
+          <button class="smallbtn ton on" id="onRed" title="این ربات بازی کند یا خاموش بماند">&#9211; ON</button>
           <input type="file" id="fileRed" accept=".py,.txt" style="display:none">
         </div>
         <div class="codecard blue" id="cardBlue">
@@ -2160,6 +2165,7 @@ else:                          # turn AND drive toward them
           <div class="cstatus" id="statusBlue">sample code</div>
           <select class="codesel" id="selBlue" title="Pick a ready-made robot brain"></select>
           <button class="smallbtn" id="loadBlue">Load robot .py</button>
+          <button class="smallbtn ton on" id="onBlue" title="این ربات بازی کند یا خاموش بماند">&#9211; ON</button>
           <input type="file" id="fileBlue" accept=".py,.txt" style="display:none">
         </div>
       </div>
@@ -2763,16 +2769,24 @@ else:                            # 7) nothing in the way -> full speed ahead
     // the handover waits here and is applied AFTER it — otherwise the sample
     // would land on top of the file the child just built.
     let pendingRed = null, pendingBlue = null;
+    let autoRunHelper = false;   // ?helpercode=1 starts the match BY ITSELF
     function applyPendingCode() {
+      let landed = false;
       if (pendingRed != null) {
         $('codeRed').value = pendingRed;
         $('statusRed').textContent = 'built in the helper';
-        pendingRed = null;
+        pendingRed = null; landed = true;
       }
       if (pendingBlue != null) {
         $('codeBlue').value = pendingBlue;
         $('statusBlue').textContent = 'built in the helper';
         pendingBlue = null;
+      }
+      // the child pressed PLAY in the helper - they came here to WATCH it
+      // drive, not to hunt for a start button. Run it.
+      if (landed && autoRunHelper) {
+        autoRunHelper = false;
+        setTimeout(() => { showMatchPanel(); $('startBtn').click(); }, 80);
       }
     }
     async function loadLeagueCode(d) {
@@ -3059,6 +3073,17 @@ else:                            # 7) nothing in the way -> full speed ahead
       };
       r.readAsText(f);
     };
+    // ⏻ a team can sit a match out: its robot spawns but never moves —
+    // perfect for testing YOUR robot alone on the real floor
+    const teamOn = { red: true, blue: true };
+    const wireOn = (id, k) => {
+      $(id).onclick = () => {
+        teamOn[k] = !teamOn[k];
+        $(id).classList.toggle('on', teamOn[k]);
+        $(id).innerHTML = teamOn[k] ? '&#9211; ON' : '&#9211; OFF';
+      };
+    };
+    wireOn('onRed', 'red'); wireOn('onBlue', 'blue');
     $('loadRed').onclick = () => $('fileRed').click();
     $('loadBlue').onclick = () => $('fileBlue').click();
     $('fileRed').onchange = () => loadFile('fileRed', 'codeRed', 'statusRed');
@@ -4165,6 +4190,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     // the file it left for us BEFORE the league loads its sample, so
     // loadLeagueCode() can lay it on top when the fetch is done.
     if (urlQ.get('helpercode')) {
+      autoRunHelper = true;
       try {
         pendingRed = localStorage.getItem('shl_helper_code') || null;
         localStorage.removeItem('shl_helper_code');
@@ -4292,6 +4318,9 @@ else:                            # 7) nothing in the way -> full speed ahead
       const solo1 = !!(dLg && !dLg.arena && $('playersSel').value === '1');
       try { redFn = makeController($('codeRed').value, 'red'); } catch (e) { $('err').textContent = 'Red code error — ' + e.message; return; }
       if (!solo1) { try { blueFn = makeController($('codeBlue').value, 'blue'); } catch (e) { $('err').textContent = 'Blue code error — ' + e.message; return; } }
+      // an OFF team stands dead where it spawns
+      if (!teamOn.red) redFn = () => ({ left: 0, right: 0 });
+      if (!solo1 && !teamOn.blue) blueFn = () => ({ left: 0, right: 0 });
       const secs = Math.max(5, Math.min(1800, parseInt($('inTime').value, 10) || 180));
       redErr = ''; blueErr = '';
       const dS = { fc: 2, fl: 2, fr: 2, l: 2, r: 2, bl: 2, br: 2 }, dI = { x: 1, y: 1, heading: 0, tilesMine: 0, tilesRival: 0, timeLeft: secs, color: 0, bumper: 0 };
@@ -5126,30 +5155,34 @@ else:                            # 7) nothing in the way -> full speed ahead
         el.onclick = () => { close(); fn(); };
       };
       const inLeague = !!d.id;
+      // DURING a match the menu is the REFEREE'S menu: camera, recording,
+      // speed, sensors, relocations - nothing that belongs to the lobby
+      const live = $('scoreboard').style.display === 'flex';
+      $('mainMenuLbl').textContent = T('منوی اصلی', 'Main menu');
       // section titles (a head hides itself when empty via CSS)
       // the results buttons follow the language too
       if ($('debriefBtn') && $('debriefBtn').querySelector('.rb-t')) $('debriefBtn').querySelector('.rb-t').textContent = T('گزارش مسابقه', 'Report');
       if ($('newMatch2') && $('newMatch2').querySelector('.rb-t')) $('newMatch2').querySelector('.rb-t').textContent = T('مسابقه‌ی جدید', 'New Match');
-      $('mhLearn').textContent = inLeague ? T('یادگیری', 'Learn') : '';
-      $('mhCompete').textContent = inLeague ? T('مسابقه', 'Compete') : '';
-      $('mhHelpers').textContent = inLeague ? T('هلپرها', 'Helpers') : '';
-      $('mhMap').textContent = T('نقشه و تنظیمات', 'Map & Settings');
-      $('mhLeague').textContent = T('لیگ', 'League');
+      $('mhLearn').textContent = inLeague && !live ? T('یادگیری', 'Learn') : '';
+      $('mhCompete').textContent = inLeague && !live ? T('مسابقه', 'Compete') : '';
+      $('mhHelpers').textContent = inLeague && !live ? T('هلپرها', 'Helpers') : '';
+      $('mhMap').textContent = !live ? T('نقشه و تنظیمات', 'Map & Settings') : T('حین مسابقه', 'During the match');
+      $('mhLeague').textContent = !live ? T('لیگ', 'League') : '';
       // LEARN
-      row('menuTut', inLeague, T('آموزش', 'Tutorial'), () => { showMatchPanel(); $('tutBtn').click(); });
-      row('menuTech', inLeague && techOf(d.group), T('چالش فنی', 'Technical challenge'), () => $('techBtn').click());
-      row('menuRules', inLeague && d.guide, T('قوانین', 'Rules'), () => $('rulesBtn').click());
+      row('menuTut', inLeague && !live, T('آموزش', 'Tutorial'), () => { showMatchPanel(); $('tutBtn').click(); });
+      row('menuTech', inLeague && !live && techOf(d.group), T('چالش فنی', 'Technical challenge'), () => $('techBtn').click());
+      row('menuRules', inLeague && !live && d.guide, T('قوانین', 'Rules'), () => $('rulesBtn').click());
       // COMPETE
-      row('menuMatch', inLeague, T('حالت مسابقه', 'Match mode'), () => showMatchPanel());
-      row('menuBook', inLeague, T('امتیازات و مسابقات', 'Standings'), () => $('bookBtn2').click());
+      row('menuMatch', inLeague && !live, T('حالت مسابقه', 'Match mode'), () => showMatchPanel());
+      row('menuBook', inLeague && !live, T('امتیازات و مسابقات', 'Standings'), () => $('bookBtn2').click());
       // HELPERS
-      row('menuHelper1', inLeague && d.helper, d.helperLabel ? T('هلپر مسیر', 'Route helper') : T('هلپر AI', 'AI helper'),
+      row('menuHelper1', inLeague && !live && d.helper, d.helperLabel ? T('هلپر مسیر', 'Route helper') : T('هلپر AI', 'AI helper'),
         () => { location.href = d.helper + '?league=' + encodeURIComponent(d.id); });
-      row('menuHelper2', inLeague && d.helper2, T('هلپر بلاکی', 'Blocks helper'),
+      row('menuHelper2', inLeague && !live && d.helper2, T('هلپر بلاکی', 'Blocks helper'),
         () => { location.href = d.helper2 + '?league=' + encodeURIComponent(d.id); });
-      row('menuRobot', inLeague && d.builder !== false, T('ربات‌ساز', 'Robot builder'), () => { if ($('editRobot')) $('editRobot').click(); });
+      row('menuRobot', inLeague && !live && d.builder !== false, T('ربات‌ساز', 'Robot builder'), () => { if ($('editRobot')) $('editRobot').click(); });
       // MAP & SETTINGS
-      row('menuGear', inLeague, T('نقشه و تنظیمات', 'Map & settings'), () => {
+      row('menuGear', inLeague && !live, T('نقشه و تنظیمات', 'Map & settings'), () => {
         const ov = $('vacSettings');
         if (ov) ov.classList.add('on');
         else { showMatchPanel(); if ($('vacGear')) $('vacGear').click(); }
@@ -5157,13 +5190,23 @@ else:                            # 7) nothing in the way -> full speed ahead
       row('menuView', inLeague, T('نمای دوربین', 'Camera view'), () => $('viewBtn').click());
       row('menuRec', inLeague, matchRec.on ? T('⏹ پایان ضبط و ذخیره', '⏹ Stop & save recording') : T('ضبط فیلم مسابقه', 'Record the match'), () => matchRec.toggle());
       // LEAGUE (language sits last, per the house style)
-      row('menuDivision', true, T('تغییر رده', 'Change division'), () => { $('lobbyBar').style.display = 'none'; showLeaguePicker(); });
+      row('menuDivision', !live, T('تغییر رده', 'Change division'), () => { $('lobbyBar').style.display = 'none'; showLeaguePicker(); });
       // the in-match rows only exist while a match is actually running —
-      // the lobby menu stays short
-      const live = $('scoreboard').style.display === 'flex';
+      // the lobby menu stays short. Their labels follow the language too.
       for (const id of ['speedBtn', 'sensBtn', 'relocRed', 'stopBtn', 'restartBtn', 'endBtn', 'relocBlue', 'lockBtn', 'dlBaseBtn', 'helpBtn', 'viewBtn']) {
         const el = $(id);
         if (el && el.classList.contains('mitem')) el.style.display = live ? '' : 'none';
+      }
+      if (live) {
+        $('speedLbl').textContent = T('سرعت بازی', 'Speed') + ': ' + simSpeed + 'x';
+        $('sensLbl').textContent = T('سنسورها', 'Sensors') + ': ' + (sensOn ? T('روشن', 'on') : T('خاموش', 'off'));
+        $('relocRed').textContent = T('جابه‌جایی تیم ۱', 'Relocate Team 1');
+        $('relocBlue').textContent = T('جابه‌جایی تیم ۲', 'Relocate Team 2');
+        $('endBtn').textContent = T('پایان بازی', 'End Game');
+        $('restartBtn').textContent = '\u27F2 ' + T('شروع دوباره', 'Restart match');
+        $('helpBtn').lastChild.textContent = T('راهنما', 'Guide');
+        $('dlBaseBtn').lastChild.textContent = T('کد پایه .py', 'Base code .py');
+        $('lockLbl').textContent = T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off'));
       }
       m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
     };
