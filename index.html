@@ -10,6 +10,8 @@
 <meta property="og:description" content="کد Python ربات جاروبرقی را بارگذاری کن و مسابقه‌ی تمیزکاری را در مرورگر اجرا کن.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="assets/ui-icons.css">
+<script defer src="assets/ui-icons.js"></script>
 <!-- the FS block-coding app lives entirely in fsapp/ — it only hands back Python -->
 <link rel="stylesheet" href="fsapp/fsapp.css">
 <style>
@@ -230,8 +232,11 @@
   .hb-act.warn { color: #ff9a9a; }
   .hb-act.done { border-color: #2f7d4a; color: #7ee7b4; }
   #hbHint { font-size: 11px; color: var(--muted); }
-  #burgerMenu { position: fixed; top: 62px; left: 14px; z-index: 30; display: none; flex-direction: column; gap: 3px; min-width: 185px; padding: 8px; background: rgba(17,20,27,.96); backdrop-filter: blur(9px); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 16px 44px rgba(0,0,0,.55); }
-  .mitem { display: flex; align-items: center; gap: 9px; padding: 10px 12px; font-family: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; border: none; border-radius: 9px; background: none; color: var(--text); }
+  /* the menu never runs off the screen: it caps at the viewport and SCROLLS */
+  #burgerMenu { position: fixed; top: 62px; left: 14px; z-index: 30; display: none; flex-direction: column; gap: 2px; min-width: 178px; max-width: 232px; padding: 7px; max-height: calc(100vh - 76px); overflow-y: auto; overscroll-behavior: contain; background: rgba(17,20,27,.97); backdrop-filter: blur(9px); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 16px 44px rgba(0,0,0,.55); }
+  #burgerMenu::-webkit-scrollbar { width: 7px; }
+  #burgerMenu::-webkit-scrollbar-thumb { background: #2c3340; border-radius: 4px; }
+  .mitem { display: flex; align-items: center; gap: 7px; padding: 7px 9px; font-family: inherit; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; border: none; border-radius: 8px; background: none; color: var(--text); }
   .mitem:hover { background: #1c2230; }
   .mitem.r { color: #ff9a9a; } .mitem.b { color: #9ec0ff; }
   .mitem.s { color: #ffd77a; } .mitem.e { color: #ffb08a; }
@@ -1634,10 +1639,10 @@
   <div id="tutorial">
     <div class="tcard">
       <div class="thead">
-        <div class="t">Tutorial <span id="tutStep">1 / 3</span></div>
+        <div class="t thead-title"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#learn"/></svg>Tutorial <span id="tutStep">1 / 3</span></div>
         <button class="smallbtn" id="tutExit">Exit</button>
       </div>
-      <div class="ttitle" id="tutTitle"></div>
+      <div class="lesson-head"><span class="tutorial-mark"><svg class="ui-icon" id="tutLessonIcon" aria-hidden="true"><use href="assets/ui-icons.svg#eye"/></svg></span><div class="ttitle" id="tutTitle"></div></div>
       <div class="tbody" id="tutBody"></div>
       <textarea class="code" id="tutCode" spellcheck="false"></textarea>
       <div id="tutErr"></div>
@@ -1646,7 +1651,7 @@
         <button class="btn" id="tutRun" style="flex:1; padding:10px;">&#9654; Run my code</button>
         <button class="smallbtn" id="tutNext">Next &#8250;</button>
       </div>
-      <div class="texpect" id="tutExpect"></div>
+      <div class="expect-wrap"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#check"/></svg><div class="texpect" id="tutExpect"></div></div>
     </div>
   </div>
 
@@ -3356,6 +3361,8 @@ else:                            # 7) nothing in the way -> full speed ahead
           if (!j || !j.cols) continue;
           const m = JSON.parse(JSON.stringify(j));
           if (d.id === 'fs' && m.rugs) m.rugs = m.rugs.filter((r) => r.kind !== 'wet');
+          // U19 navigates by position - NO doorway marker rugs, ever
+          if (d.id === 'u19' && m.rugs) m.rugs = m.rugs.filter((r) => r.kind === 'green' || r.kind === 'wet');
           m.name = (m.name || 'custom') + ' ★';
           d.map = m;
         }
@@ -5179,13 +5186,15 @@ else:                            # 7) nothing in the way -> full speed ahead
       loadDraw();
     };
 
-    // game speed: 1x <-> 2x
-    let speed2x = false;
+    // game speed: 1x -> 2x -> 4x -> 8x -> back. The physics step costs
+    // ~0.02 ms, so even 8x is a fraction of one frame — the FPS holds.
+    const SPEEDS = [1, 2, 4, 8];
+    let simSpeed = 1;
     $('speedBtn').onclick = () => {
       if (window.SHL_LOCK && engine.running) { showToast('🔒 حالت مسابقه‌ی رسمی: تغییر سرعت وسط بازی قفل است'); return; }
-      speed2x = !speed2x;
-      $('speedLbl').textContent = 'Speed: ' + (speed2x ? '2x' : '1x');
-      if (engine.running) logEvent('speed', null, speed2x ? '2x' : '1x');
+      simSpeed = SPEEDS[(SPEEDS.indexOf(simSpeed) + 1) % SPEEDS.length];
+      $('speedLbl').textContent = 'Speed: ' + simSpeed + 'x';
+      if (engine.running) logEvent('speed', null, simSpeed + 'x');
     };
 
     /* ---------- the live sensor window ----------
@@ -5899,7 +5908,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       requestAnimationFrame(loop);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (engine.running && !paused) {
-        simAcc += dt * (speed2x ? 2 : 1);
+        simAcc += dt * simSpeed;
         let slices = 0;
         while (simAcc >= SIM_DT && slices < 8 && !engine.finished) {
           engine.step(SIM_DT); logFrame(SIM_DT); missionStep();
