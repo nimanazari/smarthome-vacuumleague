@@ -4,12 +4,11 @@
 
 ## Sensors · سنسورها
 
-U19 has **no fixed kit file**: the team builds its own robot in
-`🔧 Robot` (`builder: true`), picking from the full parts catalogue —
-side and rear eyes, compass, GPS, and more. What the code can read is
-whatever the team fitted, plus:
-کیت ثابت ندارد: تیم ربات را خودش می‌سازد — چشم بغل/عقب، قطب‌نما، GPS
-و بقیه‌ی قطعات. علاوه بر قطعات:
+U19 drives the **ready-made classic rig** (`builder: false`): seven
+distance eyes all around, bumper, colour sensor, compass and GPS —
+nobody builds a robot; the code is the whole game. The rig reads:
+ربات آماده است: هفت چشم فاصله دورتادور، بامپر، سنسور رنگ، قطب‌نما و
+GPS — کسی ربات نمی‌سازد؛ همه‌چیز کدِ توست. این‌ها خوانده می‌شوند:
 
 | python name | what it is · چیست |
 |---|---|

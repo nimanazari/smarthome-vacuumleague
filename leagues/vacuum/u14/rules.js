@@ -39,6 +39,9 @@
       { en: 'Steal tiles back from the rival by cleaning over them', fa: 'با تمیزکردن روی کاشی حریف، آن را پس بگیر' },
       { en: 'FINAL mode available: the cat erases painted tiles', fa: 'حالت فینال: گربه کاشی‌های رنگ‌شده را پاک می‌کند' },
     ],
+    // No robot building in this league either — the rig is READY-MADE in
+    // kit.js; teams only pick a colour and write the brain.
+    builder: false,
     defaults: { matchSeconds: 180 },
     rules: { pets: true, wet: true, penalty: 5, battery: false },
     // the in-game rulebook (the 📖 button on the setup page)

@@ -42,7 +42,7 @@ with SIX zones and 2-tile doorways: the hall/living (room 0), the kitchen
 | battery + charging pad (`battery`) | off | off | on |
 | starter program | `fs/program.py` (three eyes + both ring halves) | `u14/program.py` | `u19/program.py` (battery runner) |
 | sensor rig (`kit`) | fixed: 3 forward eyes + the ring + colour (`fs/kit.js`) | the classic rig, team-built | the classic rig, team-built |
-| robot builder | **off** (`builder: false`) — the only choice is the team colour, which paints the shell and the tiles | on | on |
+| robot builder | **off everywhere** — every division drives its ready-made rig; the only choice is the team colour | off | off |
 | how the program is written | **two helpers**: 🤖 AI (`helper/`) and 🧩 Blocks (`helper2/`) | the AI helper (U14 mode) **or** the editor | the editor |
 
 **FS has TWO helpers, one rules file.** The 🧩 Blocks page

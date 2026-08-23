@@ -1975,23 +1975,13 @@ else:                          # turn AND drive toward them
           </table>
         </div>
         <div class="gsec">
-          <div class="gh">&#128295; Your robot is what you BUILT</div>
-          <div class="gp">Before the match you build the robot in the <b>builder</b>: pick a part, click the
-            chassis where it should go, and it is bolted there. Every part costs credits — and
-            <b>what you bolt on is exactly what your code can read</b>:</div>
-          <table class="gt" style="margin-top:8px">
-            <tr><td>no sensor pointing back</td><td><code>backleft</code> / <code>backright</code> are <code>-1</code> forever</td></tr>
-            <tr><td>no compass</td><td><code>heading</code> is <code>-1</code>, and <code>angleto()</code> is useless</td></tr>
-            <tr><td>no position sensor</td><td><code>x</code> and <code>y</code> are <code>-1</code>, and <code>goto()</code> cannot work</td></tr>
-            <tr><td>no colour sensor</td><td><code>color</code> is <code>-1</code></td></tr>
-          </table>
-          <div class="gp" style="margin-top:8px">Whatever distance sensors you fit are always readable in mount
-            order as <code>dist1</code>, <code>dist2</code>, … and edge sensors as <code>cliff1</code>,
-            <code>cliff2</code>, … The familiar names (<code>front</code>, <code>left</code>, …) are just a
-            convenience: they work when you happen to have a sensor pointing that way.</div>
+          <div class="gh">&#129302; Your robot comes READY-MADE</div>
+          <div class="gp">Nobody builds a robot in this league — every team drives the <b>same
+            fully-equipped machine</b>: distance sensors all around, bumper, colour sensor,
+            compass and position. The only thing you choose is the <b>team colour</b>; the
+            match is decided purely by the <b>code</b> you write.</div>
           <div class="gp" style="margin-top:8px">Turn on <b>Sensors</b> in the <b>☰ menu</b> during a match and each
-            robot gets its own window: a little radar showing every sensor <i>where you actually mounted it</i>,
-            with its live reading.</div>
+            robot gets its own window: a little radar showing every sensor with its live reading.</div>
         </div>
         <div class="gsec">
           <div class="gh">Memory — kept between steps, start at 0</div>

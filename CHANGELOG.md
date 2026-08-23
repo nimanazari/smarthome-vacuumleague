@@ -1,3 +1,13 @@
+## 2026-08-23 (i) — ready-made robots everywhere, U19 dump paused
+
+- The robot builder is OFF in every division (`builder: false`): teams drive
+  the ready-made rig — U19 gets the full classic (7 distance eyes, bumper,
+  colour, compass, GPS) so `goto()` and the Route helper work untouched.
+  The 🔧 Robot button and menu row are gone; the guide now says the robot
+  comes ready-made and only the code decides the match.
+- U19's trash DUMP rule is paused (`dump: false`) until the Route helper can
+  plan emptying trips; battery stays as the one resource U19 manages.
+
 ## 2026-08-23 (h) — the report speaks one language, the chart gets axes, ⏺ films the official view
 
 - The whole match report follows the app language: Persian UI → all-Persian

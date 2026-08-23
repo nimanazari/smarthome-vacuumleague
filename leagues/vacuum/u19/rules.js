@@ -49,6 +49,9 @@
       { en: 'At 0% the robot stops DEAD where it stands', fa: 'باتری صفر یعنی توقف کامل — ربات همان‌جا خاموش می‌ماند' },
       { en: 'SINGLE PLAYER: the bin holds 30 tiles — full means you clean nothing until you empty it', fa: 'تک‌نفره: مخزن فقط ۳۰ کاشی جا دارد — پر که شد تا خالی‌اش نکنی هیچ کاشی‌ای تمیز نمی‌شود' },
     ],
+    // No robot building in this league either — the rig is READY-MADE in
+    // kit.js; teams only pick a colour and write the brain.
+    builder: false,
     defaults: { matchSeconds: 180 },
     // the in-game rulebook (the 📖 button on the setup page)
     guide: {
@@ -68,7 +71,9 @@
     },
     // dumpEvery only bites in a ONE-player match (see league.js) — head to head
     // the bin never fills and reaching it once is worth +5, exactly as before
-    rules: { pets: true, wet: true, penalty: 5, battery: true, dump: true, dumpEvery: 30 },
+    // the dump stays OFF until the route helper can plan emptying trips;
+    // battery (and its charger pad) is the one resource U19 manages for now
+    rules: { pets: true, wet: true, penalty: 5, battery: true, dump: false },
     create: mk,
   });
 })(typeof self !== 'undefined' ? self : this);
