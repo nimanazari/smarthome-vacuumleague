@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI — Robot Helper · Vacuum league</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../../../favicon.png">
+<!-- THE LEAGUE'S HELPER MODULE — a page of its own, shared by the divisions
+     that declare it (`helper:` in <div>/rules.js — today FS and U14; U14 gets
+     the compass / room / clean-% powers via ?league=u14). It reads nothing but
+     the FS sensor kit next door and hands one thing back: a real Python file.
+     ماژول «هلپر» لیگ — یک صفحه‌ی مستقل که هر رده‌ای با خط `helper:` در
+     rules.js خودش اعلامش کند (الان FS و U14). خروجی‌اش فقط یک فایل پایتون
+     واقعی است. -->
+<link rel="stylesheet" href="helper.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">&#129302;</span>
+    <div>
+      <b>AI &mdash; Robot Helper</b>
+      <span id="subTitle">First Step &middot; Vacuum league</span>
+    </div>
+  </div>
+  <div class="topbtns">
+    <button class="btn ghost" id="themeBtn" type="button" title="light / dark">&#9728;&#65039; Light</button>
+    <button class="btn ghost" id="resetBtn" type="button">Start over</button>
+    <a class="btn ghost" id="backLink" href="../../../index.html?league=fs">&#8592; Back to the game</a>
+  </div>
+</header>
+
+<!-- STEP 1 + 2 — tap a sensor, then answer for THAT sensor only -->
+<main class="wrap">
+
+  <section class="card pickcard">
+    <h2><span class="step">1</span> Build your rules &mdash; drag sensors off the robot</h2>
+    <div id="diagram" class="diagram"></div>
+    <p class="hint" id="kitLine"></p>
+    <div id="sensList" class="senslist"></div>
+    <button class="addbtn" id="addRule" type="button">+ New rule &mdash; or drop a sensor right here</button>
+  </section>
+
+  <section class="card askcard" id="askCard"><!-- filled by helper.js --></section>
+
+  <!-- STEP 3 — in the same row: pick, answer, watch, all on one screen -->
+  <section class="card animcard">
+    <h2><span class="step">3</span> What your whole robot does
+      <button class="simbtn" id="simBtn" type="button">&#9654; Run</button>
+      <span class="tag" id="animTag">&nbsp;</span></h2>
+    <canvas id="anim" width="620" height="430"></canvas>
+    <!-- while ▶ Run is on: every sensor that sits in a rule, with the number
+         it is reading RIGHT NOW — filled in by helper.js -->
+    <div id="senseOut" class="senseout" style="display:none"></div>
+    <p class="why" id="animWhy"></p>
+  </section>
+
+</main>
+
+<!-- STEP 4 — the file, under the row it narrates. THE BRIDGE: the numbers in
+     the code are editable in place, so "the code IS the rules" is something a
+     child does here, before ever meeting U14's empty editor. -->
+<section class="wrapfull">
+  <section class="card codecard">
+    <h2><span class="step">4</span> Your Python <span class="hint">&mdash; the real file the match runs. The <b class="pynum-demo">yellow numbers</b> are yours: click one and type.</span></h2>
+    <p class="bridgehint fa">پل به ادیتور: این پایتونِ واقعی است — عددهای زرد را همین‌جا در خودِ کد عوض کن؛ قانون‌ها و اتاقک همان لحظه به‌روز می‌شوند.</p>
+    <pre id="code"></pre>
+    <div class="bridge fa">
+      <b>&#127891; دوران گذار به U14</b>
+      وقتی این صفحه برایت کوچک شد، همین فایل را بردار و برو سراغ ادیتور: در U14 همه‌چیز آشناست — همان if / elif، همان سنسورها، فقط این بار خودت می‌نویسی و قطب‌نما (heading) هم اضافه می‌شود.
+      <span class="en">When this page feels small, take this very file to the U14 editor — same if/elif, same sensors, now you type them yourself (plus a compass).</span>
+      <a class="btn ghost" href="../../../index.html?league=u14">ادیتور U14 &#8592;</a>
+    </div>
+  </section>
+</section>
+
+<footer class="bar">
+  <span class="barhint" id="barHint"></span>
+  <button class="btn ghost" id="copyBtn" type="button">Copy</button>
+  <button class="btn ghost" id="dlBtn" type="button">Download .py</button>
+  <button class="btn ghost" id="playBtn2" type="button" title="Hand this code to TEAM 2's editor — team 1's build stays untouched">&#9654; Team 2</button>
+  <button class="btn go" id="playBtn" type="button">&#9654; Play with this code</button>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<!-- the two shared, read-only libraries this page stands on, and this
+     division's own sensor rig — the same kit.js the engine is given -->
+<script src="../../../sensors.js"></script>
+<script src="../../../robot-parts.js"></script>
+<script src="../fs/kit.js"></script>
+<script src="helper.js"></script>
+</body>
+</html>

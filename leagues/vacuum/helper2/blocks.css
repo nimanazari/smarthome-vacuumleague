@@ -1,0 +1,332 @@
+/* ============================================================
+   leagues/vacuum/helper2/blocks.css — the look of the Blocks helper.
+
+   Same dark family as the game and the AI helper, big touch targets,
+   no external font, no image files. Light mode = body.light, driven
+   by the same shl_helper_theme key the AI helper uses.
+   ============================================================ */
+
+/* Vazirmatn, served from the game's own fonts/ folder — every Persian
+   glyph on this page uses it; English falls through to the system stack. */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../../../fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400; font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../../../fonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700; font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../../../fonts/Vazirmatn-Black.woff2') format('woff2');
+  font-weight: 800 900; font-display: swap;
+}
+
+
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0d13;
+  --card: #131923;
+  --card2: #182031;
+  --line: #232b3a;
+  --text: #eaeef6;
+  --muted: #8e9ab0;
+  --acc: #4fc3f7;
+  --sens: #ffb02e;      /* condition blocks */
+  --move: #4d8bff;      /* move blocks */
+  --good: #22c55e;
+}
+body.light {
+  --bg: #eef2f8; --card: #ffffff; --card2: #f2f5fa; --line: #d4dbe7;
+  --text: #17202e; --muted: #5b6880;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: Vazirmatn, "Segoe UI", Tahoma, sans-serif;
+  direction: rtl; padding-bottom: 92px;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(46vw 46vw at 10% -8%, rgba(255, 176, 46, .14), transparent 70%),
+    radial-gradient(40vw 40vw at 106% 106%, rgba(77, 139, 255, .14), transparent 70%);
+}
+body.light::before { opacity: .5; }
+main, header, footer, .codecard { position: relative; z-index: 1; }
+
+/* ---------------- header / footer ---------------- */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 22px; border-bottom: 1px solid var(--line);
+  background: rgba(12, 16, 23, .78); backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 20;
+}
+body.light .top { background: rgba(248, 250, 253, .85); }
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 46px; height: 46px; flex: none; display: grid; place-items: center; font-size: 25px;
+  border-radius: 14px; background: linear-gradient(140deg, #f59e0b, #4d8bff);
+}
+.brand b { display: block; font-size: 19px; }
+.brand span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.topbtns { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  font: 700 13.5px Vazirmatn, Tahoma, sans-serif; color: var(--text);
+  padding: 9px 14px; border-radius: 11px; border: 1px solid var(--line);
+  background: var(--card2); cursor: pointer; text-decoration: none; display: inline-block;
+}
+.btn.go { background: linear-gradient(140deg, #22c55e, #118a44); border: 0; color: #04170c; font-size: 15px; padding: 11px 22px; }
+.btn:hover { border-color: var(--acc); }
+
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 13px 22px; border-top: 1px solid var(--line);
+  background: rgba(12, 16, 23, .92); backdrop-filter: blur(8px);
+}
+body.light .bar { background: rgba(248, 250, 253, .92); }
+.barhint { color: var(--muted); font-size: 13px; margin-left: auto; }
+
+/* ---------------- layout ---------------- */
+.wrap {
+  display: grid; grid-template-columns: 300px 1fr; gap: 16px;
+  max-width: 1240px; margin: 18px auto; padding: 0 18px;
+}
+.wrapfull { max-width: 1240px; margin: 0 auto 30px; padding: 0 18px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; padding: 16px;
+}
+.card h2 { font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.step {
+  width: 26px; height: 26px; flex: none; display: grid; place-items: center;
+  border-radius: 50%; background: var(--acc); color: #04121c; font-size: 14px;
+}
+.hint { color: var(--muted); font-size: 12.5px; font-weight: 400; }
+
+/* ---------------- the palette ---------------- */
+.palhead { font-size: 13px; color: var(--muted); margin: 12px 0 7px; }
+.pal { display: flex; flex-direction: column; gap: 7px; }
+.blk {
+  font: 700 13.5px Vazirmatn, Tahoma, sans-serif; color: #0a0d13;
+  padding: 10px 13px; border: 0; cursor: pointer; text-align: right;
+  display: flex; align-items: center; gap: 8px;
+}
+.blk small { font-weight: 400; opacity: .75; font-family: Consolas, monospace; direction: ltr; }
+.blk.sens { background: var(--sens); clip-path: polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%); }
+.blk.move { background: var(--move); border-radius: 10px; color: #eaf2ff; }
+.blk:hover { filter: brightness(1.12); }
+
+/* ---------------- the stacks ---------------- */
+#stacks { display: flex; flex-direction: column; gap: 14px; }
+.stack {
+  border: 2px solid var(--line); border-radius: 14px; padding: 11px;
+  background: var(--card2); cursor: pointer;
+}
+.stack.sel { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(79, 195, 247, .18); }
+.stack.off { opacity: .5; }
+.stkhead { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.stkhead .idx {
+  width: 24px; height: 24px; display: grid; place-items: center; flex: none;
+  background: var(--line); border-radius: 7px; font-size: 13px; font-weight: 700;
+}
+.stkhead .word { font-weight: 800; color: var(--sens); }
+.stkbtns { margin-right: auto; display: flex; gap: 4px; }
+.stkbtns button {
+  width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--card); color: var(--text); cursor: pointer; font-size: 13px;
+}
+/* one snapped column per stack */
+.stkcol { display: flex; flex-direction: column; align-items: stretch; margin: 3px 0; }
+.stkcol .brow + .brow, .stkcol .brow + .addbtn.slot2 { margin-top: 4px; }
+.addbtn.slot2 { margin: 6px 0 0; padding: 7px 12px; width: auto; font-size: 12.5px; align-self: flex-start; }
+/* ---- SNAPPED block rows: full width, zero gap, a Scratch-style tab on
+   top so consecutive blocks read as one clicked-together stack ---- */
+.brow {
+  position: relative; display: flex; align-items: center; flex-wrap: wrap;
+  gap: 7px; width: 100%;
+  font: 700 13px Vazirmatn, "Segoe UI", Tahoma, sans-serif; color: #1a1206;
+  background: var(--sens); padding: 8px 12px 8px 12px;
+  border-radius: 8px; border: 1.5px solid rgba(0, 0, 0, .22);
+}
+/* the PUZZLE TAB: every block grows a stub underneath that clicks into
+   the block below — the classic clicked-together look */
+.brow::after {
+  content: ''; position: absolute; bottom: -5px; inset-inline-start: 18px;
+  width: 26px; height: 7px; border-radius: 0 0 6px 6px; z-index: 2;
+  background: inherit; border: 1.5px solid rgba(0, 0, 0, .22); border-top: 0;
+}
+.stkcol .brow:last-of-type::after { display: none; }
+.brow.move { background: var(--move); color: #eaf2ff; }
+.brow.move2 { background: #3a6fe0; }
+.brow .kw {
+  font-weight: 900; opacity: .8; font-size: 11.5px; text-transform: uppercase;
+  letter-spacing: .6px; padding: 2px 7px; border-radius: 6px;
+  background: rgba(0, 0, 0, .16);
+}
+.brow .pc { white-space: nowrap; }
+.brow .x { margin-inline-start: auto; cursor: pointer; font-weight: 900; opacity: .6; }
+.brow .x:hover { opacity: 1; }
+.brow input {
+  width: 46px; border: 0; border-radius: 6px; padding: 3px 4px; text-align: center;
+  font: 700 12.5px Consolas, monospace; background: rgba(255, 255, 255, .9); color: #111;
+}
+.brow select {
+  border: 0; border-radius: 6px; font: 700 12px Vazirmatn, Tahoma, sans-serif;
+  background: rgba(255, 255, 255, .9); color: #111; padding: 3px;
+}
+/* the SNAP: a new block pops into place */
+.brow.pop { animation: blkSnap .22s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes blkSnap {
+  0% { transform: scale(.82) translateY(-7px); opacity: .4; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+/* English mode: LTR text inside the blocks */
+html[dir="ltr"] .brow, html[dir="ltr"] .blk { text-align: left; }
+.word2 { font-weight: 800; color: var(--move); font-size: 13px; }
+.empty { color: var(--muted); font-size: 12.5px; }
+.addbtn {
+  margin-top: 13px; width: 100%; padding: 12px; font: 700 14px Vazirmatn, Tahoma, sans-serif;
+  color: var(--text); background: transparent; border: 2px dashed var(--line);
+  border-radius: 12px; cursor: pointer;
+}
+.addbtn:hover { border-color: var(--acc); color: var(--acc); }
+
+/* the else stack */
+.stack.else { border-style: dashed; cursor: default; }
+.stack.else .word { color: var(--good); }
+
+/* ---------------- python panel ---------------- */
+.codecard pre {
+  direction: ltr; text-align: left; overflow: auto; max-height: 460px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 11px;
+  padding: 14px; font: 12.5px/1.55 Consolas, "Courier New", monospace; color: var(--text);
+}
+
+/* ---------------- toast ---------------- */
+.toast {
+  position: fixed; bottom: 104px; right: 50%; transform: translateX(50%);
+  background: var(--acc); color: #04121c; font: 700 13.5px Vazirmatn, Tahoma, sans-serif;
+  padding: 10px 18px; border-radius: 12px; opacity: 0; pointer-events: none;
+  transition: opacity .25s; z-index: 60;
+}
+.toast.on { opacity: 1; }
+
+
+/* ================================================================
+   MINDSTACK FEEL — chunky candy blocks: a solid 3D shadow under
+   every block, a happy hop on hover, and the same palette family
+   the MindStack playground wears.
+   ================================================================ */
+:root { --sens: #f5a623; --move: #4a90e2; }
+.blk {
+  border-radius: 12px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .30);
+  transition: transform .12s, box-shadow .12s;
+}
+.blk.sens { clip-path: none; }               /* chunky rounded, like MindStack */
+.blk.sens { background: var(--sens); box-shadow: 0 4px 0 #b57310; }
+.blk.move { background: var(--move); box-shadow: 0 4px 0 #2f66a8; }
+.blk:hover { transform: translateY(-3px); filter: none; }
+.blk:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+
+.brow {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .28);
+}
+.brow.sens { box-shadow: 0 3px 0 #b57310; }
+.brow.move { box-shadow: 0 3px 0 #2f66a8; }
+.brow.move2 { box-shadow: 0 3px 0 #274f86; }
+.brow::after { border: 0; box-shadow: 0 3px 0 rgba(0, 0, 0, .22); }
+.stkcol .brow + .brow, .stkcol .brow + .addbtn.slot2 { margin-top: 6px; }
+
+/* the code panel gets the MindStack terminal look */
+.codecard pre {
+  background: #241f47; color: #e7e3ff;
+  border: 0; border-radius: 13px;
+}
+body.light .codecard pre { background: #241f47; color: #e7e3ff; }
+
+
+/* ================================================================
+   SCRATCH-TRUE SNAP — matched to MindStack's ADVANCED editor:
+   a rounded TAB under every block, a rounded NOTCH cut into the top
+   of the next one, blocks touching, pill number fields, and the
+   first (condition) block wearing the hat's big rounded shoulders.
+   ================================================================ */
+.stkcol .brow + .brow { margin-top: 2px; }         /* touching, tab bridges it */
+.brow { border-radius: 8px; }
+
+/* the TAB (male): a wide rounded stud under the block */
+.brow::after {
+  content: ''; position: absolute; bottom: -7px; inset-inline-start: 16px;
+  width: 32px; height: 8px; border-radius: 0 0 9px 9px; z-index: 2;
+  background: inherit; border: 0; box-shadow: none;
+}
+/* the NOTCH (female): a matching rounded socket cut into the top */
+.brow::before {
+  content: ''; position: absolute; top: 0; inset-inline-start: 16px;
+  width: 32px; height: 7px; border-radius: 0 0 9px 9px; z-index: 1;
+  background: var(--card2);
+}
+.stkcol .brow:first-of-type::before { display: none; }
+.stkcol .brow:last-of-type::after { display: none; }
+
+/* the first block of a stack wears the HAT: big rounded shoulders */
+.stkcol .brow:first-of-type {
+  border-top-left-radius: 16px; border-top-right-radius: 16px;
+  padding-top: 10px;
+}
+
+/* pill number fields + selects, like MindStack's white ovals */
+.brow input, .brow select {
+  border-radius: 999px; padding: 3px 9px; background: #ffffff; color: #16324a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .18);
+}
+
+/* MindStack's advanced-editor palette: hat-yellow conditions, sky-blue moves */
+:root { --sens: #f6a818; --move: #2e9bf0; }
+.blk.sens, .brow.sens { box-shadow: 0 3px 0 #c07f08; }
+.blk.move, .brow.move { box-shadow: 0 3px 0 #1f76bd; }
+.brow.move2 { background: #2384d6; box-shadow: 0 3px 0 #185f9c; }
+
+
+/* the block icons, MindStack-style */
+.bic { font-size: 16px; line-height: 1; }
+
+/* the Python-paste modal */
+#pyModal {
+  position: fixed; inset: 0; z-index: 70; display: flex;
+  align-items: center; justify-content: center;
+  background: rgba(6, 8, 12, .7); backdrop-filter: blur(4px);
+}
+.pym-card {
+  width: 560px; max-width: 94vw; display: flex; flex-direction: column; gap: 10px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px;
+}
+.pym-card b { font-size: 15px; }
+.pym-card textarea {
+  height: 220px; resize: vertical; border-radius: 10px; border: 1px solid var(--line);
+  background: #241f47; color: #e7e3ff; padding: 10px;
+  font: 12.5px/1.6 Consolas, monospace;
+}
+.pym-row { display: flex; gap: 8px; align-items: center; }
+
+
+/* HAT blocks (e.g. "always"): a start block — big domed top, no notch,
+   no tab. The puzzle joints belong to the if → then → and-then chain. */
+.brow.hat::before, .brow.hat::after { display: none !important; }
+.stkcol .brow.hat, .stkcol .brow.hat:first-of-type {
+  border-top-left-radius: 22px; border-top-right-radius: 22px;
+  padding-top: 11px;
+}

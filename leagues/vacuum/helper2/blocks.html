@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blocks helper · Simulation League</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../../../favicon.png">
+<!-- THE LEAGUE'S SECOND HELPER MODULE — the BLOCKS page (FS).
+     Scratch-style stacks that read and write THE SAME rules file the AI
+     helper saves (one storage key per division, two views), so
+     blocks ⇆ AI-helper rules ⇆ Python convert freely. The only thing it
+     ever hands the game is a real Python file.
+     ماژول هلپر دوم لیگ — صفحه‌ی بلاکی: بلاک‌ها را مثل اسکرچ بچین،
+     همان فایل قانون‌های هلپر ۱ ساخته می‌شود و خروجی، پایتونِ واقعی است. -->
+<link rel="stylesheet" href="blocks.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">&#129513;</span>
+    <div>
+      <b id="uiTitle">Blocks helper</b>
+      <span id="subTitle">First Step · Vacuum league</span>
+    </div>
+  </div>
+  <div class="topbtns">
+    <button class="btn ghost" id="themeBtn" type="button" title="روشن / تاریک">&#9728;&#65039;</button>
+    <button class="btn ghost" id="resetBtn" type="button">از نو</button>
+    <a class="btn ghost" id="backLink" href="../../../index.html">&#8594; برگرد به بازی</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- the palette: tap a block, it lands in the selected stack -->
+  <section class="card palcard">
+    <h2 id="h2Pal"><span class="step">1</span> Blocks</h2>
+    <p class="hint" id="palHint"></p>
+    <div class="palhead" id="palHeadSens"></div>
+    <div id="palSens" class="pal"></div>
+    <div class="palhead" id="palHeadActs"></div>
+    <div id="palActs" class="pal"></div>
+  </section>
+
+  <!-- the workspace: the rule stacks, in order = the if / elif chain -->
+  <section class="card workcard">
+    <h2 id="h2Work"></h2>
+    <div id="stacks"></div>
+    <button class="addbtn" id="addRule" type="button">+ قانون جدید</button>
+  </section>
+</main>
+
+<!-- the live Python — the same file the match runs -->
+<section class="wrapfull">
+  <section class="card codecard">
+    <h2 id="h2Code"></h2>
+    <pre id="code"></pre>
+  </section>
+</section>
+
+<footer class="bar">
+  <span class="barhint" id="barHint"></span>
+  <button class="btn ghost" id="copyBtn" type="button">کپی پایتون</button>
+  <button class="btn ghost" id="dlPyBtn" type="button">&#11015; فایل پایتون</button>
+  <button class="btn ghost" id="dlJsonBtn" type="button" title="فایل بلاکی — با «بارگذاری» به بلاک‌ها برمی‌گردد و در هلپر ۱ هم باز می‌شود">&#11015; فایل بلاکی</button>
+  <button class="btn ghost" id="loadJsonBtn" type="button">&#128229; بارگذاری فایل بلاکی</button>
+  <button class="btn ghost" id="loadPyBtn" type="button" title="paste or open helper-written Python and watch it become blocks">&#128229; Python &#8594; blocks</button>
+  <input type="file" id="jsonFile" accept=".json,application/json" style="display:none">
+  <input type="file" id="pyFile" accept=".py,text/x-python" style="display:none">
+  <button class="btn ghost" id="playBtn2" type="button" title="این کد به ادیتور تیم ۲ می‌رود">&#9654; تیم ۲</button>
+  <button class="btn go" id="playBtn" type="button">&#9654; بازی با این کد</button>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="blocks.js"></script>
+</body>
+</html>

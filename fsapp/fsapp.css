@@ -1,0 +1,319 @@
+/* ============================================================
+   fsapp/fsapp.css  —  the look of «Build with Blocks».
+
+   Same dark family as the rest of the site, but this page is a TOY:
+   fat rounded blocks with a pressable 3D lip, loud colours, huge
+   touch targets, everything left-to-right like the rest of the game
+   page. No external font, no image file — colours, gradients and
+   inline SVG only. Every inset/margin below is a LOGICAL property
+   (inline-start / inline-end), so the panel keeps its shape.
+   ============================================================ */
+
+body.fs-locked { overflow: hidden; }
+
+.fs-root {
+  position: fixed; inset: 0; z-index: 90; display: none;
+  flex-direction: column; overflow: hidden;
+  background: #0a0d13;
+  color: #eaeef6;
+  font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+  direction: ltr;
+  --line: #232b3a;
+  --card: #131923;
+  --muted: #8e9ab0;
+}
+.fs-root.on { display: flex; animation: fs-in .22s ease-out; }
+@keyframes fs-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+.fs-root *, .fs-root *::before, .fs-root *::after { box-sizing: border-box; }
+.fs-root button { font-family: inherit; }
+
+/* the soft colour glow behind everything */
+.fs-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.fs-sky i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .30; }
+.fs-sky i:nth-child(1) { width: 46vw; height: 46vw; right: -8vw; top: -12vw; background: #2f6bff; }
+.fs-sky i:nth-child(2) { width: 40vw; height: 40vw; left: -10vw; bottom: -14vw; background: #22c55e; }
+.fs-sky i:nth-child(3) { width: 30vw; height: 30vw; left: 34vw; top: -14vw; background: #a855f7; opacity: .2; }
+
+/* ---------------- header ---------------- */
+.fs-top {
+  position: relative; z-index: 1; flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(12, 16, 23, .72);
+  backdrop-filter: blur(8px);
+}
+.fs-brand { display: flex; align-items: center; gap: 14px; }
+.fs-logo {
+  width: 46px; height: 46px; flex: none; display: grid; place-items: center; font-size: 25px;
+  border-radius: 14px; background: linear-gradient(140deg, #3b82f6, #a855f7);
+  box-shadow: 0 6px 18px rgba(80, 90, 255, .38);
+}
+.fs-brand b { display: block; font-size: 21px; letter-spacing: .2px; }
+.fs-brand span span, .fs-brand div span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.fs-close {
+  border: 1px solid var(--line); background: #182031; color: #cbd5e5;
+  border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.fs-close:hover { background: #202a3d; color: #fff; }
+
+/* ---------------- the three columns ---------------- */
+.fs-grid {
+  position: relative; z-index: 1; flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 258px minmax(0, 1fr) minmax(382px, 31%);
+  grid-template-rows: minmax(0, 1fr);            /* never taller than the screen */
+  gap: 14px; padding: 14px 18px;
+}
+.fs-card {
+  display: flex; flex-direction: column; min-height: 0;
+  background: linear-gradient(180deg, rgba(23, 30, 42, .94), rgba(17, 22, 32, .94));
+  border: 1px solid var(--line); border-radius: 22px; padding: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .38);
+}
+.fs-card > h2 {
+  flex: none; display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  font-size: 16.5px; font-weight: 800; margin: 0 2px 10px;
+}
+.fs-card > h2 small { font-size: 12px; font-weight: 600; color: var(--muted); }
+.fs-h-em { font-size: 19px; }
+.fs-hint { font-size: 12px; color: var(--muted); margin: -4px 2px 8px; }
+.fs-palgroup {
+  font-size: 12.5px; font-weight: 800; color: #93a3bd; letter-spacing: .3px;
+  margin: 9px 2px 7px; padding-inline-start: 8px; border-inline-start: 4px solid #3b82f6; border-radius: 2px;
+}
+.fs-palgroup + div + .fs-palgroup { border-inline-start-color: #f59e0b; }
+.fs-pal { overflow-y: auto; }
+
+/* ---------------- palette blocks (the toy look) ---------------- */
+.fs-pblk {
+  position: relative; width: 100%; display: flex; align-items: center; gap: 11px;
+  margin-bottom: 9px; padding: 9px 12px; cursor: pointer; text-align: start;
+  border: none; border-radius: 15px; color: #fff; font-size: 15px; font-weight: 800;
+  background: linear-gradient(160deg, var(--c), var(--c2));
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .34), 0 10px 22px rgba(0, 0, 0, .3);
+  transition: transform .1s ease, box-shadow .1s ease, filter .1s ease;
+}
+.fs-pblk::after {                     /* the jigsaw nub underneath */
+  content: ''; position: absolute; bottom: -7px; inset-inline-start: 26px;
+  width: 20px; height: 14px; border-radius: 0 0 11px 11px; background: var(--c2);
+}
+#fsPalConds .fs-pblk:last-child { margin-bottom: 2px; }
+.fs-pblk:hover { filter: brightness(1.09); transform: translateY(-1px); }
+.fs-pblk:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, .34), 0 4px 10px rgba(0, 0, 0, .3); }
+.fs-pname { flex: 1; line-height: 1.3; }
+.fs-plus { font-size: 19px; opacity: .8; font-weight: 700; }
+.fs-pcond { font-size: 14px; }
+.fs-ic {
+  width: 31px; height: 31px; flex: none; display: grid; place-items: center;
+  border-radius: 10px; background: rgba(255, 255, 255, .2);
+}
+.fs-ic svg { width: 19px; height: 19px; fill: #fff; }
+
+/* ---------------- the program strip ---------------- */
+.fs-mid { min-width: 0; }
+.fs-loop {
+  margin-inline-start: auto; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; color: #cbd5e5; cursor: pointer;
+  background: #1b2434; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
+}
+.fs-loop input { width: 15px; height: 15px; accent-color: #22c55e; cursor: pointer; }
+.fs-loopwarn { font-size: 11.5px; font-weight: 700; color: #fcd34d; }
+.fs-mini {
+  border: 1px solid var(--line); background: #1b2434; color: #cbd5e5;
+  border-radius: 999px; padding: 5px 11px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.fs-mini:hover { background: #26324a; color: #fff; }
+.fs-strip {
+  flex: 1 1 auto; min-height: 140px; overflow-y: auto; padding: 12px 10px 16px;
+  border-radius: 18px; border: 2px dashed #2e3a52;
+  background:
+    radial-gradient(circle at 12px 12px, rgba(255, 255, 255, .045) 1.6px, transparent 1.7px) 0 0 / 24px 24px,
+    rgba(9, 12, 18, .55);
+}
+.fs-empty { text-align: center; padding: 34px 10px; color: var(--muted); }
+.fs-emptyic { display: block; width: 46px; height: 46px; margin: 0 auto 10px; opacity: .5; }
+.fs-emptyic svg { width: 46px; height: 46px; fill: #7c8aa4; }
+.fs-empty b { display: block; font-size: 17px; color: #cbd5e5; }
+.fs-empty i { display: block; font-size: 13px; margin-top: 5px; font-style: normal; }
+
+.fs-blk {
+  position: relative; display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 15px; padding: 11px 12px; border-radius: 17px; color: #fff;
+  background: linear-gradient(160deg, var(--c), var(--c2));
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .32), 0 12px 24px rgba(0, 0, 0, .3);
+  touch-action: none; cursor: grab;
+}
+.fs-blk::after {
+  content: ''; position: absolute; bottom: -7px; inset-inline-start: 34px;
+  width: 22px; height: 14px; border-radius: 0 0 12px 12px; background: var(--c2);
+}
+.fs-blk.fs-dragging { cursor: grabbing; transform: rotate(-1.2deg) scale(1.02); box-shadow: 0 16px 34px rgba(0, 0, 0, .55); opacity: .96; }
+.fs-blk.fs-new { animation: fs-pop .45s ease-out; }
+@keyframes fs-pop { 0% { transform: scale(.8); opacity: 0; } 60% { transform: scale(1.04); } 100% { transform: none; opacity: 1; } }
+.fs-grip { font-size: 17px; opacity: .55; line-height: 34px; cursor: grab; user-select: none; }
+.fs-badge {
+  width: 27px; height: 27px; flex: none; display: grid; place-items: center; margin-top: 3px;
+  border-radius: 50%; background: rgba(0, 0, 0, .3); font-size: 13.5px; font-weight: 800;
+}
+.fs-body { flex: 1; min-width: 0; }
+.fs-row1 { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+.fs-bname { flex: 1; font-size: 16px; font-weight: 800; }
+.fs-row2 {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255, 255, 255, .22);
+}
+.fs-then { font-size: 13px; font-weight: 700; opacity: .9; margin-inline-end: 2px; }
+.fs-mv {
+  width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer;
+  border-radius: 11px; border: 2px solid rgba(255, 255, 255, .3); background: rgba(0, 0, 0, .22);
+}
+.fs-mv svg { width: 18px; height: 18px; fill: #fff; opacity: .8; }
+.fs-mv:hover { background: rgba(0, 0, 0, .34); }
+.fs-mv.on { background: var(--m); border-color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .35); }
+.fs-mv.on svg { opacity: 1; }
+.fs-colors { gap: 7px; }
+.fs-dot {
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; padding: 0;
+  background: var(--d); border: 2px solid rgba(255, 255, 255, .4);
+}
+.fs-dot.on { border-color: #fff; transform: scale(1.16); box-shadow: 0 0 0 2px rgba(255, 255, 255, .4); }
+.fs-colname { font-size: 12.5px; font-weight: 700; opacity: .92; margin-inline-start: 4px; }
+.fs-secs {
+  display: inline-flex; align-items: center; gap: 2px; margin-inline-start: auto;
+  background: rgba(0, 0, 0, .26); border-radius: 999px; padding: 3px;
+}
+.fs-secs b { min-width: 58px; text-align: center; font-size: 15px; font-weight: 800; }
+.fs-secs b small { display: block; font-size: 9.5px; font-weight: 600; opacity: .8; margin-top: -2px; }
+.fs-sq {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; color: #fff; font-size: 17px; font-weight: 800;
+  border: none; background: rgba(255, 255, 255, .2); line-height: 1;
+}
+.fs-sq:hover { background: rgba(255, 255, 255, .34); }
+.fs-del {
+  width: 30px; height: 30px; flex: none; border-radius: 50%; cursor: pointer; margin-top: 2px;
+  border: none; background: rgba(0, 0, 0, .28); color: #fff; font-size: 14px; font-weight: 800;
+}
+.fs-del:hover { background: #0f1420; }
+
+/* ---------------- the talk box ---------------- */
+.fs-talk { flex: none; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 11px; }
+.fs-talk-h { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 800; margin-bottom: 8px; }
+.fs-offline {
+  margin-inline-start: auto; font-size: 11px; font-weight: 700; color: #86e0b4;
+  background: rgba(34, 197, 94, .12); border: 1px solid rgba(34, 197, 94, .35);
+  border-radius: 999px; padding: 3px 10px;
+}
+.fs-talk-row { display: flex; gap: 10px; align-items: stretch; }
+.fs-talk-row textarea {
+  flex: 1; resize: none; font-family: inherit; font-size: 15px; line-height: 1.7; color: #eaeef6;
+  background: #0d1119; border: 2px solid #2e3a52; border-radius: 15px; padding: 10px 13px;
+}
+.fs-talk-row textarea:focus { outline: none; border-color: #4d8bff; box-shadow: 0 0 0 3px rgba(77, 139, 255, .2); }
+.fs-go {
+  flex: none; width: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  border: none; border-radius: 15px; cursor: pointer; color: #08131f; font-size: 21px; font-weight: 800;
+  background: linear-gradient(150deg, #fde047, #f59e0b);
+  box-shadow: 0 5px 0 #b45309, 0 10px 20px rgba(245, 158, 11, .3);
+}
+.fs-go span { font-size: 14px; }
+.fs-go:active { transform: translateY(4px); box-shadow: 0 1px 0 #b45309; }
+.fs-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.fs-chip {
+  border: 1px dashed #3a465e; background: #151c28; color: #b9c6dc; cursor: pointer;
+  border-radius: 999px; padding: 5px 11px; font-size: 12px; font-family: inherit;
+}
+.fs-chip:hover { background: #1e2739; color: #fff; border-style: solid; }
+.fs-report { margin-top: 8px; max-height: 104px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.fs-rline {
+  display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  font-size: 13.5px; line-height: 1.65; border-radius: 12px; padding: 7px 11px;
+}
+.fs-rline.ok { background: rgba(34, 197, 94, .1); border: 1px solid rgba(34, 197, 94, .3); color: #b9f2d0; }
+.fs-rline.bad { background: rgba(245, 158, 11, .1); border: 1px solid rgba(245, 158, 11, .35); color: #fcdfa8; }
+.fs-rmark { flex: none; }
+.fs-rnote { display: block; font-style: normal; font-size: 12px; opacity: .8; }
+.fs-fix {
+  border: none; cursor: pointer; border-radius: 999px; padding: 5px 12px;
+  font-size: 12.5px; font-weight: 700; color: #08131f; background: #fbbf24;
+}
+.fs-fix:hover { background: #fcd34d; }
+.fs-fix:disabled { background: #2b3a2f; color: #86e0b4; cursor: default; }
+
+/* ---------------- the python pane ---------------- */
+.fs-code { min-width: 0; }
+.fs-okline { flex: none; font-size: 12.5px; font-weight: 700; margin: -4px 2px 8px; min-height: 17px; color: var(--muted); }
+.fs-okline.good { color: #6ee7a8; }
+.fs-okline.bad { color: #fda4af; }
+.fs-py {
+  flex: 1; min-height: 0; overflow: auto; margin: 0;
+  background: #080b11; border: 1px solid #202838; border-radius: 15px; padding: 13px 15px;
+  font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+  font-size: 11.6px; line-height: 1.72; color: #d7e0ec;
+  white-space: pre-wrap; overflow-wrap: anywhere; direction: ltr; text-align: left;
+  tab-size: 4;
+}
+/* one line = one block, so a long comment wraps with a hanging indent */
+.fs-py > div { padding-inline-start: 3.4em; text-indent: -3.4em; min-height: 1.72em; }
+.fs-py .c { color: #6b8bb0; font-weight: 400; }
+.fs-py .k { color: #ff9ec4; font-weight: 700; }
+.fs-py .f { color: #7dd3fc; font-weight: 700; }
+.fs-py .n { color: #f6c177; font-weight: 400; }
+
+/* ---------------- the two big buttons ---------------- */
+.fs-bottom {
+  position: relative; z-index: 1; flex: none;
+  display: flex; align-items: center; gap: 14px; padding: 12px 22px;
+  border-top: 1px solid var(--line); background: rgba(12, 16, 23, .8);
+}
+.fs-btn {
+  border: none; cursor: pointer; border-radius: 16px; padding: 15px 30px;
+  font-size: 18px; font-weight: 800; color: #06210f; font-family: inherit;
+  transition: transform .1s ease, box-shadow .1s ease, filter .1s ease;
+}
+.fs-run { background: linear-gradient(150deg, #4ade80, #16a34a); box-shadow: 0 5px 0 #14532d, 0 12px 26px rgba(34, 197, 94, .32); }
+.fs-save { background: linear-gradient(150deg, #7dd3fc, #2563eb); color: #04142e; box-shadow: 0 5px 0 #1e3a8a, 0 12px 26px rgba(59, 130, 246, .3); }
+.fs-btn:hover { filter: brightness(1.07); }
+.fs-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, .4); }
+.fs-foot-note { font-size: 12.5px; color: var(--muted); }
+
+/* the button that opens all this, on the setup panel */
+#fsBlockBtn {
+  background: linear-gradient(135deg, #f59e0b, #a855f7);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, .3);
+  color: #fff;
+}
+
+/* ---------------- scrollbars, in the same dark family ---------------- */
+.fs-root ::-webkit-scrollbar { width: 10px; height: 10px; }
+.fs-root ::-webkit-scrollbar-track { background: rgba(255, 255, 255, .03); border-radius: 8px; }
+.fs-root ::-webkit-scrollbar-thumb { background: #33405a; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.fs-root ::-webkit-scrollbar-thumb:hover { background: #44557a; }
+
+/* ---------------- a short screen (the 768 px classroom laptop) ---------------- */
+@media (max-height: 830px) {
+  .fs-top { padding: 8px 20px; }
+  .fs-logo { width: 40px; height: 40px; font-size: 22px; }
+  .fs-brand b { font-size: 19px; }
+  .fs-grid { padding: 10px 14px; gap: 12px; }
+  .fs-card { padding: 12px; border-radius: 18px; }
+  .fs-pblk { margin-bottom: 7px; padding: 7px 11px; font-size: 14.5px; }
+  .fs-ic { width: 28px; height: 28px; }
+  .fs-ic svg { width: 17px; height: 17px; }
+  .fs-hint { display: none; }
+  .fs-chips { max-height: 27px; overflow: hidden; }
+  .fs-report { max-height: 74px; }
+  .fs-talk-row textarea { font-size: 14px; }
+  .fs-btn { padding: 11px 24px; font-size: 16.5px; }
+  .fs-bottom { padding: 9px 20px; }
+}
+
+/* ---------------- smaller screens ---------------- */
+@media (max-width: 1180px) {
+  .fs-grid { grid-template-columns: 250px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 40%); }
+  .fs-code { grid-column: 1 / -1; }
+}
+@media (max-width: 860px) {
+  .fs-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow-y: auto; }
+  .fs-pal, .fs-code { max-height: 46vh; }
+  .fs-brand span span, .fs-brand div span { display: none; }
+}

@@ -1,0 +1,96 @@
+/* ============================================================
+   leagues/vacuum/maps/grown-rooms.js  —  the 22x22 ROOMS house,
+   the official floor for FS / U14 / U19.
+
+   THIS floor plan was drawn BY THE ORGANISER in the Map Maker
+   (exported 2026-08-22) and stamped official here. Re-drawing it:
+   edit in the Map Maker, «خروجی JSON», paste the fields back in —
+   or hand the .json to the game's «لود فایل مپ» for a per-browser
+   default without touching this file.
+
+   Six zones, every door its own marker colour:
+       room == 1   the kitchen        (top-right)
+       room == 2   bedroom 1          (top-left)
+       room == 3   bedroom 2          (bottom-left)
+       room == 4   bedroom 3          (mid-left)
+       room == 5   the bathroom       (bottom-right, OPEN to the hall)
+       room == 0   the hall / living  (everything else)
+
+   clean1..clean5 report each room's clean-%, per robot. The wet
+   pair is tile-aligned and mirrored about the centre; FS filters
+   it out in fs/rules.js and plays the same house dry.
+
+   فارسی: این نقشه را برگزارکننده در مپ‌ساز کشیده و همین‌جا رسمی
+   شده است. برای بازطراحی: مپ‌ساز → خروجی JSON → همین فایل.
+   ============================================================ */
+(function (root) {
+  'use strict';
+  const M = (root.VacuumMaps = root.VacuumMaps || {});
+
+  const GROWN_ROOMS = {
+    v: 1, name: 'vacuum-rooms-22', league: 'vacuum', cols: 22, rows: 22, tileSize: 0.625,
+    objects: [
+      { t: 'sofa', x: 7.2, y: 0.9, w: 3.5, d: 0.95, rot: 0 },
+      { t: 'table', x: 7.5, y: 2.6, w: 1.4, d: 1, rot: 0 },
+      { t: 'tv', x: 7.96875, y: 7.1875, w: 3.1, d: 0.9, rot: 0 },
+      { t: 'pouf', x: 13.35, y: 0.4, w: 0.8, d: 0.8, rot: 0 },
+      { t: 'pouf', x: 13.35, y: 1.25, w: 0.8, d: 0.8, rot: 0 },
+      { t: 'shelf', x: 13.275, y: 6.5, w: 0.95, d: 0.9, rot: 0 },
+      { t: 'pouf', x: 5, y: 5, w: 0.8, d: 0.8, rot: 0 },
+      { t: 'plant', x: 6.2, y: 13.2, w: 0.6, d: 0.6, rot: 0 },
+      { t: 'plant', x: 5.8, y: 3.3, w: 0.6, d: 0.6, rot: 0 },
+      { t: 'dining', x: 11.5, y: 12.4, w: 1.4, d: 1, rot: 0 },
+      { t: 'trash', x: 13.28125, y: 9.6875, w: 0.45, d: 0.45, rot: 0 },
+      { t: 'petbowl', x: 9.4, y: 13.2, w: 0.4, d: 0.4, rot: 0 },
+      { t: 'plant', x: 13.25, y: 13.25, w: 0.6, d: 0.6, rot: 0 },
+      { t: 'bed', x: 1, y: 10.9375, w: 2, d: 2.4, rot: 2 },
+      { t: 'lamp', x: 4.6, y: 13.2, w: 0.5, d: 0.5, rot: 0 },
+      { t: 'bed', x: 1, y: 2.96875, w: 2, d: 2.4, rot: 0 },
+      { t: 'lamp', x: 4.6, y: 0.7, w: 0.5, d: 0.5, rot: 0 },
+      { t: 'plant', x: 3.4, y: 5.2, w: 0.6, d: 0.6, rot: 0 },
+      { t: 'lamp', x: 4.53125, y: 9.6875, w: 0.5, d: 0.5, rot: 0 },
+      { t: 'plant', x: 8.28125, y: 9.6875, w: 0.6, d: 0.6, rot: 0 },
+      { t: 'dock', x: 12.9, y: 4.6, w: 1.1, d: 1.1, rot: 0 },
+      { t: 'dump', x: 13.28125, y: 10.3125, w: 0.5, d: 0.5, rot: 1 },
+      { t: 'piano', x: 11.5625, y: 0.325, w: 1.5, d: 0.65, rot: 2 },
+    ],
+    walls: [
+      { x: 2.6525, y: 9.21875, w: 5.625, d: 0.16 },
+      { x: 5.625, y: 13.125, w: 0.16, d: 1.25 },
+      { x: 2.8125, y: 4.375, w: 5.625, d: 0.16 },
+      { x: 4.375, y: 5.3125, w: 0.16, d: 1.875 },
+      { x: 5.625, y: 0.9375, w: 0.16, d: 1.875 },
+      { x: 5.625, y: 3.75, w: 0.16, d: 1.25 },
+      { x: 11.25, y: 9.375, w: 5, d: 0.16 },
+      { x: 8.75, y: 10, w: 0.16, d: 1.25 },
+      { x: 8.75, y: 12.8125, w: 0.16, d: 1.875 },
+      { x: 11.875, y: 3.125, w: 3.75, d: 0.16 },
+      { x: 5.625, y: 9.84375, w: 0.16, d: 0.785 },
+    ],
+    rugs: [
+      { x: 7.8125, y: 4.6875, w: 3.125, d: 1.875, kind: 'green' },
+      { x: 6.5625, y: 12.1875, w: 0.625, d: 0.625, kind: 'purple' },
+      { x: 6.5625, y: 2.8125, w: 0.625, d: 0.625, kind: 'orange' },
+      { x: 9.6875, y: 8.4375, w: 0.625, d: 0.625, kind: 'cyan' },
+      { x: 8.4375, y: 11.5625, w: 0.625, d: 0.625, kind: 'green' },
+      { x: 9.6875, y: 1.5625, w: 0.625, d: 0.625, kind: 'orange' },
+      // the wet pair (U14 / U19 punish it, FS filters it out):
+      // tile-aligned, mirrored about the centre — fair from either corner
+      { x: 6.875, y: 10.3125, w: 1.25, d: 0.625, kind: 'wet' },
+      { x: 6.875, y: 3.4375, w: 1.25, d: 0.625, kind: 'wet' },
+    ],
+    spawns: {
+      red: { x: 9.4, y: 1.6, rot: 0 }, blue: { x: 7.2, y: 12.5, rot: 2 },
+      cat: { x: 11.09375, y: 4.375, on: true }, dog: { x: 10.78125, y: 5.46875, on: true },
+    },
+    rooms: [
+      { id: 1, name: 'kitchen', x1: 8.75, y1: 9.375, x2: 13.75, y2: 13.75 },
+      { id: 2, name: 'bedroom 1', x1: 0, y1: 9.375, x2: 5.625, y2: 13.75 },
+      { id: 3, name: 'bedroom 2', x1: 0, y1: 0, x2: 5.625, y2: 4.375 },
+      { id: 4, name: 'bedroom 3', x1: 0, y1: 4.375, x2: 4.375, y2: 9.375 },
+      { id: 5, name: 'bathroom', x1: 10, y1: 0, x2: 13.75, y2: 3.125 },
+    ],
+  };
+
+  M.GROWN_ROOMS = GROWN_ROOMS;
+})(typeof self !== 'undefined' ? self : this);

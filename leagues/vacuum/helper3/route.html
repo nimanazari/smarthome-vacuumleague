@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📍 Route — هلپر مسیر · لیگ جاروبرقی</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../../../favicon.png">
+<!-- THE LEAGUE'S THIRD HELPER MODULE — the ROUTE page (U19).
+     Tap the map to drop numbered waypoints; the robot drives them with
+     goto(x, y), point to point, and the battery guard sends it to the
+     charging pad and back all by itself. Output: a real Python file.
+     ماژول هلپر سوم — نقشه را لمس کن، نقطه بگذار؛ ربات نقطه‌به‌نقطه
+     با goto می‌راند و هر وقت باتری کم شد خودش می‌رود شارژر و برمی‌گردد. -->
+<link rel="stylesheet" href="route.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">&#128205;</span>
+    <div>
+      <b>Route — هلپر مسیر</b>
+      <span id="subTitle">U19 · Vacuum league</span>
+    </div>
+  </div>
+  <div class="topbtns">
+    <button class="btn ghost" id="themeBtn" type="button" title="روشن / تاریک">&#9728;&#65039;</button>
+    <button class="btn ghost" id="resetBtn" type="button">از نو</button>
+    <a class="btn ghost" id="backLink" href="../../../index.html">&#8594; برگرد به بازی</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card mapcard">
+    <h2><span class="step">۱</span> روی خانه بزن تا نقطه بگذاری
+      <span class="hint">— ربات به همین ترتیب، نقطه‌به‌نقطه می‌رود. روی نقطه بزنی حذف می‌شود.</span></h2>
+    <canvas id="mapCv" width="760" height="760"></canvas>
+    <p class="hint" id="mapHint"></p>
+  </section>
+
+  <section class="card sidecard">
+    <h2><span class="step">۲</span> مسیر و باتری</h2>
+    <div id="wpList" class="wplist"></div>
+    <div class="setbox">
+      <div class="sb-title">⚙ تنظیمات مسیر</div>
+      <label class="opt"><input type="checkbox" id="loopChk" checked> 🔁 مسیر حلقه باشد (بعد از آخرین نقطه، برگرد به اولی)</label>
+      <label class="opt"><input type="checkbox" id="battChk" checked> 🔋 گارد باتری روشن باشد (خودش برود شارژ)</label>
+      <div class="opt battrow" id="battRow1">
+        اگر باتری زیر <input id="lowIn" type="text" inputmode="numeric" value="35"> ٪ شد → برو شارژر؛
+      </div>
+      <div class="opt battrow" id="battRow2">
+        روی شارژر:
+        <select id="stayMode">
+          <option value="pct">بمان تا درصدِ شارژ</option>
+          <option value="secs">بمان چند ثانیه</option>
+        </select>
+        <span id="stayPctWrap">تا <input id="fullIn" type="text" inputmode="numeric" value="90"> ٪</span>
+        <span id="staySecWrap" style="display:none"><input id="staySecIn" type="text" inputmode="numeric" value="5"> ثانیه</span>
+        ، بعد برگرد سرِ مسیر.
+      </div>
+    </div>
+    <p class="hint">شارژر (dock) جای ثابتی دارد و کد با <code>dockx, docky</code> پیدایش می‌کند —
+      روی نقشه با 🔌 سبز نشان داده شده. قاعده‌ی سرانگشتی: همیشه بیش از
+      <code>distto(dockx, docky) / 30</code> درصد شارژ نگه دار.</p>
+    <h2 style="margin-top:14px"><span class="step">۳</span> پایتونِ همین مسیر</h2>
+    <pre id="code"></pre>
+  </section>
+</main>
+
+<footer class="bar">
+  <span class="barhint" id="barHint"></span>
+  <button class="btn ghost" id="copyBtn" type="button">کپی پایتون</button>
+  <button class="btn ghost" id="dlPyBtn" type="button">&#11015; فایل پایتون</button>
+  <button class="btn ghost" id="playBtn2" type="button" title="این کد به ادیتور تیم ۲ می‌رود">&#9654; تیم ۲</button>
+  <button class="btn go" id="playBtn" type="button">&#9654; بازی با این مسیر</button>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<!-- the league's maps, straight from their modular files -->
+<script src="../maps/rooms.js"></script>
+<script src="../maps/grown-rooms.js"></script>
+<!-- the 3D pipeline, for the TOP-DOWN PHOTO the route is drawn on -->
+<script src="../../../vendor/three.min.js"></script>
+<script src="../../../homeobjects.js"></script>
+<script src="../../../sensors.js"></script>
+<script src="../../../robot-parts.js"></script>
+<script src="../../../physics.js"></script>
+<script src="../../../robot-battery.js"></script>
+<script src="../../../leagues.js"></script>
+<script src="../../../leagues/manifest.js"></script>
+<script>
+  // the league folders, exactly the way the game loads them
+  (function () {
+    const tag = (src) => document.write('<scr' + 'ipt src="../../../' + src + '"></scr' + 'ipt>');
+    for (const L of (self.LEAGUE_MANIFEST || [])) {
+      for (const x of (L.pre || [])) tag('leagues/' + L.id + '/' + x);
+      tag('leagues/' + L.id + '/robot.js');
+      tag('leagues/' + L.id + '/league.js');
+      for (const e of (L.extra || [])) tag('leagues/' + L.id + '/' + e);
+      for (const d of L.divisions) tag('leagues/' + L.id + '/' + d + '/rules.js');
+    }
+  })();
+</script>
+<script src="../../../engine.js"></script>
+<script src="../../../render.js"></script>
+<script src="route.js"></script>
+</body>
+</html>

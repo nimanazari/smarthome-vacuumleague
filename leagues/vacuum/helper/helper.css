@@ -1,0 +1,449 @@
+/* ============================================================
+   leagues/vacuum/helper/helper.css  —  the look of the Robot Helper.
+
+   Belongs to the vacuum league's FS division and to nothing else.
+   Same dark family as the game, but everything here is big: an
+   8-year-old taps this, he does not aim at it. No external font, no
+   image file — colours, gradients and inline SVG only.
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0d13;
+  --card: #131923;
+  --card2: #182031;
+  --line: #232b3a;
+  --text: #eaeef6;
+  --muted: #8e9ab0;
+  --acc: #4fc3f7;
+  --good: #22c55e;
+  --warn: #f59e0b;
+  --hot: #f43f5e;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+  direction: ltr;
+  padding-bottom: 92px;                 /* room for the sticky action bar */
+}
+
+/* the soft glow behind everything */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(46vw 46vw at 90% -8%, rgba(47, 107, 255, .26), transparent 70%),
+    radial-gradient(40vw 40vw at -6% 106%, rgba(34, 197, 94, .20), transparent 70%);
+}
+main, header, footer, .codecard { position: relative; z-index: 1; }
+
+/* ---------------- header ---------------- */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 22px; border-bottom: 1px solid var(--line);
+  background: rgba(12, 16, 23, .78); backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 46px; height: 46px; flex: none; display: grid; place-items: center; font-size: 25px;
+  border-radius: 14px; background: linear-gradient(140deg, #3b82f6, #a855f7);
+  box-shadow: 0 6px 18px rgba(80, 90, 255, .38);
+}
+.brand b { display: block; font-size: 20px; letter-spacing: .2px; }
+.brand span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.topbtns { display: flex; gap: 10px; }
+
+/* ---------------- buttons ---------------- */
+.btn {
+  font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  border-radius: 12px; padding: 11px 17px; border: 1px solid var(--line);
+  background: var(--card2); color: #cbd5e5; text-decoration: none; display: inline-block;
+}
+.btn:hover { background: #202a3d; color: #fff; }
+.btn.go {
+  border-color: transparent; color: #06210f;
+  background: linear-gradient(140deg, #4ade80, #16a34a);
+  box-shadow: 0 6px 18px rgba(22, 163, 74, .35);
+}
+.btn.go:hover { filter: brightness(1.08); color: #06210f; }
+
+/* ---------------- layout ----------------
+   The picture on the left is the navigation: tap a sensor there and the
+   right-hand column asks about THAT sensor and nothing else, then shows
+   what the whole robot does with the answer. The file is underneath.
+
+   Both rows are a pair of cards of the SAME height — grid stretch does it,
+   and each card lays its own content out in a column so the tall thing
+   inside (the picture's list, the code) takes up the slack instead of the
+   card growing past its neighbour. */
+/* one compressed row: pick (1), answer (2), watch (3) — the file underneath */
+.wrap {
+  display: grid; grid-template-columns: 290px minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px;
+  padding: 14px 16px 0; align-items: stretch; max-width: 1600px; margin: 0 auto;
+}
+.wrapfull { padding: 12px 16px 16px; max-width: 1600px; margin: 0 auto; }
+.wrap > .card, .wrapfull > .card { display: flex; flex-direction: column; min-width: 0; }
+
+.card {
+  background: rgba(19, 25, 35, .84); border: 1px solid var(--line);
+  border-radius: 16px; padding: 12px;
+}
+.card h2 { font-size: 15px; letter-spacing: .3px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.hint { font-size: 12.5px; color: var(--muted); line-height: 1.6; font-weight: 400; }
+.tag {
+  margin-inline-start: auto; font-size: 11.5px; font-weight: 700; color: #0a0d13;
+  background: var(--acc); border-radius: 999px; padding: 3px 10px;
+}
+/* run / pause for the little room */
+.simbtn {
+  margin-inline-start: 8px; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 800; color: #06210f;
+  background: linear-gradient(140deg, #4ade80, #16a34a);
+  border: 0; border-radius: 999px; padding: 4px 13px;
+}
+.simbtn.on { background: linear-gradient(140deg, #fbbf24, #d97706); }
+.simbtn:hover { filter: brightness(1.1); }
+.step {
+  width: 22px; height: 22px; flex: none; display: grid; place-items: center;
+  border-radius: 50%; background: var(--acc); color: #06210f; font-size: 12.5px; font-weight: 800;
+}
+
+/* ---------------- the robot diagram — the navigation of this page ----------
+   the card stretches to the column beside it, but the picture and the list
+   stay at the TOP of it: centring them in the slack pushed the list off the
+   bottom of the screen, which is where the switches live */
+.diagram { display: grid; place-items: center; flex: none; margin: 2px 0 10px; }
+.diagram svg { width: 100%; max-width: 216px; height: auto; display: block; margin: 0 auto; overflow: visible; }
+.diagram .pick { cursor: pointer; }
+.diagram .pick:hover .chip { stroke: #fff; }
+
+/* the same sensors as a list, one line each — the whole robot at a glance
+   without nine walls of text */
+.senslist { display: flex; flex-direction: column; gap: 5px; margin-top: 11px; flex: none; }
+.srow {
+  display: flex; align-items: center; gap: 4px;
+  border: 1px solid transparent; border-radius: 11px; padding-inline-end: 6px;
+  background: #0e1420; color: #cbd5e5;
+}
+.srow:hover { background: #182031; }
+.srow.sel { border-color: var(--acc); background: #16243a; }
+.srow.off .sname { opacity: .5; }
+/* the name selects the sensor; the switch next to it decides whether the robot
+   uses it at all — two taps that never get in each other's way */
+.sname {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; cursor: grab;
+  font-family: inherit; text-align: start; font-size: 13px;
+  border: 0; background: none; color: inherit; padding: 7px 4px 7px 8px;
+  touch-action: none;               /* a rule row is dragged, not scrolled */
+}
+body.rowdragging { cursor: grabbing; user-select: none; }
+body.rowdragging .sname { cursor: grabbing; }
+.srow.lifting { border-color: var(--acc); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+/* the rule that is driving the robot RIGHT NOW, mirrored from the simulator */
+.srow.firing { border-color: var(--hot); background: #2a1622; }
+.srow.firing .ridx { background: var(--hot); color: #fff; }
+.srow .sdot { width: 18px; height: 18px; flex: none; }
+.srow .sdot svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+.srow code {
+  font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; color: var(--acc);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; min-width: 74px;
+}
+.srow .sact {
+  margin-inline-start: auto; font-size: 11px; color: var(--muted); font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 4;
+}
+.srow.sel .sact { color: #eaeef6; }
+.stog { display: flex; align-items: center; flex: none; padding: 6px; cursor: pointer; }
+.stog input { width: 19px; height: 19px; accent-color: var(--good); cursor: pointer; margin: 0; }
+.salways {
+  flex: none; font-size: 10px; font-weight: 800; letter-spacing: .4px; color: #06210f;
+  background: var(--good); border-radius: 999px; padding: 3px 8px; margin-inline-end: 4px;
+}
+/* the rule's place in the chain — 1 is asked first, and you can TYPE a new
+   number straight into the badge to move the rule there */
+.ridx {
+  flex: none; width: 22px; height: 22px; text-align: center; padding: 0;
+  border: 0; border-radius: 6px; background: #1d2637; color: var(--acc);
+  font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums;
+  font-family: inherit; cursor: text; margin-inline-start: 6px;
+}
+.ridx:hover { background: #2a3650; }
+.ridx:focus { outline: 2px solid var(--acc); outline-offset: -2px; color: #fff; }
+/* priority up / down and the bin, tiny but tappable */
+.rbtns { display: flex; gap: 2px; flex: none; }
+.rbtns button {
+  width: 22px; height: 22px; border: 0; border-radius: 6px; cursor: pointer;
+  background: #1d2637; color: #cbd5e5; font-size: 12px; line-height: 1; font-family: inherit;
+}
+.rbtns button:hover { background: #2a3650; color: #fff; }
+.rbtns button:disabled { opacity: .3; cursor: default; }
+/* + new rule — also a drop target for a dragged sensor */
+.addbtn {
+  margin-top: 7px; width: 100%; cursor: pointer; font-family: inherit;
+  border: 1.5px dashed #33415c; border-radius: 11px; background: transparent;
+  color: var(--muted); font-size: 12.5px; font-weight: 700; padding: 9px;
+}
+.addbtn:hover { border-color: var(--acc); color: var(--acc); }
+/* drag & drop */
+.diagram .pick { touch-action: none; }
+body.dragging { cursor: grabbing; user-select: none; }
+.ghostchip {
+  position: fixed; z-index: 99; transform: translate(-50%, -120%); pointer-events: none;
+  font-family: "Consolas", "Courier New", monospace; font-size: 13px; font-weight: 700;
+  color: #06210f; background: var(--acc); border-radius: 999px; padding: 5px 12px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .5);
+}
+.droptgt { outline: 2px dashed var(--acc); outline-offset: 2px; }
+/* the sensors inside the selected rule, each removable */
+.mchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.mchip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; color: #eaeef6;
+  background: #0e1420; border: 1px solid #33415c; border-radius: 999px; padding: 4px 6px 4px 10px;
+}
+.mchip i { width: 15px; height: 15px; display: inline-flex; }
+.mchip i svg { width: 15px; height: 15px; fill: currentColor; }
+.mchip button {
+  width: 18px; height: 18px; border: 0; border-radius: 50%; cursor: pointer;
+  background: #1d2637; color: #cbd5e5; font-size: 12px; line-height: 1;
+}
+.mchip button:hover { background: var(--hot); color: #fff; }
+.mhint { font-size: 11.5px; color: var(--muted); }
+
+/* ---------------- the little room ---------------- */
+/* the room fills whatever height the row settles on */
+.animcard canvas {
+  width: 100%; height: auto; flex: 1; min-height: 0; object-fit: contain;
+  display: block; margin: 0 auto;
+  border-radius: 12px; background: #0d1119; border: 1px solid var(--line);
+}
+.animcard .why { flex: none; }
+/* the live readout: one chip per sensor a rule reads, updating while ▶ Run
+   is on — the chip goes red together with its beam when its rule fires */
+.senseout { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; flex: none; }
+.senseout .schip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #0e1420; border: 1px solid var(--line); border-radius: 9px; padding: 5px 10px;
+}
+.senseout code { font-family: "Consolas", "Courier New", monospace; font-size: 12px; color: var(--acc); }
+.senseout b {
+  font-size: 12.5px; color: #eaeef6; font-variant-numeric: tabular-nums;
+  min-width: 46px; text-align: end; display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px;
+}
+.senseout b i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,.25); }
+.senseout .schip.hot { border-color: var(--hot); background: #2a1622; }
+.senseout .schip.hot b { color: #ff8fa3; }
+.senseout .snone { font-size: 12px; color: var(--muted); }
+.why { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: 9px; min-height: 34px; }
+
+/* ---------------- the one sensor being taught ---------------- */
+.askcard { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc) inset, 0 10px 30px rgba(0, 0, 0, .35); }
+.askcard.off { border-color: var(--line); box-shadow: none; opacity: .72; }
+.askcard .aq { font-size: 14px; margin: 13px 0 8px; }
+
+.ahead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.adot {
+  width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  background: #1d2637; border: 1px solid var(--line);
+}
+.adot svg { width: 22px; height: 22px; fill: currentColor; }
+.aname { font-size: 17px; font-weight: 700; }
+.aname code {
+  font-family: "Consolas", "Courier New", monospace; font-size: 14px;
+  color: var(--acc); background: #0e1420; border: 1px solid var(--line);
+  border-radius: 7px; padding: 2px 8px; margin-inline-start: 9px; font-weight: 400;
+}
+.awhere { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.ronoff { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.ronoff input { width: 18px; height: 18px; accent-color: var(--good); cursor: pointer; }
+
+/* the line of Python this one sensor is responsible for */
+.mypy {
+  font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; line-height: 1.6;
+  background: #0b1017; border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; margin-top: 12px; overflow-x: auto; white-space: pre; color: #9fd0a8;
+}
+
+.rwhen { font-size: 13px; color: #b6c2d6; margin: 11px 0 8px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.num {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: #0e1420; border: 1px solid var(--line); border-radius: 11px; padding: 3px;
+}
+.num button {
+  width: 30px; height: 30px; border: 0; border-radius: 8px; background: #1d2637; color: #cbd5e5;
+  font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit; line-height: 1;
+}
+.num button:hover { background: #2a3650; color: #fff; }
+.num b { min-width: 58px; text-align: center; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+/* the same box, but the number can simply be typed over */
+.num input {
+  width: 52px; text-align: center; font-family: inherit; font-size: 15px; font-weight: 700;
+  color: #eaeef6; background: transparent; border: 0; border-radius: 8px; padding: 4px 0;
+  font-variant-numeric: tabular-nums; -moz-appearance: textfield;
+}
+.num input:hover { background: #1a2334; }
+.num input:focus { outline: 2px solid var(--acc); outline-offset: -2px; background: #101827; }
+.num i { font-style: normal; font-size: 12.5px; color: var(--muted); padding-inline-end: 5px; }
+
+/* the action picker — big, colourful, one tap */
+/* all seven answers on one row where there is room for them — a child compares
+   them at a glance, he does not read a list */
+/* Small on purpose. Eight big loud tiles read as a decision; the same eight,
+   quiet and compact, read as a row of buttons — which is all they are. */
+.acts { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; margin-top: 2px; }
+.act {
+  position: relative; cursor: pointer; font-family: inherit; text-align: center;
+  border: 1px solid var(--line); border-radius: 11px; background: var(--card2); color: #cbd5e5;
+  padding: 8px 5px 7px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transition: transform .12s, border-color .12s, background .12s;
+}
+.act svg { width: 21px; height: 21px; fill: currentColor; }
+.act span { font-size: 10.5px; font-weight: 700; line-height: 1.25; }
+.act:hover { transform: translateY(-2px); background: #202a3d; color: #fff; }
+.act.on { border-color: transparent; color: #06210f; background: linear-gradient(150deg, #67e8f9, #22b8d6); }
+.act .star {
+  position: absolute; inset-block-start: -7px; inset-inline-end: -5px;
+  background: var(--good); color: #06210f; font-size: 8.5px; font-weight: 800;
+  border-radius: 999px; padding: 1px 5px; letter-spacing: .3px;
+}
+
+/* ---- every number of the rule, side by side, each saying what it writes ---- */
+.dials { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 8px; margin-top: 11px; }
+.dialbox {
+  background: #0e1420; border: 1px solid var(--line); border-radius: 14px;
+  padding: 11px 13px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
+}
+.dlabel { font-size: 13.5px; font-weight: 700; }
+.dnote { font-size: 11.5px; color: var(--muted); font-family: "Consolas", "Courier New", monospace; }
+.dnote b { color: var(--acc); }
+.dialbox .num { background: #131a28; }
+
+.swing {
+  margin-top: 11px; border-radius: 14px; padding: 12px 14px;
+  background: linear-gradient(140deg, rgba(103, 232, 249, .10), rgba(34, 197, 94, .07));
+  border: 1px solid #24425a;
+}
+.swingnums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; }
+.swingnums span { font-size: 13.5px; color: var(--muted); }
+.swingnums b { font-size: 18px; color: var(--acc); font-variant-numeric: tabular-nums; margin-inline-end: 3px; }
+.swingnums .wheelnums { margin-inline-start: auto; font-family: "Consolas", "Courier New", monospace; font-size: 12px; }
+.swingnums .wheelnums b { font-size: 14px; color: #9fd0a8; }
+.swing p { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 8px; }
+.swing p b { color: #cbd5e5; }
+
+.rwhy { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
+.rwhy b { color: #cbd5e5; }
+
+/* the colour sensor's own row of floor colours */
+.chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.chip2 {
+  cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700;
+  border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px 7px 9px;
+  background: var(--card2); color: #cbd5e5; display: inline-flex; align-items: center; gap: 8px;
+}
+.chip2 i { width: 14px; height: 14px; border-radius: 50%; display: block; border: 1px solid rgba(255,255,255,.25); }
+.chip2 em { font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--good); }
+/* a colour that already has an answer */
+.chip2.on { background: #14251c; border-color: #2a5b3c; }
+.chip2.on em::before { content: '· '; }
+/* and the one being answered right now */
+.chip2.sel { border-color: var(--acc); color: #fff; box-shadow: 0 0 0 1px var(--acc) inset; background: #1c2740; }
+
+/* "Do nothing" is an answer too, but a quiet one */
+.act.quiet { opacity: .8; }
+.act.quiet.on { background: linear-gradient(150deg, #94a3b8, #64748b); color: #0b1017; opacity: 1; }
+
+/* nothing tapped yet */
+.askcard.empty { border-color: var(--line); box-shadow: none; }
+.emptybox { text-align: center; padding: 44px 18px; }
+.emptybox .ehand { font-size: 42px; display: block; margin-bottom: 12px; }
+.emptybox b { font-size: 19px; display: block; margin-bottom: 8px; }
+.emptybox p { font-size: 13.5px; color: var(--muted); line-height: 1.7; max-width: 46ch; margin: 0 auto; }
+
+/* ---------------- the code ---------------- */
+.codecard h2 { justify-content: flex-start; }
+.codecard pre {
+  font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; line-height: 1.6;
+  background: #0b1017; border: 1px solid var(--line); border-radius: 14px;
+  padding: 13px 15px; overflow: auto; white-space: pre; color: #d7e3f4;
+  height: 380px;                   /* the file scrolls; the page does not grow */
+}
+
+/* THE BRIDGE: the numbers a rule owns, editable right in the Python */
+@font-face { font-family: 'Vazirmatn'; src: url('../../../fonts/Vazirmatn-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Vazirmatn'; src: url('../../../fonts/Vazirmatn-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+.fa { font-family: 'Vazirmatn', "Segoe UI", Tahoma, sans-serif; direction: rtl; text-align: right; }
+.pynum, .pynum-demo {
+  color: #ffd166; font-weight: 700; cursor: pointer; border-radius: 5px;
+  padding: 0 3px; background: rgba(255, 209, 102, .10);
+  border-bottom: 1px dashed rgba(255, 209, 102, .55);
+}
+.pynum:hover, .pynum:focus { background: rgba(255, 209, 102, .22); outline: none; }
+.pynum .pyedit {
+  width: 4.5ch; border: none; border-radius: 4px; padding: 0 2px;
+  font: inherit; color: #0b1017; background: #ffd166; text-align: center;
+}
+.bridgehint { margin: 0 0 9px; font-size: 12.5px; color: var(--muted); line-height: 2; }
+.bridge {
+  margin-top: 11px; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; line-height: 2;
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+}
+.bridge b { white-space: nowrap; }
+.bridge .en { display: block; flex-basis: 100%; direction: ltr; text-align: left; font-size: 11px; color: var(--muted); font-family: "Segoe UI", Tahoma, sans-serif; }
+.bridge .btn { text-decoration: none; }
+
+/* ---------------- the sticky action bar ---------------- */
+.bar {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 13px 22px; border-top: 1px solid var(--line);
+  background: rgba(12, 16, 23, .9); backdrop-filter: blur(8px);
+}
+.barhint { margin-inline-end: auto; font-size: 12.5px; color: var(--muted); }
+
+.toast {
+  position: fixed; inset-block-end: 96px; inset-inline-start: 50%; transform: translateX(-50%);
+  background: #182031; border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 18px; font-size: 13.5px; font-weight: 700; z-index: 40;
+  display: none; box-shadow: 0 8px 26px rgba(0, 0, 0, .5);
+}
+.toast.on { display: block; }
+
+/* ---------------- narrow screens ---------------- */
+@media (max-width: 1180px) {
+  .wrap { grid-template-columns: 1fr; }
+  .animcard canvas { max-width: 620px; flex: none; }
+}
+@media (max-width: 620px) {
+  .top { padding: 10px 14px; }
+  .wrap, .wrapfull { padding: 12px; }
+  .wrap { padding-bottom: 0; }
+  .bar { padding: 11px 14px; }
+  .barhint { display: none; }
+  .aname { font-size: 17px; }
+}
+
+
+/* ---------------- light mode ----------------
+   The page chrome flips to daylight; the robot diagram and the little
+   room stay dark on purpose — they read as screens either way. */
+body.light {
+  --bg: #eef2f8;
+  --card: #ffffff;
+  --card2: #f2f5fa;
+  --line: #d4dbe7;
+  --text: #17202e;
+  --muted: #5b6880;
+}
+body.light::before {
+  background:
+    radial-gradient(46vw 46vw at 90% -8%, rgba(47, 107, 255, .10), transparent 70%),
+    radial-gradient(40vw 40vw at -6% 106%, rgba(34, 197, 94, .08), transparent 70%);
+}
+body.light .top { background: rgba(248, 250, 253, .85); }
+body.light .bar { background: rgba(248, 250, 253, .92); }

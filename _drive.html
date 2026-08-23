@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>self-test</title>
+</head>
+<body>
+<pre id="out">running…</pre>
+<div id="slot"></div>
+
+<script src="vendor/three.min.js"></script>
+<script src="homeobjects.js"></script>
+<script src="sensors.js"></script>
+<script src="robot-parts.js"></script>
+<script src="physics.js"></script>
+<script src="robot-battery.js"></script>
+<script src="leagues.js"></script>
+<script src="leagues/manifest.js"></script>
+<script>
+  (function () {
+    const tag = (src) => document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    for (const e of (self.LEAGUE_MANIFEST || [])) {
+      for (const x of (e.pre || [])) tag('leagues/' + e.id + '/' + x);
+      tag('leagues/' + e.id + '/robot.js');
+      tag('leagues/' + e.id + '/league.js');
+      for (const x of (e.extra || [])) tag('leagues/' + e.id + '/' + x);
+      for (const d of e.divisions) tag('leagues/' + e.id + '/' + d + '/rules.js');
+    }
+  })();
+</script>
+<script src="engine.js"></script>
+<script src="pyreader.js"></script>
+
+<script>
+(async function () {
+  const out = { manifest: (self.LEAGUE_MANIFEST || []).map((m) => m.id), divs: [] };
+  const say = (o) => { document.getElementById('out').textContent = JSON.stringify(o, null, 1); };
+  try {
+    out.groups = Leagues.groups().map((g) => g.id);
+    out.robotsRegistered = Object.keys(HomeObjects._robots || {});
+    const grab = async (p) => { const r = await fetch(p); if (!r.ok) throw new Error(p + ' -> HTTP ' + r.status); return r.text(); };
+
+    for (const d of Leagues.all()) {
+      const row = { id: d.id, code: d.code, name: d.name && d.name.en };
+      try {
+        const prog = PyReader.compile(await grab(d.program));
+        let progB = null;
+        if (d.programBlue) progB = PyReader.compile(await grab(d.programBlue));
+        if (d.helper) { const r = await fetch(d.helper); row.helper = d.helper + ' HTTP ' + r.status; }
+        if (d.kit) row.kit = (typeof d.kit === 'string') ? d.kit : ('own rig, ' + d.kit.parts.length + ' parts');
+
+        const e = new Engine({ league: d.id });
+        e.redController = prog;
+        if (progB) e.blueController = progB;
+        e.running = true;
+        const p0 = { x: e.robots.red.x, y: e.robots.red.y };
+        for (let i = 0; i < 900; i++) e.step(1 / 30);      // 30 s of match at 30 Hz
+        row.ok = true;
+        row.matchSeconds = e.cfg.matchSeconds;
+        row.elapsed = Math.round(e.elapsed);
+        row.robotModel = e.robotModel;
+        row.drove = +Math.hypot(e.robots.red.x - p0.x, e.robots.red.y - p0.y).toFixed(2);
+        row.scores = e.mode && e.mode.scores ? JSON.parse(JSON.stringify(e.mode.scores)) : null;
+        if (e.mode && e.mode.hud) {
+          const h = e.mode.hud();
+          row.hud = String(h.chip || h.center || '').replace(/<[^>]*>/g, '').trim().slice(0, 70);
+        }
+      } catch (err) { row.ok = false; row.error = String((err && err.message) || err); }
+      out.divs.push(row);
+    }
+
+    out.bots = [];
+    for (const g of Leagues.groups()) {
+      for (const b of (g.bots || [])) {
+        const r = await fetch(b.file).catch(() => ({ status: 'ERR' }));
+        out.bots.push(b.file + ' HTTP ' + r.status);
+      }
+    }
+    out.pass = out.divs.every((d) => d.ok) && out.bots.every((b) => /HTTP 200/.test(b));
+  } catch (err) {
+    out.pass = false;
+    out.fatal = String((err && err.stack) || err).split('\n').slice(0, 3).join(' | ');
+  }
+  say(out);
+  document.getElementById('slot').innerHTML =
+    '<b id="done">' + (out.pass ? 'PASS' : 'FAIL') + '</b>';
+})();
+</script>
+</body>
+</html>

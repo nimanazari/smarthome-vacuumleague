@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<!-- This page lives INSIDE the league folder. <base> re-roots it two
+     folders up so every path below (vendor/, leagues/, fonts/,
+     index.html) reads exactly as it does from the game page. -->
+<base href="../../">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مپ‌ساز — طراحی نقشه‌ی خانه | لیگ جاروبرقی هوشمند</title>
+<meta name="description" content="مپ‌ساز لیگ خانه هوشمند: خانه‌ی دلخواهت را سه‌بعدی بچین، دیوار بکش، مبلمان بگذار و نقشه را در بازی تست کن.">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  @font-face { font-family: Vazirmatn; src: url('fonts/Vazirmatn-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: Vazirmatn; src: url('fonts/Vazirmatn-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+  @font-face { font-family: Vazirmatn; src: url('fonts/Vazirmatn-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#0c0f14; --card:#171b22; --card2:#10141c; --line:#2a2f3a; --text:#e8eaed; --muted:#9aa3af; --accent:#4d8bff; --red:#ff4d4d; --blue:#3b78ff;
+          --topbg:linear-gradient(180deg,#141922,#0e1219); --sidebg:#0e1218; --midbg:#0a0d12; --pvbg:#0b0e13; --inp:#0f1319; --hov:#1c2230; }
+  body.light { --bg:#eef1f6; --card:#ffffff; --card2:#e7ebf2; --line:#cdd5e0; --text:#1d2530; --muted:#5b6675; --accent:#2f6bff;
+          --topbg:linear-gradient(180deg,#ffffff,#eef1f6); --sidebg:#e9edf3; --midbg:#dfe4ec; --pvbg:#d8dee8; --inp:#f7f9fc; --hov:#dde4ee; }
+  html, body { height: 100%; }
+  body { font-family: Vazirmatn, system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+  svg.ic { width:1.15em; height:1.15em; vertical-align:-2px; flex:none; }
+
+  #top { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); background:var(--topbg); flex-wrap:wrap; }
+  #top .logo { font-size:17px; font-weight:700; white-space:nowrap; display:inline-flex; align-items:center; gap:7px; }
+  #top .logo .lg { color:var(--accent); }
+  .tbtn { display:inline-flex; align-items:center; gap:6px; padding:8px 13px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; background:var(--inp); color:var(--text); border:1px solid var(--line); border-radius:9px; }
+  .tbtn:hover { border-color: var(--accent); }
+  .tbtn.play { background:linear-gradient(135deg,#2f6bff,#5b9bff); border:none; color:#fff; box-shadow:0 6px 18px rgba(59,120,255,.3); }
+  .tbtn.play:hover { filter:brightness(1.1); }
+  /* which map is open, and is it safe on the shelf? */
+  #curMap { display:flex; align-items:center; gap:8px; padding:6px 12px; background:var(--inp); border:1px solid var(--line); border-radius:9px; max-width:300px; }
+  #curMapName { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px; }
+  #curMap .st { font-size:10.5px; white-space:nowrap; color:var(--muted); }
+  #curMap .st.ok { color:#4fbe86; }
+  #curMap .st.dirty { color:#e08b52; }
+
+  /* ---------- "my maps" panel, in the toolbox ---------- */
+  #mapsSec { padding:11px; background:var(--card2); border:1px solid var(--line); border-radius:13px; }
+  #mapName { width:100%; padding:9px 12px; font:inherit; font-size:13px; background:var(--inp); color:var(--text); border:1px solid var(--line); border-radius:9px; outline:none; margin-bottom:8px; }
+  #mapName:focus { border-color:var(--accent); }
+  #lgChip { margin-bottom:8px; width:100%; }
+  .mmrow { display:flex; gap:7px; margin-bottom:7px; }
+  .mmbtn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 6px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; color:var(--text); background:var(--inp); border:1px solid var(--line); border-radius:10px; }
+  .mmbtn:hover { border-color:var(--accent); }
+  .mmbtn.primary { background:linear-gradient(135deg,#2f6bff,#5b9bff); border:none; color:#fff; }
+  .mmbtn.primary:hover { filter:brightness(1.1); }
+  .mmstate { font-size:10.5px; line-height:1.7; color:var(--muted); margin:2px 2px 10px; min-height:18px; }
+  .mmstate.ok { color:#4fbe86; }
+  .mmstate.dirty { color:#e08b52; }
+  .mmlisth { display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--muted); margin:0 2px 6px; }
+  #savedList { display:flex; flex-direction:column; gap:3px; max-height:240px; overflow:auto; }
+  #savedList::-webkit-scrollbar { width:7px; } #savedList::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; }
+  #savedList .mrow { display:flex; align-items:center; gap:3px; padding:2px; border:1px solid transparent; border-radius:10px; }
+  #savedList .mrow.cur { border-color:var(--accent); background:rgba(77,139,255,.12); }
+  #savedList .mload { flex:1; min-width:0; text-align:right; padding:8px 9px; font:inherit; font-size:12.5px; color:var(--text); background:none; border:none; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #savedList .mload:hover { background:var(--hov); }
+  #savedList .mic { flex:none; padding:6px; color:var(--muted); background:none; border:none; cursor:pointer; border-radius:7px; line-height:0; }
+  #savedList .mic svg { display:block; }
+  #savedList .mic:hover { background:var(--hov); color:var(--text); }
+  #savedList .mic.del:hover { background:#33202a; color:#ff9a9a; }
+  #savedList .empty { padding:11px 9px; font-size:11.5px; line-height:1.8; color:var(--muted); text-align:center; border:1px dashed var(--line); border-radius:10px; }
+
+  #main { display:flex; height: calc(100vh - 57px); }
+
+  /* ---------- toolbox (right side in RTL) ---------- */
+  #side { width:272px; flex:none; overflow-y:auto; padding:12px; border-left:1px solid var(--line); background:var(--sidebg); display:flex; flex-direction:column; gap:14px; }
+  #side::-webkit-scrollbar { width:9px; } #side::-webkit-scrollbar-thumb { background:var(--line); border-radius:5px; }
+  .sec h3 { font-size:11.5px; font-weight:700; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
+  .toolrow { display:flex; gap:7px; }
+  .tool { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 4px; font:inherit; font-size:11.5px; font-weight:700; color:var(--text); cursor:pointer; background:var(--card2); border:1px solid var(--line); border-radius:11px; }
+  .tool .i svg { width:21px; height:21px; display:block; }
+  .tool:hover { border-color:var(--accent); }
+  .tool.on { border-color:var(--accent); background:rgba(77,139,255,.14); box-shadow:0 0 0 1px var(--accent) inset; }
+  #palette { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .palhead { grid-column:1 / -1; font-size:10.5px; font-weight:700; letter-spacing:.06em; color:var(--muted); margin:6px 2px 0; }
+  #iSwatches { display:flex; gap:5px; flex-wrap:wrap; }
+  #iSwatches button { width:20px; height:20px; border-radius:6px; border:1px solid rgba(255,255,255,.25); cursor:pointer; padding:0; }
+  #iSwatches button:hover { transform:scale(1.15); }
+  .pal { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px 8px; cursor:grab; background:var(--card2); border:1px solid var(--line); border-radius:12px; transition:transform .1s, border-color .1s; color:var(--text); }
+  .pal .i { color:var(--accent); }
+  .pal .i svg { width:26px; height:26px; display:block; }
+  .pal .n { font-size:11px; font-weight:700; text-align:center; }
+  .pal:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .pal.on { border-color:var(--accent); background:rgba(77,139,255,.14); }
+  .brow { display:flex; align-items:center; gap:8px; margin-bottom:7px; font-size:12.5px; }
+  .brow label { flex:1; color:var(--muted); }
+  .brow input[type=number] { width:76px; padding:6px 8px; font:inherit; font-size:12.5px; text-align:center; background:var(--inp); color:var(--text); border:1px solid var(--line); border-radius:8px; outline:none; }
+  .brow select { width:118px; padding:6px 8px; font:inherit; font-size:12px; background:var(--inp); color:var(--text); border:1px solid var(--line); border-radius:8px; outline:none; }
+  .brow input:focus, .brow select:focus { border-color:var(--accent); }
+  .chk { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); margin-bottom:6px; cursor:pointer; }
+  .chk input { accent-color:var(--accent); width:15px; height:15px; }
+  .hint { font-size:10.5px; color:var(--muted); line-height:1.8; }
+
+  /* inspector */
+  #insp { display:none; flex-direction:column; gap:9px; padding:12px; background:var(--card2); border:1px solid var(--accent); border-radius:13px; }
+  #insp .t { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; }
+  #insp .t .tic { color:var(--accent); } #insp .t .tic svg { width:21px; height:21px; display:block; }
+  .irow { display:flex; align-items:center; gap:8px; font-size:12px; }
+  .irow label { width:44px; color:var(--muted); flex:none; }
+  .irow input[type=range] { flex:1; accent-color:var(--accent); }
+  .irow .val { width:44px; text-align:center; color:var(--text); font-variant-numeric:tabular-nums; flex:none; font-size:11.5px; }
+  .irow input[type=color] { width:42px; height:28px; padding:0; border:1px solid var(--line); border-radius:7px; background:none; cursor:pointer; }
+  .ibtns { display:flex; gap:6px; }
+  .ibtn { flex:1; padding:7px 4px; font:inherit; font-size:11.5px; font-weight:700; cursor:pointer; color:var(--text); background:var(--inp); border:1px solid var(--line); border-radius:8px; }
+  .ibtn:hover { border-color:var(--accent); }
+  .ibtn.danger { color:#ff9a9a; } .ibtn.danger:hover { border-color:#ff6b6b; }
+  #warns { font-size:11px; color:#ffb08a; line-height:1.8; }
+
+  /* ---------- canvas ---------- */
+  #mid { flex:1; position:relative; min-width:0; background:var(--midbg); }
+  #cv { position:absolute; inset:0; width:100%; height:100%; touch-action:none; display:none; }
+  #pv3 { position:absolute; inset:0; }
+  #pv3 canvas { position:absolute; inset:0; }
+  #cvHint { position:absolute; bottom:10px; right:50%; transform:translateX(50%); z-index:5; font-size:11px; color:var(--muted); background:var(--card); padding:6px 14px; border-radius:9px; border:1px solid var(--line); pointer-events:none; white-space:nowrap; opacity:.92; }
+  /* view switch: 3D (edit like The Sims) / 2D plan */
+  #viewSw { position:absolute; top:10px; right:50%; transform:translateX(50%); z-index:6; display:flex; gap:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--card); }
+  #viewSw button { display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; border:none; background:none; color:var(--muted); }
+  #viewSw button.on { background:rgba(77,139,255,.16); color:var(--accent); }
+  /* floating ⟳ handle next to the 3-D selection: one click = 90° */
+  #rot3d { position:absolute; z-index:7; width:36px; height:36px; display:none; align-items:center; justify-content:center; border-radius:50%; border:2px solid var(--accent); background:var(--card); color:var(--accent); font-size:18px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.4); }
+  #rot3d:hover { background:var(--accent); color:#fff; }
+
+  @media (max-width: 760px) {
+    #main { flex-direction:column; }
+    #side { width:100%; height:44%; border-left:none; border-top:1px solid var(--line); order:2; }
+    #mid { order:1; }
+  }
+</style>
+</head>
+<body>
+  <div id="top">
+    <div class="logo"><span class="lg" data-ic="tools"></span><span>مپ‌ساز</span></div>
+    <div id="curMap" title="نقشه‌ای که الان بازه — ساخت و ذخیره‌اش توی جعبه‌ابزار، بخش «نقشه‌های من»">
+      <span id="curMapName">نقشه‌ی بی‌نام</span><span class="st" id="curMapState">● ذخیره نشده</span>
+    </div>
+    <button class="tbtn" id="exportBtn"><span data-ic="download"></span> خروجی JSON</button>
+    <button class="tbtn" id="defaultBtn" title="این نقشه، نقشه‌ی رسمیِ یک رده شود — در این مرورگر همیشه می‌ماند">&#11088; دیفالتِ رده</button>
+    <button class="tbtn" id="importBtn"><span data-ic="upload"></span> ورودی</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <button class="tbtn" id="clearBtn"><span data-ic="trash"></span> پاک‌کردن همه</button>
+    <button class="tbtn" id="uploadBtn" hidden title="آپلود نقشه به سایت — فقط ادمین"><span data-ic="cloud"></span> آپلود به سایت</button>
+    <button class="tbtn" id="themeBtn" title="تم روشن/تیره"><span data-ic="moon"></span></button>
+    <span style="flex:1"></span>
+    <button class="tbtn play" id="playBtn"><span data-ic="play"></span> تست توی بازی</button>
+  </div>
+
+  <div id="main">
+    <!-- toolbox -->
+    <div id="side">
+      <!-- build a map, give it a name, keep it for good -->
+      <div class="sec" id="mapsSec">
+        <h3>نقشه‌های من — ساخت و ذخیره</h3>
+        <input id="mapName" type="text" placeholder="اسم نقشه… (مثلاً خونه‌ی من)" value="">
+        <div class="mmrow">
+          <button class="mmbtn primary" id="saveBtn" type="button"><span data-ic="save"></span> ذخیره</button>
+          <button class="mmbtn" id="saveAsBtn" type="button" title="یک نسخه‌ی تازه با اسم دیگر — نقشه‌ی اصلی دست‌نخورده می‌ماند"><span data-ic="copy"></span> ذخیره‌ی کپی</button>
+        </div>
+        <button class="mmbtn" id="newBtn" type="button" style="width:100%"><span data-ic="plus"></span> نقشه‌ی نو بساز</button>
+        <div class="mmstate" id="mmState"></div>
+        <div class="mmlisth"><span>نقشه‌های ذخیره‌شده</span><span id="mmCount"></span></div>
+        <div id="savedList"></div>
+        <div class="hint">هر نقشه با اسم خودش برای همیشه توی همین مرورگر می‌ماند و در لیست نقشه‌های بازی هم می‌آید. بعد از اولین ذخیره، هر تغییری خودکار ذخیره می‌شود.</div>
+      </div>
+
+      <div class="sec">
+        <h3>ابزار</h3>
+        <div class="toolrow">
+          <button class="tool on" id="toolSelect" data-tool="select"><span class="i" data-ic="cursor"></span>انتخاب</button>
+          <button class="tool" id="toolWall" data-tool="wall"><span class="i" data-ic="wall"></span>دیوار</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>جعبه‌ابزار — کلیک کن، بعد روی نقشه بذار</h3>
+        <div id="palette"></div>
+      </div>
+
+      <div class="sec">
+        <h3>زمین</h3>
+        <div class="brow"><label>ستون (کاشی) — استاندارد ۱۶</label><input type="number" id="bCols" min="8" max="30" step="1" value="16"></div>
+        <div class="brow"><label>ردیف (کاشی) — استاندارد ۱۶</label><input type="number" id="bRows" min="8" max="30" step="1" value="16"></div>
+        <div class="brow"><label>سایز کاشی</label><select id="bTile">
+          <option value="0.625">استاندارد</option>
+          <option value="0.78125">بزرگ +۲۵٪</option>
+          <option value="0.9375">خیلی بزرگ +۵۰٪</option>
+        </select></div>
+      <div class="irow" style="flex-wrap:wrap;gap:5px"><button class="ibtn" id="bP16" style="flex:none;width:auto;padding:5px 10px">16×16</button><button class="ibtn" id="bP22" style="flex:none;width:auto;padding:5px 10px">22×22</button><span class="val" id="bMeters" style="margin-inline-start:auto"></span></div>
+        <div class="hint">امتیاز هر کاشی یکیه — زمین بزرگ‌تر یعنی کاشی بیشتر و بازی طولانی‌تر.</div>
+      </div>
+
+      <div class="sec">
+        <h3>حیوانات و شروع</h3>
+        <label class="chk"><input type="checkbox" id="catOn" checked> گربه 🐱 توی این مپ باشه</label>
+        <label class="chk"><input type="checkbox" id="dogOn" checked> سگ 🐶 توی این مپ باشه</label>
+        <div class="hint">نشانگرهای R و B (شروع ربات‌ها) و 🐱🐶 رو با درگ روی نقشه جابه‌جا کن.</div>
+      </div>
+
+      <!-- inspector: appears when something is selected -->
+      <div id="insp">
+        <div class="t"><span class="tic" id="iIcon"></span><span id="iName">—</span></div>
+        <div class="irow" id="iRowW"><label>عرض</label><input type="range" id="iW" min="0.5" max="4" step="0.05"><span class="val" id="iWv"></span></div>
+        <div class="irow" id="iRowD"><label>عمق</label><input type="range" id="iD" min="0.5" max="4" step="0.05"><span class="val" id="iDv"></span></div>
+        <div class="irow" id="iColorRow"><label>رنگ</label><input type="color" id="iColor"><button class="ibtn" id="iColorReset" style="flex:none;width:auto;padding:6px 10px">پیش‌فرض</button></div>
+        <div class="irow" id="iSwRow"><label>سریع</label><div id="iSwatches"></div></div>
+        <div class="ibtns">
+          <button class="ibtn" id="iRot">⟳ چرخش</button>
+          <button class="ibtn" id="iDup">⧉ کپی</button>
+          <button class="ibtn danger" id="iDel">🗑 حذف</button>
+        </div>
+        <div class="hint">کلیدها: R چرخش · Delete حذف · Ctrl+D کپی</div>
+      </div>
+
+      <div id="warns"></div>
+    </div>
+
+    <!-- main editing area: 3D (default, Sims-style) + 2D plan -->
+    <div id="mid">
+      <div id="pv3"></div>
+      <canvas id="cv"></canvas>
+      <div id="viewSw">
+        <button id="sw3" class="on"><span data-ic="cube"></span> سه‌بعدی</button>
+        <button id="swTop"><span data-ic="topview"></span> از بالا</button>
+        <button id="sw2"><span data-ic="mapview"></span> نقشه</button>
+      </div>
+      <div id="cvHint">یک شیء از جعبه‌ابزار انتخاب کن و روی خونه کلیک کن — مبل‌ها رو با ماوس بگیر و بکش</div>
+      <button id="rot3d" title="چرخش ۹۰ درجه">&#10227;</button>
+    </div>
+  </div>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="homeobjects.js"></script>
+  <script src="sensors.js"></script>
+  <script src="robot-parts.js"></script>
+  <script src="physics.js"></script>
+  <script src="robot-battery.js"></script>
+  <script src="leagues.js"></script>
+  <!-- the league folders, straight from the manifest (see leagues/manifest.js) -->
+  <script src="leagues/manifest.js"></script>
+  <script>
+    (function () {
+      const tag = (src) => document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+      for (const L of (window.LEAGUE_MANIFEST || [])) {
+        for (const x of (L.pre || [])) tag('leagues/' + L.id + '/' + x);   // maps first
+        tag('leagues/' + L.id + '/robot.js');
+        tag('leagues/' + L.id + '/league.js');
+        for (const e of (L.extra || [])) tag('leagues/' + L.id + '/' + e);
+        for (const d of L.divisions) tag('leagues/' + L.id + '/' + d + '/rules.js');
+      }
+    })();
+  </script>
+  <script src="engine.js"></script>
+  <script src="render.js"></script>
+  <script src="leagues/vacuum/mapmaker.js"></script>
+</body>
+</html>
