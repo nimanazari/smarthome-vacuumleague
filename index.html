@@ -4701,7 +4701,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('dbSeriesCap').textContent = T('امتیاز در طول زمان — عمودی: امتیاز · افقی: زمان', 'Score over time — up: score · right: time');
       $('dbHeatCap').innerHTML = T('پررنگ‌تر = زمان بیشتر در آن نقطه · ✖ = جای جابه‌جایی داور', 'brighter = more time spent there · ✖ = referee relocation') +
         (engine.cfg.seed != null ? ' · <b>seed ' + engine.cfg.seed + '</b>' : '');
-      drawDebriefHeat(); drawDebriefSeries(); fillDebriefStats(); fillDebriefEvents(); fillDebriefTips();
+      drawDebriefHeat(); drawDebriefSeries(); fillDebriefStats(); fillDebriefEvents(); $('dbTips').innerHTML = '';
     }
     $('debriefBtn').onclick = showDebrief;
     $('dbBack').onclick = () => { $('debriefCard').style.display = 'none'; $('rcardMain').style.display = ''; };
