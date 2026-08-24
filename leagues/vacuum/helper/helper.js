@@ -43,6 +43,13 @@
   // number and the clean-% of each room — and the turn-to-a-compass-number
   // move that makes "leave the finished room" a plan a child can click out.
   const U14 = /(^|-)u14$/.test(LEAGUE);
+  // ONE language at a time — the page follows the game's shl_lang
+  let PAGE_LANG = 'en';
+  try { PAGE_LANG = localStorage.getItem('shl_lang') || 'en'; } catch (e) { /* private mode */ }
+  document.body.classList.add(PAGE_LANG === 'fa' ? 'lang-fa' : 'lang-en');
+  if (PAGE_LANG === 'fa') {
+    document.querySelectorAll('[data-fa]').forEach((el) => { el.textContent = el.getAttribute('data-fa'); });
+  }
 
   const SAVE_KEY = 'shl_helper_' + LEAGUE + '_rules';   // this page's own answers
   const HANDOFF_KEY = 'shl_helper_code';                // how the game receives the file
@@ -536,7 +543,9 @@
   }
 
   function drawList() {
-    $('kitLine').textContent = SENSORS.length +
+    $('kitLine').textContent = (typeof PAGE_LANG !== 'undefined' && PAGE_LANG === 'fa')
+      ? SENSORS.length + ' سنسور روی ربات است. روی یکی بزن تا داخل قانونِ انتخاب‌شده بیفتد، یا بکشش روی یک قانون، روی +، یا روی تابلوی بزرگ. ترتیب قانون‌ها همان ترتیبی است که ربات می‌پرسدشان.'
+      : SENSORS.length +
       ' sensors on the robot. Tap one to drop it into the selected rule, or DRAG it onto a rule, ' +
       'onto +, or onto the big panel. The order of the rules is the order the robot asks them in.';
 
@@ -1814,8 +1823,9 @@
         'everything in a rule lights up red the moment that rule takes over. Change the answer and watch it again.'
       : 'Build a rule and this little room will show you what your answer does.';
     const nOn = RULES.filter((x) => x.on && x.members.length).length;
-    $('barHint').textContent = RULES.length + ' rule' + (RULES.length === 1 ? '' : 's') + ' built · ' +
-      nOn + ' in the file.';
+    $('barHint').textContent = (typeof PAGE_LANG !== 'undefined' && PAGE_LANG === 'fa')
+      ? RULES.length + ' قانون ساخته شد · ' + nOn + ' تا در فایل است.'
+      : RULES.length + ' rule' + (RULES.length === 1 ? '' : 's') + ' built · ' + nOn + ' in the file.';
     save();
   }
 
@@ -1874,10 +1884,15 @@
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
   };
 
+  /* ---- ONE language at a time: the page follows the game (shl_lang).
+     data-fa carries the Persian text for the fixed chrome; .i18n-fa /
+     .i18n-en blocks show only in their own language. ---- */
   /* ---- U14's room-number lesson: one click builds the leave-the-room
      recipe so the coach can SHOW it, then edit the numbers live ---- */
   if (U14 && $('roomLesson')) {
     $('roomLesson').style.display = '';
+    if ($('roomLessonEn')) $('roomLessonEn').style.display = '';
+    if ($('roomRecipeBtnEn')) $('roomRecipeBtnEn').onclick = () => $('roomRecipeBtn').click();
     $('roomRecipeBtn').onclick = () => {
       const r = newRule(['room', 'clean']);
       r.roomPick = 2; r.cleanRoom = 2; r.cleanPct = 80;   // in room 2, room 2 is 80% mine

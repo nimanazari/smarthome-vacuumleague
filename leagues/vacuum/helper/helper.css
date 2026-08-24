@@ -282,11 +282,11 @@ body.dragging { cursor: grabbing; user-select: none; }
 /* the line of Python this one sensor is responsible for */
 .mypy {
   font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; line-height: 1.6;
-  background: var(--deep2); border: 1px solid var(--line); border-radius: 12px;
+  background: #0b1017; border: 1px solid #232b3a; border-radius: 12px;
   padding: 12px 14px; margin-top: 12px; overflow-x: auto; white-space: pre; color: #9fd0a8;
 }
 
-.rwhen { font-size: 13px; color: #b6c2d6; margin: 11px 0 8px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.rwhen { font-size: 13px; color: var(--muted); margin: 11px 0 8px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .num {
   display: inline-flex; align-items: center; gap: 2px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 3px;
@@ -386,7 +386,7 @@ body.dragging { cursor: grabbing; user-select: none; }
 .codecard h2 { justify-content: flex-start; }
 .codecard pre {
   font-family: "Consolas", "Courier New", monospace; font-size: 12.5px; line-height: 1.6;
-  background: var(--deep2); border: 1px solid var(--line); border-radius: 14px;
+  background: #0b1017; border: 1px solid #232b3a; border-radius: 14px;
   padding: 13px 15px; overflow: auto; white-space: pre; color: #d7e3f4;
   height: 380px;                   /* the file scrolls; the page does not grow */
 }
@@ -492,3 +492,7 @@ body.light .bar { background: rgba(248, 250, 253, .92); }
 .roomlesson { margin-top: 10px; padding: 11px 14px; border-radius: 12px;
   border: 1px dashed var(--line, #2c3340); font-size: 13px; line-height: 1.9; }
 .roomlesson p { margin: 4px 0 8px; }
+
+/* ONE language at a time — the page follows the game's shl_lang */
+body.lang-en .i18n-fa { display: none !important; }
+body.lang-fa .i18n-en { display: none !important; }

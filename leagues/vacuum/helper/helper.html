@@ -29,8 +29,8 @@
   </div>
   <div class="topbtns">
     <button class="btn ghost" id="themeBtn" type="button" title="light / dark">&#9728;&#65039; Light</button>
-    <button class="btn ghost" id="resetBtn" type="button">Start over</button>
-    <a class="btn ghost" id="backLink" href="../../../index.html?league=fs">&#8592; Back to the game</a>
+    <button class="btn ghost" id="resetBtn" type="button" data-fa="از نو">Start over</button>
+    <a class="btn ghost" id="backLink" href="../../../index.html?league=fs" data-fa="&#8594; برگرد به بازی">&#8592; Back to the game</a>
   </div>
 </header>
 
@@ -38,13 +38,13 @@
 <main class="wrap">
 
   <section class="card pickcard">
-    <h2><span class="step">1</span> Build your rules &mdash; drag sensors off the robot</h2>
+    <h2><span class="step">1</span> <span data-fa="قانون‌هایت را بساز — سنسورها را از روی ربات بکش">Build your rules &mdash; drag sensors off the robot</span></h2>
     <div id="diagram" class="diagram"></div>
     <p class="hint" id="kitLine"></p>
     <div id="sensList" class="senslist"></div>
-    <button class="addbtn" id="addRule" type="button">+ New rule &mdash; or drop a sensor right here</button>
+    <button class="addbtn" id="addRule" type="button" data-fa="+ قانون جدید — یا سنسور را همین‌جا بینداز">+ New rule &mdash; or drop a sensor right here</button>
     <!-- U14 only: THE room-number lesson, right where the rules are built -->
-    <div class="roomlesson" id="roomLesson" style="display:none">
+    <div class="roomlesson i18n-fa" id="roomLesson" style="display:none">
       <b>🚪 شماره‌ی اتاق به چه درد می‌خورد؟</b>
       <p><code>room</code> می‌گوید الان در کدام اتاقی (۰ هال، ۱ آشپزخانه، ۲/۳/۴ اتاق‌خواب، ۵ سرویس)
       و <code>clean2</code> می‌گوید چند درصدِ اتاق ۲ رنگِ توست. این دو تا با هم یعنی
@@ -56,13 +56,23 @@
       درجه‌ی هر مرحله را جدا تنظیم کن تا مسیرِ خروج دقیقاً همانی شود که روی نقشه می‌بینی.</p>
       <button class="addbtn" id="roomRecipeBtn" type="button">🚪 قانونِ «خروج از اتاقِ تمام‌شده» را بساز (۳ مرحله‌ای)</button>
     </div>
+    <div class="roomlesson i18n-en" id="roomLessonEn" style="display:none">
+      <b>🚪 What is the room number for?</b>
+      <p><code>room</code> says which room you are in (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom)
+      and <code>clean2</code> says how much of room 2 wears YOUR colour. Together they mean your robot
+      knows "this room is DONE — time to leave": face the door (read its degree off the map),
+      drive straight, and the moment you cross it <code>room</code> changes and the rule switches itself off.</p>
+      <p><b>Multi-leg exits:</b> some spots take more than one turn — every rule chains up to
+      <b>3 moves</b>: "Turn to 270 → Forward → Turn to 180". Tune each leg's degree to match your map.</p>
+      <button class="addbtn" id="roomRecipeBtnEn" type="button">🚪 Build the "leave the finished room" rule (3 legs)</button>
+    </div>
   </section>
 
   <section class="card askcard" id="askCard"><!-- filled by helper.js --></section>
 
   <!-- STEP 3 — in the same row: pick, answer, watch, all on one screen -->
   <section class="card animcard">
-    <h2><span class="step">3</span> What your whole robot does
+    <h2><span class="step">3</span> <span data-fa="کل رباتت چه می‌کند">What your whole robot does</span>
       <button class="simbtn" id="simBtn" type="button">&#9654; Run</button>
       <span class="tag" id="animTag">&nbsp;</span></h2>
     <canvas id="anim" width="620" height="430"></canvas>
@@ -79,24 +89,30 @@
      child does here, before ever meeting U14's empty editor. -->
 <section class="wrapfull">
   <section class="card codecard">
-    <h2><span class="step">4</span> Your Python <span class="hint">&mdash; the real file the match runs. The <b class="pynum-demo">yellow numbers</b> are yours: click one and type.</span></h2>
-    <p class="bridgehint fa">پل به ادیتور: این پایتونِ واقعی است — عددهای زرد را همین‌جا در خودِ کد عوض کن؛ قانون‌ها و اتاقک همان لحظه به‌روز می‌شوند.</p>
+    <h2><span class="step">4</span> <span data-fa="پایتونِ تو">Your Python</span> <span class="hint i18n-en">&mdash; the real file the match runs. The <b class="pynum-demo">yellow numbers</b> are yours: click one and type.</span><span class="hint i18n-fa">— همان فایل واقعی مسابقه. <b class="pynum-demo">عددهای زرد</b> مال توست: رویش کلیک کن و تایپ کن.</span></h2>
+    <p class="bridgehint fa i18n-fa">پل به ادیتور: این پایتونِ واقعی است — عددهای زرد را همین‌جا در خودِ کد عوض کن؛ قانون‌ها و اتاقک همان لحظه به‌روز می‌شوند.</p>
+    <p class="bridgehint i18n-en">Bridge to the editor: this is real Python — edit the yellow numbers right inside the code and the rules update live.</p>
     <pre id="code"></pre>
-    <div class="bridge fa">
+    <div class="bridge fa i18n-fa">
       <b>&#127891; دوران گذار به U14</b>
       وقتی این صفحه برایت کوچک شد، همین فایل را بردار و برو سراغ ادیتور: در U14 همه‌چیز آشناست — همان if / elif، همان سنسورها، فقط این بار خودت می‌نویسی و قطب‌نما (heading) هم اضافه می‌شود.
       <span class="en">When this page feels small, take this very file to the U14 editor — same if/elif, same sensors, now you type them yourself (plus a compass).</span>
       <a class="btn ghost" href="../../../index.html?league=u14">ادیتور U14 &#8592;</a>
+    </div>
+    <div class="bridge i18n-en">
+      <b>&#127891; Graduating to U14</b>
+      When this page feels small, take this very file to the U14 editor — same if / elif, same sensors, now you type them yourself (plus a compass).
+      <a class="btn ghost" href="../../../index.html?league=u14">U14 editor &#8594;</a>
     </div>
   </section>
 </section>
 
 <footer class="bar">
   <span class="barhint" id="barHint"></span>
-  <button class="btn ghost" id="copyBtn" type="button">Copy</button>
-  <button class="btn ghost" id="dlBtn" type="button">Download .py</button>
+  <button class="btn ghost" id="copyBtn" type="button" data-fa="کپی">Copy</button>
+  <button class="btn ghost" id="dlBtn" type="button" data-fa="⬇ فایل پایتون">Download .py</button>
   <button class="btn ghost" id="playBtn2" type="button" title="Hand this code to TEAM 2's editor — team 1's build stays untouched">&#9654; Team 2</button>
-  <button class="btn go" id="playBtn" type="button">&#9654; Play with this code</button>
+  <button class="btn go" id="playBtn" type="button" data-fa="▶ با همین کد بازی کن">&#9654; Play with this code</button>
 </footer>
 
 <div id="toast" class="toast"></div>
