@@ -17,7 +17,7 @@ TeamKit برای تیم‌ها (فقط بازی و کدنویسی؛ بدون م�
 import io, os, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_TOP = {'TeamKit', 'AdminKit', '__pycache__', '.claude', '.git', '.gitignore', 'CLAUDE.md'}
+SKIP_TOP = {'TeamKit', 'AdminKit', '__pycache__', '.claude', '.git', '.gitignore', 'CLAUDE.md', 'local-notes'}
 
 RUN_FILES = [
     'index.html', 'rulebook.html', 'serve.bat', 'serve.ps1', 'favicon.png',

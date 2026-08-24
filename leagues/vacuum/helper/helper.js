@@ -431,7 +431,9 @@
       s.push('<rect x="' + (cxp - 32) + '" y="' + (cyp - 20) + '" width="64" height="52" fill="transparent" pointer-events="all"/>');
       s.push('<circle cx="' + cxp + '" cy="' + cyp + '" r="13" pointer-events="none" fill="' + sn.color +
         '" opacity="' + (hot ? 1 : (usedAnywhere(sn.id) ? .65 : .3)) + '" stroke="' + (hot ? '#eaf7ff' : '#0a0d13') + '" stroke-width="2"/>');
-      s.push('<g transform="translate(' + (cxp - 8) + ',' + (cyp - 8) + ') scale(0.67)" fill="#0a0d13" color="#0a0d13" pointer-events="none">' + ICON[sn.icon] + '</g>');
+      // a NESTED svg needs an explicit size or it swallows the whole diagram
+      s.push('<g transform="translate(' + (cxp - 8) + ',' + (cyp - 8) + ') scale(0.67)" fill="#0a0d13" color="#0a0d13" pointer-events="none">' +
+        ICON[sn.icon].replace('<svg ', '<svg width="24" height="24" ') + '</g>');
       s.push('<text x="' + cxp + '" y="' + (cyp + 27) + '" text-anchor="middle" font-size="10.5" pointer-events="none" ' +
         'font-family="Consolas, monospace" fill="' + (hot ? '#eaf7ff' : '#5b6880') + '">' + esc(sn.py.toUpperCase()) + '</text>');
       s.push('</g>');
