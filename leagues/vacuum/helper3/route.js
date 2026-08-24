@@ -311,6 +311,8 @@
     const A = CP.anchor;
     P(cmt('elif wp == ' + DOCK_IDX + ':', 'ON the pad - drink up'));
     P('    goto(dockx, docky)');
+    P(cmt('    if distto(dockx, docky) < 60 and atgoal == 0:', 'the pad is TAKEN - wait in line'));
+    P(cmt('        gotoslow(dockx, docky)', 'nudge forward at walking pace'));
     if (ROUTE.stay === 'secs') {
       P(cmt('    if atgoal == 1:', 'count the seconds ON the pad'));
       P(cmt('        timer = timer + 1', '10 steps = one second'));

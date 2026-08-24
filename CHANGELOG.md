@@ -1,3 +1,22 @@
+## 2026-08-24 (b) — the charger has queue rules now
+
+- AUTOMATIC referee, no hands: ANY robot that stays inside one small circle
+  for 15 s (was 10) is relocated with the usual penalty — camping the pad
+  with a full battery included.
+- WAITING IN LINE is legal: a robot with a low battery parked just off the
+  pad while the rival drinks is queueing, not stuck — the watchdog leaves
+  it alone (a FULL robot loitering there still gets moved).
+- An EMPTY battery no longer freezes the robot: it CRAWLS at 15% speed, so
+  a dead robot can still drag itself onto the pad and come back to life.
+- The Route helper's dock state now handles a TAKEN pad: near the charger
+  but not arrived -> nudge forward at walking pace (gotoslow) until it is
+  our turn. dockx/docky are given to every robot from the first tick, so
+  the generated code needs nothing else.
+- Full scenario verified: blue camped the pad, red queued ~4 s, charged
+  from 40%% back to full, zero relocations; the camper was auto-relocated
+  5x by the 15-s watchdog. Crawl-at-0%% and charge-on-pad verified too.
+- All rule texts (guides, RULES.md, rulebook) now say 15 s.
+
 ## 2026-08-24 — the route helper prices the trip home
 
 - Every waypoint chip now also says what the trip HOME costs from there:

@@ -31,7 +31,7 @@
   };
 
   const RUG_SPEED = 0.5;        // a robot crawls at half speed on a rug
-  const STUCK_SECONDS = 10;     // barely moving this long -> the watchdog fires
+  const STUCK_SECONDS = 15;     // barely moving this long -> the watchdog fires
   const STUCK_RADIUS = 0.85;    // "barely moving" means inside this circle
 
   const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));

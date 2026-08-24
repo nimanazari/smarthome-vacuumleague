@@ -35,9 +35,10 @@
   const OVERTIME_STEPS = [10, 5, 5, 5, 5, 5];
 
   // ---- battery model (U19) — the pack itself lives in robot-battery.js ----
-  // limp 0: an EMPTY battery stops the robot dead where it stands. Getting
-  // home in time is the whole discipline of this division.
-  const BATTERY = { drive: 100 / 60, charge: 25, limp: 0, dockR: 0.32,
+  // An EMPTY battery no longer parks the robot for good: it LIMPS at a
+  // crawl (15% speed), so a dead robot can still drag itself onto the pad.
+  // Managing the battery so you never have to crawl is still the discipline.
+  const BATTERY = { drive: 100 / 60, charge: 25, limp: 0.15, dockR: 0.32,
     fixed: { x: 7.1875, y: 5.9375 } };   // the dock lives by the east shelf, like a real one
 
   // ---- the dust bin (U19, SINGLE PLAYER only) ----
@@ -240,9 +241,11 @@
       // the station AND still filling up, the referee leaves it alone. Once it
       // is full the normal watchdog is back — camping is not cleaning.
       if (this.pack && this.pack.charging(rb)) { this.world.resetStuck(rb); return; }
-      // a DEAD battery parks the robot for good — that is the rule working,
-      // not a stuck robot, so the referee must not keep teleporting the corpse
-      if (this.pack && rb.battery != null && rb.battery <= 0) { this.world.resetStuck(rb); return; }
+      // WAITING IN LINE is legal: a low robot parked just off the pad while
+      // the rival drinks is queueing, not stuck — the referee leaves it be.
+      // (A FULL robot camping by the pad still gets the watchdog.)
+      if (this.pack && this.dock && rb.battery != null && rb.battery < 95 &&
+          Math.hypot(rb.x - this.dock.x, rb.y - this.dock.y) < 0.9) { this.world.resetStuck(rb); return; }
       if (this.world.updateStuck(rb, dt)) this.relocate(rb.color, 'stuck');
     }
 
