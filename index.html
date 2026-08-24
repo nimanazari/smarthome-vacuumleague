@@ -4228,6 +4228,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         heat: new Float32Array(engine.cols * engine.rows),
         stuck: 0, dist: 0, flat: 0,
         bumps: 0, chgVisits: 0, chgSecs: 0, minBatt: 100, _lastBump: 0, _onPad: false,
+        sx: null, sy: null,          // where the robot STARTED
         reloc: 0, relocLost: 0, wet: 0, wetLost: 0,
         crashTicks: 0, cpuMs: 0, cpuTicks: 0, cpuPeak: 0, slowTicks: 0,
         lx: null, ly: null,          // last logged position (pre-teleport)
@@ -4248,6 +4249,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (!t || !rb) continue;
         const i = Math.floor(rb.x / engine.cfg.tile), j = Math.floor(rb.y / engine.cfg.tile);
         if (i >= 0 && i < engine.cols && j >= 0 && j < engine.rows) t.heat[j * engine.cols + i] += simDt;
+        if (t.sx == null) { t.sx = rb.x; t.sy = rb.y; }
         if (t.lx != null) {
           const d = Math.hypot(rb.x - t.lx, rb.y - t.ly);
           if (d < 0.5) t.dist += d;              // a bigger jump is a teleport, not driving
@@ -4662,6 +4664,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       const lbl = engine.hud().scoreLabel || 'points';
       row('امتیاز', lbl, (t) => t === matchLog.red ? engine.scores.red : engine.scores.blue);
       if (engine.totalTiles > 0) row('پوشش خانه', 'coverage', (t) => Math.round((t === matchLog.red ? engine.scores.red : engine.scores.blue) / engine.totalTiles * 100) + '%');
+      const cmPt = (x, y) => '(' + Math.round(x * 100) + ',' + Math.round(y * 100) + ')';
+      row('شروع ← پایان', 'start → end', (t) => t.sx == null ? null : cmPt(t.sx, t.sy) + ' ← ' + cmPt(t.lx, t.ly) + ' cm');
       row('مسافت پیموده', 'distance', (t) => Math.round(t.dist) + ' m');
       row('زمان گیر کرده', 'time stuck', (t) => secs(t.stuck));
       row('جابه‌جایی داور', 'relocations', (t) => t.reloc + (t.relocLost ? ' (−' + t.relocLost + ')' : ''));

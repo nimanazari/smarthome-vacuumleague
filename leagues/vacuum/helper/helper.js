@@ -1879,8 +1879,11 @@
     $('roomRecipeBtn').onclick = () => {
       const r = newRule(['room', 'clean']);
       r.roomPick = 2; r.cleanRoom = 2; r.cleanPct = 80;   // in room 2, room 2 is 80% mine
-      r.act = 'turnto'; r.deg = 270;                      // face the door (edit per map!)
-      r.act2 = 'forward'; r.secs2 = 2; r.speed2 = 25;     // drive OUT through it
+      // a MULTI-LEG exit: some rooms take several stages to leave —
+      // face the door, drive through, then face the NEXT corridor.
+      r.act = 'turnto'; r.deg = 270;                      // leg 1: face the door
+      r.act2 = 'forward'; r.secs2 = 2; r.speed2 = 25;     // leg 2: drive OUT through it
+      r.act3 = 'turnto'; r.deg3 = 180;                    // leg 3: face where the route continues
       RULES.push(r);
       sel = r.id;
       resetSim(); refresh();
