@@ -50,6 +50,7 @@
   if (PAGE_LANG === 'fa') {
     document.querySelectorAll('[data-fa]').forEach((el) => { el.textContent = el.getAttribute('data-fa'); });
   }
+  const L = (en, fa) => (PAGE_LANG === 'fa' && fa != null ? fa : en);
 
   const SAVE_KEY = 'shl_helper_' + LEAGUE + '_rules';   // this page's own answers
   const HANDOFF_KEY = 'shl_helper_code';                // how the game receives the file
@@ -84,16 +85,16 @@
   //   the robot turns the way (wr - wl) says: bigger right wheel = nose left
   const curve = (s) => Math.max(1, Math.round(s * 0.32));   // the slow wheel of a curve
   const ACTS = {
-    turnleft: { label: 'Turn left', icon: 'turnleft', def: 18, wheels: (s) => [-s, s], why: 'spin on the spot, nose to the left' },
-    turnright: { label: 'Turn right', icon: 'turnright', def: 18, wheels: (s) => [s, -s], why: 'spin on the spot, nose to the right' },
-    backleft: { label: 'Back away left', icon: 'backleft', def: 25, wheels: (s) => [-s, -curve(s)], why: 'reverse in a curve — you leave AND you face somewhere new' },
-    backright: { label: 'Back away right', icon: 'backright', def: 25, wheels: (s) => [-curve(s), -s], why: 'reverse in a curve — you leave AND you face somewhere new' },
-    back: { label: 'Straight back', icon: 'back', def: 25, wheels: (s) => [-s, -s], why: 'straight back — you leave, but you still face the same thing' },
-    forward: { label: 'Drive on', icon: 'forward', def: 25, wheels: (s) => [s, s], why: 'get out of there forwards' },
-    stop: { label: 'Stand still', icon: 'stop', def: 0, wheels: () => [0, 0], why: 'zero and zero — wait where you are' },
+    turnleft: { label: L('Turn left', 'بچرخ به چپ'), icon: 'turnleft', def: 18, wheels: (s) => [-s, s], why: L('spin on the spot, nose to the left', 'درجا بچرخ، دماغه به چپ') },
+    turnright: { label: L('Turn right', 'بچرخ به راست'), icon: 'turnright', def: 18, wheels: (s) => [s, -s], why: L('spin on the spot, nose to the right', 'درجا بچرخ، دماغه به راست') },
+    backleft: { label: L('Back away left', 'عقب‌گردِ چپ'), icon: 'backleft', def: 25, wheels: (s) => [-s, -curve(s)], why: L('reverse in a curve — you leave AND you face somewhere new', 'دنده‌عقبِ قوس‌دار — هم دور می‌شوی هم رو به جای تازه') },
+    backright: { label: L('Back away right', 'عقب‌گردِ راست'), icon: 'backright', def: 25, wheels: (s) => [-curve(s), -s], why: L('reverse in a curve — you leave AND you face somewhere new', 'دنده‌عقبِ قوس‌دار — هم دور می‌شوی هم رو به جای تازه') },
+    back: { label: L('Straight back', 'مستقیم عقب'), icon: 'back', def: 25, wheels: (s) => [-s, -s], why: L('straight back — you leave, but you still face the same thing', 'مستقیم عقب — دور می‌شوی ولی هنوز رو به همان چیزی') },
+    forward: { label: L('Drive on', 'برو جلو'), icon: 'forward', def: 25, wheels: (s) => [s, s], why: L('get out of there forwards', 'رو به جلو از آنجا بیرون بزن') },
+    stop: { label: L('Stand still', 'بایست'), icon: 'stop', def: 0, wheels: () => [0, 0], why: L('zero and zero — wait where you are', 'صفر و صفر — همان‌جا صبر کن') },
     // U14 only: an ABSOLUTE turn. Not "spin for so long" but "spin until the
     // compass reads my number" — the code it writes checks heading every step.
-    turnto: { label: 'Turn to °', icon: 'compassI', def: 18, wheels: (s) => [s, -s], why: 'turn on the spot until the compass reads your number (0 = right, 90 = up, 180 = left, 270 = down)' },
+    turnto: { label: L('Turn to °', 'بچرخ تا °'), icon: 'compassI', def: 18, wheels: (s) => [s, -s], why: L('turn on the spot until the compass reads your number (0 = right, 90 = up, 180 = left, 270 = down)', 'آن‌قدر درجا بچرخ تا قطب‌نما عدد تو را نشان بدهد (۰ راست، ۹۰ بالا، ۱۸۰ چپ، ۲۷۰ پایین)') },
   };
   const ACT_IDS = (U14 ? ['turnto'] : []).concat(['turnleft', 'turnright', 'backleft', 'backright', 'back', 'forward', 'stop']);
   // the four compass directions, as the game counts them (0 = right, CCW)
@@ -122,14 +123,14 @@
 
   // the floor colours the colour sensor reports (the ids ARE the Python names)
   const COLORS = [
-    { id: 'white', label: 'white', hex: '#f8fafc', note: 'floor nobody has cleaned yet' },
-    { id: 'green', label: 'green', hex: '#22c55e', note: 'the big rug - half speed, no points' },
-    { id: 'purple', label: 'purple', hex: '#a855f7', note: 'the small rug - no points' },
-    { id: 'black', label: 'black', hex: '#111827', note: 'a wall or furniture right ahead' },
-    { id: 'red', label: 'red', hex: '#ef4444', note: 'already cleaned by the red robot' },
-    { id: 'blue', label: 'blue', hex: '#3b82f6', note: 'already cleaned by the blue robot' },
-    { id: 'orange', label: 'orange', hex: '#f59e0b', note: 'an orange marker rug - no points' },
-    { id: 'cyan', label: 'cyan', hex: '#22d3ee', note: 'a cyan marker rug - no points' },
+    { id: 'white', label: 'white', hex: '#f8fafc', note: L('floor nobody has cleaned yet', 'کفِ تمیز‌نشده') },
+    { id: 'green', label: 'green', hex: '#22c55e', note: L('the big rug - half speed, no points', 'فرش بزرگ — نصف سرعت، بی‌امتیاز') },
+    { id: 'purple', label: 'purple', hex: '#a855f7', note: L('the small rug - no points', 'فرش کوچک — بی‌امتیاز') },
+    { id: 'black', label: 'black', hex: '#111827', note: L('a wall or furniture right ahead', 'دیوار یا مبلمانِ درست جلوی رو') },
+    { id: 'red', label: 'red', hex: '#ef4444', note: L('already cleaned by the red robot', 'قبلاً ربات قرمز تمیزش کرده') },
+    { id: 'blue', label: 'blue', hex: '#3b82f6', note: L('already cleaned by the blue robot', 'قبلاً ربات آبی تمیزش کرده') },
+    { id: 'orange', label: 'orange', hex: '#f59e0b', note: L('an orange marker rug - no points', 'فرش نشانه‌ی نارنجی — بی‌امتیاز') },
+    { id: 'cyan', label: 'cyan', hex: '#22d3ee', note: L('a cyan marker rug - no points', 'فرش نشانه‌ی فیروزه‌ای — بی‌امتیاز') },
   ];
   const colorOf = (id) => COLORS.filter((c) => c.id === id)[0] || COLORS[0];
   // what a first robot should usually do about each colour. white is the whole
@@ -213,6 +214,15 @@
     }
     return list;
   }
+
+  const FA_TITLES = {
+    front: 'چشم فاصله‌ی جلو (سانتی‌متر)', frontleft: 'چشم جلو-چپ', frontright: 'چشم جلو-راست',
+    bumpfront: 'بامپر جلو — لمس', bumpback: 'بامپر عقب — لمس', color: 'سنسور رنگِ زیر ربات',
+    compass: 'قطب‌نما (۰ راست، ۹۰ بالا، ۱۸۰ چپ، ۲۷۰ پایین)',
+    room: 'شماره‌ی اتاقی که تویش هستم (۰ هال، ۱ آشپزخانه، ۲/۳/۴ اتاق‌خواب، ۵ سرویس)',
+    clean: 'چند درصد یک اتاق رنگِ من است (۰ تا ۱۰۰)',
+  };
+  const faTitle = (sn) => (PAGE_LANG === 'fa' && FA_TITLES[sn.id]) ? FA_TITLES[sn.id] : sn.title;
 
   const KIT = readLoadout();
   const SENSORS = buildSensors(KIT);
@@ -532,11 +542,11 @@
   const ruleColor = (r) => (r.members.length > 1 ? '#c084fc' : (r.members.length ? sensorOf(r.members[0]).color : '#8e9ab0'));
 
   function summaryOf(r) {
-    if (!r.on) return 'off';
-    if (!r.members.length) return 'no sensor yet';
+    if (!r.on) return L('off', 'خاموش');
+    if (!r.members.length) return L('no sensor yet', 'هنوز سنسور ندارد');
     if (r.act === 'turnto') {
       const extra = legsOf(r).length - 1;
-      return 'face ' + r.deg + '°' + (extra ? ' +' + extra + ' step' + (extra > 1 ? 's' : '') : '');
+      return L('face ', 'رو کن به ') + r.deg + '°' + (extra ? ' +' + extra + L(' step' + (extra > 1 ? 's' : ''), ' حرکت') : '');
     }
     const m = motion(r.act, r.speed, r.secs);
     return ACTS[r.act].label + (m.deg >= 1 ? ' · ' + Math.round(m.deg) + '°' : '');
@@ -693,10 +703,13 @@
       box.className = 'card askcard empty';
       box.innerHTML =
         '<div class="emptybox"><span class="ehand">&#128072;</span>' +
-        '<b>Make a rule</b>' +
-        '<p>Tap a sensor on the picture — or press <b>+ New rule</b> and drag sensors in. ' +
+        '<b>' + L('Make a rule', 'یک قانون بساز') + '</b>' +
+        '<p>' + L('Tap a sensor on the picture — or press <b>+ New rule</b> and drag sensors in. ' +
         'One sensor makes a simple rule; drop MORE sensors into the same rule and they must ' +
-        'ALL see something at once for it to fire. Your rules, your order, your robot.</p></div>';
+        'ALL see something at once for it to fire. Your rules, your order, your robot.',
+        'روی یکی از سنسورهای عکس بزن — یا <b>+ قانون جدید</b> را بزن و سنسورها را بکش داخلش. ' +
+        'یک سنسور یعنی یک قانون ساده؛ چند سنسور در یک قانون یعنی باید همه با هم چیزی ببینند تا روشن شود. ' +
+        'قانون‌هایت، ترتیبت، رباتت.') + '</p></div>';
       return;
     }
 
@@ -708,10 +721,10 @@
     head.className = 'ahead';
     head.innerHTML =
       '<span class="adot" style="color:' + ruleColor(r) + '">' + ICON[ruleIcon(r)] + '</span>' +
-      '<span><span class="aname">Rule ' + (RULES.indexOf(r) + 1) + '</span>' +
-      '<div class="awhere">' + (r.members.length > 1 ? 'ALL of these at once — that is one and in the Python' :
-        (r.members.length ? esc(sensorOf(r.members[0]).title) : 'no sensor in it yet')) + '</div></span>' +
-      '<label class="ronoff"><input type="checkbox"' + (r.on ? ' checked' : '') + '> use this rule</label>';
+      '<span><span class="aname">' + L('Rule ', 'قانون ') + (RULES.indexOf(r) + 1) + '</span>' +
+      '<div class="awhere">' + (r.members.length > 1 ? L('ALL of these at once — that is one and in the Python', 'همه‌ی این‌ها با هم — در پایتون یعنی یک and') :
+        (r.members.length ? esc(faTitle(sensorOf(r.members[0]))) : L('no sensor in it yet', 'هنوز سنسوری تویش نیست'))) + '</div></span>' +
+      '<label class="ronoff"><input type="checkbox"' + (r.on ? ' checked' : '') + '> ' + L('use this rule', 'این قانون به کار برود') + '</label>';
     head.querySelector('input').onchange = (e) => { r.on = e.target.checked; refresh(); };
     box.appendChild(head);
 
@@ -728,8 +741,9 @@
     });
     const hint = document.createElement('span');
     hint.className = 'mhint';
-    hint.textContent = r.members.length ? '+ tap or drag another sensor from the picture to and it in' :
-      'tap or drag a sensor from the picture into this rule';
+    hint.textContent = r.members.length
+      ? L('+ tap or drag another sensor from the picture to and it in', '+ سنسور دیگری را از عکس بزن یا بکش تا and شود')
+      : L('tap or drag a sensor from the picture into this rule', 'یک سنسور را از عکس بزن یا بکش داخل این قانون');
     chips.appendChild(hint);
     box.appendChild(chips);
 
@@ -740,7 +754,7 @@
     if (hasColor) {
       const when = document.createElement('div');
       when.className = 'rwhen';
-      when.appendChild(txt('The floor colour this rule waits for:'));
+      when.appendChild(txt(L('The floor colour this rule waits for:', 'این قانون منتظرِ کدام رنگِ کف است:')));
       const cc = document.createElement('div');
       cc.className = 'chips';
       COLORS.forEach((c) => {
@@ -777,22 +791,22 @@
       return w;
     };
     if (r.members.indexOf('compass') >= 0) {
-      chipRow('This rule waits until the robot FACES which way? (heading, ±45°)',
+      chipRow(L('This rule waits until the robot FACES which way? (heading, ±45°)', 'این قانون صبر می‌کند تا ربات رو به کدام سمت باشد؟ (heading، ±۴۵°)'),
         DIRS.map((d) => ({ label: d.ar + ' ' + d.d + '°', title: d.fa, v: d.d })),
         (o) => r.dir === o.v, (o) => { r.dir = o.v; });
     }
     if (r.members.indexOf('room') >= 0) {
-      chipRow('The rule fires while the robot is IN which room?',
+      chipRow(L('The rule fires while the robot is IN which room?', 'قانون وقتی روشن است که ربات داخلِ کدام اتاق باشد؟'),
         ROOM_NAMES.map((n, i) => ({ label: i + ' · ' + esc(n), v: i })),
         (o) => r.roomPick === o.v, (o) => { r.roomPick = o.v; });
     }
     if (r.members.indexOf('clean') >= 0) {
-      chipRow('Watch the clean-% of WHICH room?',
+      chipRow(L('Watch the clean-% of WHICH room?', 'درصد تمیزیِ کدام اتاق را نگاه کنیم؟'),
         [1, 2, 3, 4, 5].map((i) => ({ label: 'clean' + i + ' · ' + esc(ROOM_NAMES[i]), v: i })),
         (o) => r.cleanRoom === o.v, (o) => { r.cleanRoom = o.v; });
       const dl = document.createElement('div');
       dl.className = 'dials';
-      dl.appendChild(dial('Room counts as DONE over', r.cleanPct, '%',
+      dl.appendChild(dial(L('Room counts as DONE over', 'اتاق «تمام‌شده» حساب شود بالای'), r.cleanPct, '%',
         'writes clean' + r.cleanRoom + ' &gt; <b>' + r.cleanPct + '</b>',
         (dir) => { r.cleanPct = clamp(r.cleanPct + dir * 5, 5, 99); refresh(); },
         (v) => { r.cleanPct = clamp(Math.round(v), 5, 99); refresh(); }));
@@ -802,8 +816,9 @@
     // THEN — the whole point of the page: which way do I go?
     const q = document.createElement('h2');
     q.className = 'aq';
-    q.innerHTML = '<span class="step">2</span> When ' +
-      (r.members.length > 1 ? 'ALL of them fire together' : 'it fires') + ', which way should the robot go?';
+    q.innerHTML = '<span class="step">2</span> ' + (PAGE_LANG === 'fa'
+      ? 'وقتی ' + (r.members.length > 1 ? 'همه با هم روشن شدند' : 'روشن شد') + '، ربات کدام طرف برود؟'
+      : 'When ' + (r.members.length > 1 ? 'ALL of them fire together' : 'it fires') + ', which way should the robot go?');
     box.appendChild(q);
 
     const acts = document.createElement('div');
@@ -814,7 +829,7 @@
       b.type = 'button';
       b.className = 'act' + (r.act === id ? ' on' : '');
       b.innerHTML = ICON[A.icon] + '<span>' + esc(A.label) + '</span>' +
-        (id === best ? '<span class="star">smart</span>' : '');
+        (id === best ? '<span class="star">' + L('smart', 'هوشمند') + '</span>' : '');
       b.title = A.why;
       b.onclick = () => { r.act = id; r.speed = A.def; r.on = true; refresh(); };
       acts.appendChild(b);
@@ -828,13 +843,13 @@
       dl.appendChild(dial(label, get(), '°', 'turns until heading reads <b>' + get() + '</b>',
         (dir) => { set((((get() + dir * 45) % 360) + 360) % 360); refresh(); },
         (v) => { set(((Math.round(v) % 360) + 360) % 360); refresh(); }));
-      dl.appendChild(dial('How fast to spin', spGet(), '', 'writes wheels <b>' + spGet() + '</b> / <b>-' + spGet() + '</b>',
+      dl.appendChild(dial(L('How fast to spin', 'با چه سرعتی بچرخد'), spGet(), '', 'writes wheels <b>' + spGet() + '</b> / <b>-' + spGet() + '</b>',
         (dir) => { spSet(ladder(SPD, spGet(), dir)); refresh(); },
         (v) => { spSet(clamp(Math.round(v), 1, 25)); refresh(); }));
       box.appendChild(dl);
       const dc = document.createElement('div');
       dc.className = 'rwhen';
-      dc.appendChild(txt('...or tap a direction:'));
+      dc.appendChild(txt(L('...or tap a direction:', '...یا یک جهت را بزن:')));
       const cc = document.createElement('div');
       cc.className = 'chips';
       DIRS.forEach((d) => {
@@ -850,15 +865,17 @@
       box.appendChild(dc);
     };
     if (r.act === 'turnto') {
-      degDial('Turn until heading reads', () => r.deg, (v) => { r.deg = v; },
+      degDial(L('Turn until heading reads', 'بچرخ تا قطب‌نما بشود'), () => r.deg, (v) => { r.deg = v; },
         () => r.speed, (v) => { r.speed = v; });
       const sw = document.createElement('div');
       sw.className = 'swing';
-      sw.innerHTML = '<div class="swingnums"><span><b>' + r.deg + '°</b> on the compass</span>' +
-        '<span class="wheelnums">0 = right · 90 = up · 180 = left · 270 = down</span></div>' +
-        '<p>Not a timed spin: the code keeps checking <code>heading</code> every step and stops ' +
+      sw.innerHTML = '<div class="swingnums"><span><b>' + r.deg + '°</b> ' + L('on the compass', 'روی قطب‌نما') + '</span>' +
+        '<span class="wheelnums">' + L('0 = right · 90 = up · 180 = left · 270 = down', '۰ راست · ۹۰ بالا · ۱۸۰ چپ · ۲۷۰ پایین') + '</span></div>' +
+        '<p>' + L('Not a timed spin: the code keeps checking <code>heading</code> every step and stops ' +
         'turning the moment it reads about ' + r.deg + '° (±12°). Chain two of these with a drive ' +
-        'in between and the robot walks out of a room corner by corner.</p>';
+        'in between and the robot walks out of a room corner by corner.',
+        'چرخشِ زمانی نیست: کد هر لحظه <code>heading</code> را چک می‌کند و همین که حدود ' + r.deg +
+        '° شد (±۱۲°) می‌ایستد. دو تا از همین را با یک حرکت مستقیم وسطش زنجیر کن تا ربات مرحله‌به‌مرحله از اتاق بیرون برود.') + '</p>';
       box.appendChild(sw);
     }
 
@@ -868,16 +885,16 @@
       dials.className = 'dials';
       const hasDist = r.members.map(sensorOf).some((s) => s && s.kind === 'dist');
       if (hasDist) {
-        dials.appendChild(dial('Closer than', r.cm, 'cm', 'writes ' +
+        dials.appendChild(dial(L('Closer than', 'نزدیک‌تر از'), r.cm, 'cm', 'writes ' +
           (r.members.length > 1 ? 'each eye' : r.members[0]) + ' &lt; <b>' + r.cm + '</b>',
           (dir) => { r.cm = ladder(CM, r.cm, dir); refresh(); },
           (v) => { r.cm = clamp(Math.round(v), 5, 200); refresh(); }));
       }
       const m0 = motion(r.act, r.speed, r.secs);
-      dials.appendChild(dial('How fast to turn', r.speed, '', 'writes wheels <b>' + m0.wl + '</b> / <b>' + m0.wr + '</b>',
+      dials.appendChild(dial(L('How fast to turn', 'با چه سرعتی'), r.speed, '', 'writes wheels <b>' + m0.wl + '</b> / <b>' + m0.wr + '</b>',
         (dir) => { r.speed = ladder(SPD, r.speed, dir); refresh(); },
         (v) => { r.speed = clamp(Math.round(v), 1, 25); refresh(); }));
-      dials.appendChild(dial('For how long', num1(r.secs), 's', 'writes seconds(<b>' + num1(r.secs) + '</b>) = ' + m0.steps + ' steps',
+      dials.appendChild(dial(L('For how long', 'چند ثانیه'), num1(r.secs), 's', 'writes seconds(<b>' + num1(r.secs) + '</b>) = ' + m0.steps + ' steps',
         (dir) => { r.secs = ladder(SECS, r.secs, dir); refresh(); },
         (v) => { r.secs = Math.round(clamp(v, 0.1, 6) * 10) / 10; refresh(); }));
       box.appendChild(dials);
@@ -888,13 +905,16 @@
       swing.className = 'swing';
       swing.innerHTML =
         '<div class="swingnums">' +
-          '<span><b>' + Math.round(m.deg) + '&deg;</b>' + (m.deg ? ' of turn' : ' — it does not turn') + '</span>' +
-          '<span><b>' + Math.round(m.cm) + ' cm</b> travelled</span>' +
-          '<span class="wheelnums">wheels <b>' + m.wl + '</b> / <b>' + m.wr + '</b></span>' +
+          '<span><b>' + Math.round(m.deg) + '&deg;</b>' + (m.deg ? L(' of turn', ' چرخش') : L(' — it does not turn', ' — نمی‌چرخد')) + '</span>' +
+          '<span><b>' + Math.round(m.cm) + ' cm</b>' + L(' travelled', ' جابه‌جایی') + '</span>' +
+          '<span class="wheelnums">' + L('wheels', 'چرخ‌ها') + ' <b>' + m.wl + '</b> / <b>' + m.wr + '</b></span>' +
         '</div>' +
-        '<p>Both numbers are <b>roughly right</b>, worked out from the wheels the way the match works them out. ' +
+        '<p>' + L('Both numbers are <b>roughly right</b>, worked out from the wheels the way the match works them out. ' +
         'On the real floor a robot leaning on a wall or a chair turns a little less — so treat ' +
-        Math.round(m.deg) + '&deg; as the aim, and watch the room for what actually happens.</p>';
+        Math.round(m.deg) + '&deg; as the aim, and watch the room for what actually happens.',
+        'هر دو عدد <b>حدودی</b>اند — از روی چرخ‌ها همان‌طور حساب شده‌اند که خودِ مسابقه حساب می‌کند. ' +
+        'روی زمینِ واقعی رباتی که به دیوار یا صندلی تکیه کرده کمی کمتر می‌چرخد — پس ' +
+        Math.round(m.deg) + '° را هدف بگیر و اتاقک را نگاه کن ببین واقعاً چه می‌شود.') + '</p>';
       box.appendChild(swing);
     }
 
@@ -902,14 +922,14 @@
     // and then spin. How far each part goes is the child's numbers, not ours.
     const q2 = document.createElement('h2');
     q2.className = 'aq';
-    q2.innerHTML = '<span class="step">+</span> ...and THEN? (a second move, if you want one)';
+    q2.innerHTML = '<span class="step">+</span> ' + L('...and THEN? (a second move, if you want one)', '...و بعدش؟ (حرکت دوم، اگر خواستی)');
     box.appendChild(q2);
     const acts2 = document.createElement('div');
     acts2.className = 'acts acts2';
     const none = document.createElement('button');
     none.type = 'button';
     none.className = 'act quiet' + (r.act2 == null ? ' on' : '');
-    none.innerHTML = ICON.none + '<span>Nothing</span>';
+    none.innerHTML = ICON.none + '<span>' + L('Nothing', 'هیچی') + '</span>';
     none.onclick = () => { r.act2 = null; refresh(); };
     acts2.appendChild(none);
     ACT_IDS.forEach((id) => {
@@ -925,16 +945,16 @@
     });
     box.appendChild(acts2);
     if (r.act2 === 'turnto') {
-      degDial('Then: turn until heading reads', () => r.deg2, (v) => { r.deg2 = v; },
+      degDial(L('Then: turn until heading reads', 'بعد: بچرخ تا قطب‌نما بشود'), () => r.deg2, (v) => { r.deg2 = v; },
         () => r.speed2, (v) => { r.speed2 = v; });
     } else if (r.act2) {
       const m2 = motion(r.act2, r.speed2, r.secs2);
       const dials2 = document.createElement('div');
       dials2.className = 'dials';
-      dials2.appendChild(dial('Then: how fast', r.speed2, '', 'writes wheels <b>' + m2.wl + '</b> / <b>' + m2.wr + '</b>',
+      dials2.appendChild(dial(L('Then: how fast', 'بعد: چه سرعتی'), r.speed2, '', 'writes wheels <b>' + m2.wl + '</b> / <b>' + m2.wr + '</b>',
         (dir) => { r.speed2 = ladder(SPD, r.speed2, dir); refresh(); },
         (v) => { r.speed2 = clamp(Math.round(v), 1, 25); refresh(); }));
-      dials2.appendChild(dial('Then: how long', num1(r.secs2), 's',
+      dials2.appendChild(dial(L('Then: how long', 'بعد: چند ثانیه'), num1(r.secs2), 's',
         (m2.deg >= 1 ? 'about <b>' + Math.round(m2.deg) + ' deg</b> of turn' : '<b>' + Math.round(m2.cm) + ' cm</b> travelled'),
         (dir) => { r.secs2 = ladder(SECS, r.secs2, dir); refresh(); },
         (v) => { r.secs2 = Math.round(clamp(v, 0.1, 6) * 10) / 10; refresh(); }));
@@ -946,14 +966,14 @@
     if (U14 && r.act2) {
       const q3 = document.createElement('h2');
       q3.className = 'aq';
-      q3.innerHTML = '<span class="step">+</span> ...and THEN? (a third move — turn, drive, turn walks you out of a room)';
+      q3.innerHTML = '<span class="step">+</span> ' + L('...and THEN? (a third move — turn, drive, turn walks you out of a room)', '...و بعدش؟ (حرکت سوم — «بچرخ، برو، بچرخ» تو را از اتاق بیرون می‌برد)');
       box.appendChild(q3);
       const acts3 = document.createElement('div');
       acts3.className = 'acts acts2';
       const none3 = document.createElement('button');
       none3.type = 'button';
       none3.className = 'act quiet' + (r.act3 == null ? ' on' : '');
-      none3.innerHTML = ICON.none + '<span>Nothing</span>';
+      none3.innerHTML = ICON.none + '<span>' + L('Nothing', 'هیچی') + '</span>';
       none3.onclick = () => { r.act3 = null; refresh(); };
       acts3.appendChild(none3);
       ACT_IDS.forEach((id) => {
@@ -969,16 +989,16 @@
       });
       box.appendChild(acts3);
       if (r.act3 === 'turnto') {
-        degDial('Finally: turn until heading reads', () => r.deg3, (v) => { r.deg3 = v; },
+        degDial(L('Finally: turn until heading reads', 'آخر: بچرخ تا قطب‌نما بشود'), () => r.deg3, (v) => { r.deg3 = v; },
           () => r.speed3, (v) => { r.speed3 = v; });
       } else if (r.act3) {
         const m3 = motion(r.act3, r.speed3, r.secs3);
         const dials3 = document.createElement('div');
         dials3.className = 'dials';
-        dials3.appendChild(dial('Finally: how fast', r.speed3, '', 'writes wheels <b>' + m3.wl + '</b> / <b>' + m3.wr + '</b>',
+        dials3.appendChild(dial(L('Finally: how fast', 'آخر: چه سرعتی'), r.speed3, '', 'writes wheels <b>' + m3.wl + '</b> / <b>' + m3.wr + '</b>',
           (dir) => { r.speed3 = ladder(SPD, r.speed3, dir); refresh(); },
           (v) => { r.speed3 = clamp(Math.round(v), 1, 25); refresh(); }));
-        dials3.appendChild(dial('Finally: how long', num1(r.secs3), 's',
+        dials3.appendChild(dial(L('Finally: how long', 'آخر: چند ثانیه'), num1(r.secs3), 's',
           (m3.deg >= 1 ? 'about <b>' + Math.round(m3.deg) + ' deg</b> of turn' : '<b>' + Math.round(m3.cm) + ' cm</b> travelled'),
           (dir) => { r.secs3 = ladder(SECS, r.secs3, dir); refresh(); },
           (v) => { r.secs3 = Math.round(clamp(v, 0.1, 6) * 10) / 10; refresh(); }));
@@ -994,7 +1014,7 @@
     // the lines of Python THIS rule is responsible for
     const mine = document.createElement('pre');
     mine.className = 'mypy';
-    mine.textContent = r.on ? ruleLines(r) : '# this rule is switched off - it writes nothing';
+    mine.textContent = r.on ? ruleLines(r) : L('# this rule is switched off - it writes nothing', '# این قانون خاموش است - چیزی نمی‌نویسد');
     box.appendChild(mine);
   }
 
@@ -1006,18 +1026,18 @@
     head.className = 'ahead';
     head.innerHTML =
       '<span class="adot" style="color:#22c55e">' + ICON.forward + '</span>' +
-      '<span><span class="aname">Just driving<code>else</code></span>' +
-      '<div class="awhere">not a rule — the wheels when no rule is true</div></span>';
+      '<span><span class="aname">' + L('Just driving', 'رانندگیِ عادی') + '<code>else</code></span>' +
+      '<div class="awhere">' + L('not a rule — the wheels when no rule is true', 'قانون نیست — چرخ‌ها وقتی هیچ قانونی روشن نیست') + '</div></span>';
     box.appendChild(head);
 
     const p = document.createElement('div');
     p.className = 'rwhen';
-    p.appendChild(txt('This is what the robot does while no rule has anything to say — it rolls straight ahead, cleaning every tile it crosses.'));
+    p.appendChild(txt(L('This is what the robot does while no rule has anything to say — it rolls straight ahead, cleaning every tile it crosses.', 'کاری که ربات وقتی هیچ قانونی حرفی ندارد می‌کند — مستقیم می‌راند و هر کاشی سر راهش را تمیز می‌کند.')));
     box.appendChild(p);
 
     const dials = document.createElement('div');
     dials.className = 'dials';
-    dials.appendChild(dial('How fast to drive', DRIVE.speed, '', 'writes wheels <b>' + DRIVE.speed + '</b> / <b>' + DRIVE.speed + '</b>',
+    dials.appendChild(dial(L('How fast to drive', 'با چه سرعتی براند'), DRIVE.speed, '', 'writes wheels <b>' + DRIVE.speed + '</b> / <b>' + DRIVE.speed + '</b>',
       (dir) => { DRIVE.speed = ladder(SPD, DRIVE.speed, dir); refresh(); },
       (v) => { DRIVE.speed = clamp(Math.round(v), 1, 25); refresh(); }));
     box.appendChild(dials);
@@ -1025,10 +1045,11 @@
     const sw = document.createElement('div');
     sw.className = 'swing';
     sw.innerHTML =
-      '<div class="swingnums"><span><b>' + Math.round(DRIVE.speed / 25 * 100) + ' cm</b> a second</span>' +
-      '<span class="wheelnums">wheels <b>' + DRIVE.speed + '</b> / <b>' + DRIVE.speed + '</b></span></div>' +
-      '<p>25 is full speed. Slower means fewer tiles a minute, but the eyes get more warning before a wall — ' +
-      'the numbers are <b>roughly right</b>, as always.</p>';
+      '<div class="swingnums"><span><b>' + Math.round(DRIVE.speed / 25 * 100) + ' cm</b>' + L(' a second', ' در ثانیه') + '</span>' +
+      '<span class="wheelnums">' + L('wheels', 'چرخ‌ها') + ' <b>' + DRIVE.speed + '</b> / <b>' + DRIVE.speed + '</b></span></div>' +
+      '<p>' + L('25 is full speed. Slower means fewer tiles a minute, but the eyes get more warning before a wall — ' +
+      'the numbers are <b>roughly right</b>, as always.',
+      '۲۵ یعنی تمام سرعت. آهسته‌تر یعنی کاشیِ کمتر در دقیقه، ولی چشم‌ها زودتر از دیوار خبر می‌دهند — اعداد مثل همیشه <b>حدودی</b>اند.') + '</p>';
     box.appendChild(sw);
 
     const mine = document.createElement('pre');
@@ -1038,13 +1059,15 @@
   }
 
   function whyLine(r, best) {
-    if (!r.on) return 'This rule is switched off, so it writes no line of Python.';
+    if (!r.on) return L('This rule is switched off, so it writes no line of Python.', 'این قانون خاموش است و هیچ خطی از پایتون نمی‌نویسد.');
     const A = ACTS[r.act];
     let s = '<b>' + esc(A.label) + '</b> — ' + esc(A.why) + '.';
     if (r.act !== best) {
-      s += ' The smart answer for these sensors is usually <b>' + esc(ACTS[best].label) + '</b> — tap it and watch the room to see the difference.';
+      s += L(' The smart answer for these sensors is usually <b>' + esc(ACTS[best].label) + '</b> — tap it and watch the room to see the difference.',
+        ' جوابِ هوشمند برای این سنسورها معمولاً <b>' + esc(ACTS[best].label) + '</b> است — بزنش و اتاقک را نگاه کن تا فرق را ببینی.');
     } else if (r.members.length > 1) {
-      s += ' All ' + r.members.length + ' must fire in the SAME tenth of a second, so put this rule ABOVE the single-sensor ones or they will always win first.';
+      s += L(' All ' + r.members.length + ' must fire in the SAME tenth of a second, so put this rule ABOVE the single-sensor ones or they will always win first.',
+        ' هر ' + r.members.length + ' تا باید در یک دهم‌ثانیه با هم روشن شوند؛ این قانون را بالای قانون‌های تک‌سنسوری بگذار وگرنه همیشه آن‌ها اول می‌برند.');
     }
     return s;
   }
@@ -1132,7 +1155,9 @@
       return 'color == ' + r.colorPick;
     }).join(' and ');
   }
-  const ROOM_NAMES = ['the hall', 'the kitchen', 'bedroom 1', 'bedroom 2', 'bedroom 3', 'the bathroom'];
+  const ROOM_NAMES = (PAGE_LANG === 'fa')
+    ? ['هال', 'آشپزخانه', 'اتاق‌خواب ۱', 'اتاق‌خواب ۲', 'اتاق‌خواب ۳', 'سرویس']
+    : ['the hall', 'the kitchen', 'bedroom 1', 'bedroom 2', 'bedroom 3', 'the bathroom'];
   function noteOf(r) {
     if (r.members.length > 1) return 'all of these at once';
     const s = sensorOf(r.members[0]);
@@ -1821,7 +1846,7 @@
     $('animWhy').innerHTML = r
       ? 'This is your whole program running, not just one rule. <b>' + esc(ruleName(r)) + '</b> is drawn bright; ' +
         'everything in a rule lights up red the moment that rule takes over. Change the answer and watch it again.'
-      : 'Build a rule and this little room will show you what your answer does.';
+      : L('Build a rule and this little room will show you what your answer does.', 'یک قانون بساز تا این اتاقک نشانت بدهد جوابت چه می‌کند.');
     const nOn = RULES.filter((x) => x.on && x.members.length).length;
     $('barHint').textContent = (typeof PAGE_LANG !== 'undefined' && PAGE_LANG === 'fa')
       ? RULES.length + ' قانون ساخته شد · ' + nOn + ' تا در فایل است.'
@@ -1929,8 +1954,8 @@
 
   /* ---- go ---- */
   $('subTitle').textContent =
-    /(^|-)fs$/.test(LEAGUE) ? 'First Step · Vacuum league' :
-    /(^|-)u14$/.test(LEAGUE) ? 'U14 · Vacuum league' : LEAGUE;
+    /(^|-)fs$/.test(LEAGUE) ? L('First Step · Vacuum league', 'فرست‌استپ · لیگ جاروبرقی') :
+    /(^|-)u14$/.test(LEAGUE) ? L('U14 · Vacuum league', 'زیر ۱۴ سال · لیگ جاروبرقی') : LEAGUE;
   fit();
   resetSim();
   refresh();

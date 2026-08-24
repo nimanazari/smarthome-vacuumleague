@@ -496,3 +496,4 @@ body.light .bar { background: rgba(248, 250, 253, .92); }
 /* ONE language at a time — the page follows the game's shl_lang */
 body.lang-en .i18n-fa { display: none !important; }
 body.lang-fa .i18n-en { display: none !important; }
+body.lang-fa .bridge .en { display: none; }
