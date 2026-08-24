@@ -24,7 +24,7 @@ RUN_FILES = [
     'engine.js', 'render.js', 'physics.js', 'homeobjects.js', 'sensors.js',
     'robot-parts.js', 'robot-battery.js', 'pyreader.js', 'leagues.js',
     'builder.js', 'robotController.py',
-    'RULES.md', 'CODING.md',
+    'RULES.md', 'CODING.md', 'TEACHING.md',
 ]
 RUN_DIRS = ['fonts', 'vendor', 'fsapp', 'leagues']
 

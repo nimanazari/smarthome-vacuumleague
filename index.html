@@ -4227,6 +4227,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       const mk = () => ({
         heat: new Float32Array(engine.cols * engine.rows),
         stuck: 0, dist: 0, flat: 0,
+        bumps: 0, chgVisits: 0, chgSecs: 0, minBatt: 100, _lastBump: 0, _onPad: false,
         reloc: 0, relocLost: 0, wet: 0, wetLost: 0,
         crashTicks: 0, cpuMs: 0, cpuTicks: 0, cpuPeak: 0, slowTicks: 0,
         lx: null, ly: null,          // last logged position (pre-teleport)
@@ -4255,7 +4256,17 @@ else:                            # 7) nothing in the way -> full speed ahead
         // count the time past its first 3 s, so brief manoeuvres stay free
         if (rb.stuckTimer > 3) t.stuck += simDt;
         t.lx = rb.x; t.ly = rb.y;
-        if (engine.dock && rb.battery != null && rb.battery <= 0) t.flat += simDt;
+        // wall touches: a fresh bumper press counts once
+        if (rb.bumper && !t._lastBump) t.bumps++;
+        t._lastBump = rb.bumper;
+        if (engine.dock && rb.battery != null) {
+          t.minBatt = Math.min(t.minBatt, rb.battery);
+          const onPad = Math.hypot(rb.x - engine.dock.x, rb.y - engine.dock.y) <= 0.32 + (rb.r || 0.18);
+          if (onPad && !t._onPad) t.chgVisits++;
+          if (onPad && rb.battery < 100) t.chgSecs += simDt;
+          t._onPad = onPad;
+          if (rb.battery <= 0) t.flat += simDt;
+        }
       }
       const sec = Math.floor(engine.elapsed);
       if (sec !== matchLog.lastSec) {
@@ -4655,6 +4666,9 @@ else:                            # 7) nothing in the way -> full speed ahead
       row('زمان گیر کرده', 'time stuck', (t) => secs(t.stuck));
       row('جابه‌جایی داور', 'relocations', (t) => t.reloc + (t.relocLost ? ' (−' + t.relocLost + ')' : ''));
       if (engine.puddles.length) row('ورود به کف خیس', 'wet-floor hits', (t) => t.wet + (t.wetLost ? ' (−' + t.wetLost + ')' : ''));
+      row('برخورد با دیوار و وسایل', 'wall touches', (t) => t.bumps);
+      if (engine.dock) row('توقف شارژ', 'charge stops', (t) => t.chgVisits + ' × · ' + Math.round(t.chgSecs) + ' s');
+      if (engine.dock) row('کمترین باتری', 'lowest battery', (t) => Math.round(t.minBatt) + '%');
       if (engine.dock) row('باتری خالی', 'time at 0%', (t) => secs(t.flat));
       row('زمان پردازنده', 'CPU avg / peak', (t) => t.cpuTicks ? (t.cpuMs / t.cpuTicks).toFixed(2) + ' / ' + t.cpuPeak.toFixed(1) + ' ms' : '—');
       row('خطای برنامه', 'crash ticks', (t) => t.crashTicks || 0);

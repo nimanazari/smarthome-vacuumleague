@@ -43,6 +43,16 @@
     <p class="hint" id="kitLine"></p>
     <div id="sensList" class="senslist"></div>
     <button class="addbtn" id="addRule" type="button">+ New rule &mdash; or drop a sensor right here</button>
+    <!-- U14 only: THE room-number lesson, right where the rules are built -->
+    <div class="roomlesson" id="roomLesson" style="display:none">
+      <b>🚪 شماره‌ی اتاق به چه درد می‌خورد؟</b>
+      <p><code>room</code> می‌گوید الان در کدام اتاقی (۰ هال، ۱ آشپزخانه، ۲/۳/۴ اتاق‌خواب، ۵ سرویس)
+      و <code>clean2</code> می‌گوید چند درصدِ اتاق ۲ رنگِ توست. این دو تا با هم یعنی
+      رباتت می‌فهمد «این اتاق تمام شد — وقتِ رفتن است»: رو کن به سمتِ در
+      (درجه‌اش را از نقشه بخوان)، مستقیم برو، و به محض رد شدن از در،
+      <code>room</code> عوض می‌شود و قانون خودش خاموش می‌شود.</p>
+      <button class="addbtn" id="roomRecipeBtn" type="button">🚪 قانونِ «خروج از اتاقِ تمام‌شده» را بساز</button>
+    </div>
   </section>
 
   <section class="card askcard" id="askCard"><!-- filled by helper.js --></section>

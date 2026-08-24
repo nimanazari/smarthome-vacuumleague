@@ -447,3 +447,8 @@ body.light::before {
 }
 body.light .top { background: rgba(248, 250, 253, .85); }
 body.light .bar { background: rgba(248, 250, 253, .92); }
+
+/* the U14 room-number lesson box */
+.roomlesson { margin-top: 10px; padding: 11px 14px; border-radius: 12px;
+  border: 1px dashed var(--line, #2c3340); font-size: 13px; line-height: 1.9; }
+.roomlesson p { margin: 4px 0 8px; }

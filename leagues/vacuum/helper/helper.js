@@ -1872,6 +1872,22 @@
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
   };
 
+  /* ---- U14's room-number lesson: one click builds the leave-the-room
+     recipe so the coach can SHOW it, then edit the numbers live ---- */
+  if (U14 && $('roomLesson')) {
+    $('roomLesson').style.display = '';
+    $('roomRecipeBtn').onclick = () => {
+      const r = newRule(['room', 'clean']);
+      r.roomPick = 2; r.cleanRoom = 2; r.cleanPct = 80;   // in room 2, room 2 is 80% mine
+      r.act = 'turnto'; r.deg = 270;                      // face the door (edit per map!)
+      r.act2 = 'forward'; r.secs2 = 2; r.speed2 = 25;     // drive OUT through it
+      RULES.push(r);
+      sel = r.id;
+      resetSim(); refresh();
+      toast('قانون خروج ساخته شد — درجه‌ی در (۲۷۰) را با نقشه‌ی خودت تنظیم کن');
+    };
+  }
+
   /* ---- dark / light ---- */
   const THEME_KEY = 'shl_helper_theme';
   function applyTheme(t) {
