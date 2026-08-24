@@ -59,7 +59,10 @@
      صفحه حساب می‌کند و به کد می‌دهد.
      ================================================================ */
   const RES = 0.15625;                       // a quarter tile
-  const INFLATE = 0.34;                      // robot radius + a margin
+  const INFLATE = 0.30;                      // robot radius + a margin — the same
+                                             // 0.30 the map validator proves every
+                                             // doorway open with (0.34 sealed the
+                                             // narrow bedroom doorways shut)
   const NXC = Math.round(W / RES), NYC = Math.round(H / RES);
   const BLOCKED = (() => {
     const g = new Uint8Array(NXC * NYC);
@@ -584,6 +587,18 @@
   }
   // estimated battery at each MAIN point: distance x 2.83 %/m from the
   // spawn, with the guard's recharge folded in when it would trigger
+  // the REAL planned path from (x,y) home to the pad, in metres
+  function dockDistFrom(x, y) {
+    if (!DOCK) return null;
+    const [dx, dy] = nearestFree(DOCK.x, DOCK.y);
+    const [sx, sy] = nearestFree(x, y);
+    const p = smooth(astar(sx, sy, dx, dy));
+    if (!p || p.length < 2) return null;
+    let L = 0;
+    for (let i = 1; i < p.length; i++) L += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+    return L;
+  }
+
   function batteryEstimates() {
     const pts = expandRoute();
     if (!pts.length) return {};
@@ -602,6 +617,19 @@
       }
       if (w.target && est[w.n] === undefined) est[w.n] = { b: Math.max(0, Math.round(b)), chg: false };
     }
+    // the trip HOME from every MAIN point: metres -> %% -> seconds. The robot
+    // drives ~0.6 m/s and burns ~2.83 %%/m; the pad refills 25 %%/s.
+    for (const w of pts) {
+      if (!w.target || !est[w.n]) continue;
+      const L = dockDistFrom(w.x, w.y);
+      if (L == null) continue;
+      const e2 = est[w.n];
+      e2.dockM = +L.toFixed(1);
+      e2.dockPct = Math.round(L * RATE);
+      e2.dockSecs = Math.round(L / 0.6);
+      e2.dead = e2.b - e2.dockPct < 0;            // could NOT reach the pad
+      e2.fullSecs = Math.ceil((100 - Math.max(0, e2.b - e2.dockPct)) / 25);
+    }
     return est;
   }
 
@@ -613,6 +641,14 @@
       return;
     }
     drawList._est = batteryEstimates();
+    // one loud line when ANY point cannot make it home on its estimate
+    const deadPts = Object.keys(drawList._est).filter((k) => drawList._est[k].dead);
+    if (deadPts.length) {
+      const warn = document.createElement('div');
+      warn.className = 'wpwarn';
+      warn.textContent = '⚠ از نقطه‌ی ' + deadPts.join(' و ') + ' با این تنظیمات به شارژر نمی‌رسی و ربات وسط راه خاموش می‌شود — آستانه‌ی «برو شارژر» را بالاتر بگذار.';
+      box.appendChild(warn);
+    }
     ROUTE.wps.forEach((w, i) => {
       const row = document.createElement('div');
       row.className = 'wprow';
@@ -626,9 +662,16 @@
       const eb = drawList._est && drawList._est[i + 1];
       if (eb) {
         const bs = document.createElement('span');
-        bs.className = 'wpbatt' + (eb.b <= ROUTE.low ? ' low' : '');
-        bs.textContent = '🔋≈' + eb.b + '%' + (eb.chg ? ' 🔌' : '');
-        bs.title = eb.chg ? 'قبل از این نقطه یک بار شارژ می‌کند' : 'باتری تقریبی وقتی به این نقطه می‌رسد';
+        bs.className = 'wpbatt' + (eb.dead ? ' dead' : eb.b <= ROUTE.low ? ' low' : '');
+        bs.textContent = '🔋≈' + eb.b + '%' + (eb.chg ? ' 🔌' : '') +
+          (eb.dockPct != null ? ' · 🏠−' + eb.dockPct + '٪' : '') + (eb.dead ? ' ⚠' : '');
+        bs.title = (eb.chg ? 'قبل از این نقطه یک بار شارژ می‌کند.\n' : '') +
+          (eb.dockPct != null
+            ? 'راهِ خانه از این نقطه: ~' + eb.dockM + ' متر ≈ ' + eb.dockPct + '٪ باتری و ~' + eb.dockSecs + ' ثانیه.\n' +
+              (eb.dead ? '⚠ با این باتری به شارژر نمی‌رسد — آستانه‌ی «برو شارژر» را بالاتر بگذار!\n'
+                : 'می‌رسد؛ ') +
+              'روی پد: هر ثانیه ۲۵٪ — تا ۱۰۰٪ حدود ' + eb.fullSecs + ' ثانیه.'
+            : 'باتری تقریبی وقتی به این نقطه می‌رسد');
         row.appendChild(bs);
       }
       const x = document.createElement('button');

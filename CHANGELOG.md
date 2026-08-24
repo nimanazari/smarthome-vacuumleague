@@ -1,3 +1,16 @@
+## 2026-08-24 — the route helper prices the trip home
+
+- Every waypoint chip now also says what the trip HOME costs from there:
+  metres -> battery %% -> seconds (real A* path, not a straight line), plus
+  how many seconds ON the pad reach 100%% (25 %%/s). If the estimate says a
+  point cannot make it to the charger, the chip turns red with a warning
+  line under the list: raise the go-charge threshold.
+- Planner fix: INFLATE 0.34 sealed the narrow bedroom doorways in the A*
+  grid — bedroom 2 was unreachable to the planner (its charge chains fell
+  back to blind straight lines). Now 0.30, the same margin the map
+  validator proves every doorway open with. Verified: the sealed room
+  plans clean paths again and every chip shows its home cost.
+
 ## 2026-08-23 (k) — helper code runs BY ITSELF, per-team power switch, a referee-only in-match menu
 
 - ▶ in ANY helper now lands in the game and the match STARTS ITSELF — no
