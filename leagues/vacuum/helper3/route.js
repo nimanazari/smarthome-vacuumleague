@@ -415,8 +415,10 @@
       if (o.t === 'dock') {
         cx.fillStyle = 'rgba(34,197,94,.85)';
         cx.fillRect(X(o.x - w / 2), Y(o.y + d / 2), w * S, d * S);
-        cx.fillStyle = '#04170c'; cx.font = '700 15px sans-serif';
-        cx.fillText('🔌', X(o.x) - 8, Y(o.y) + 6);
+        const dx = X(o.x), dy = Y(o.y);
+        cx.strokeStyle = '#04170c'; cx.lineWidth = 2; cx.lineCap = 'round'; cx.lineJoin = 'round';
+        cx.beginPath(); cx.moveTo(dx - 5, dy - 6); cx.lineTo(dx - 5, dy - 1); cx.quadraticCurveTo(dx - 5, dy + 5, dx, dy + 5); cx.quadraticCurveTo(dx + 5, dy + 5, dx + 5, dy - 1); cx.lineTo(dx + 5, dy - 6); cx.stroke();
+        cx.beginPath(); cx.moveTo(dx - 8, dy - 6); cx.lineTo(dx - 2, dy - 6); cx.moveTo(dx + 2, dy - 6); cx.lineTo(dx + 8, dy - 6); cx.moveTo(dx, dy + 5); cx.lineTo(dx, dy + 9); cx.stroke();
         return;
       }
       cx.fillStyle = o.t === 'dump' ? 'rgba(245,158,11,.6)' : 'rgba(142,154,176,.4)';
@@ -648,7 +650,7 @@
     if (deadPts.length) {
       const warn = document.createElement('div');
       warn.className = 'wpwarn';
-      warn.textContent = '⚠ از نقطه‌ی ' + deadPts.join(' و ') + ' با این تنظیمات به شارژر نمی‌رسی و ربات وسط راه خاموش می‌شود — آستانه‌ی «برو شارژر» را بالاتر بگذار.';
+      warn.textContent = 'از نقطه‌ی ' + deadPts.join(' و ') + ' با این تنظیمات به شارژر نمی‌رسی و ربات وسط راه خاموش می‌شود — آستانه‌ی «برو شارژر» را بالاتر بگذار.';
       box.appendChild(warn);
     }
     ROUTE.wps.forEach((w, i) => {
