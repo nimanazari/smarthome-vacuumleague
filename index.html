@@ -22,7 +22,7 @@
   #scene { position: fixed; inset: 0; }
   .ic { width: 1.05em; height: 1.05em; vertical-align: -2px; flex: none; }
   /* in the menu, the old inline icons wear the same small tile as ui-icons */
-  .mitem .ic { width: 13px; height: 13px; padding: 5px; border-radius: 8px; background: rgba(255,255,255,.06); box-sizing: content-box; }
+  .mitem .ic { width: 16px; height: 16px; padding: 5px; border-radius: 8px; background: rgba(255,255,255,.06); box-sizing: content-box; }
 
   /* ---------- scoreboard ---------- */
   #scoreboard { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 22px; z-index: 5; }
@@ -1489,13 +1489,13 @@
     <button class="mitem" id="helpBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Guide</button>
     <button class="mitem" id="dlBaseBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Base code .py</button>
     <div class="msep"></div>
-    <button class="mitem r" id="relocRed">Relocate Team 1</button>
-    <button class="mitem s" id="stopBtn">Stop</button>
-    <button class="mitem s" id="restartBtn">&#10227; Restart match</button>
-    <button class="mitem e" id="endBtn">End Game</button>
-    <button class="mitem b" id="relocBlue">Relocate Team 2</button>
+    <button class="mitem r" id="relocRed"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#warning"/></svg><span class="mi-t">Relocate Team 1</span></button>
+    <button class="mitem s" id="stopBtn"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#pause"/></svg><span class="mi-t">Stop</span></button>
+    <button class="mitem s" id="restartBtn"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#loop"/></svg><span class="mi-t">Restart match</span></button>
+    <button class="mitem e" id="endBtn"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#close"/></svg><span class="mi-t">End Game</span></button>
+    <button class="mitem b" id="relocBlue"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#warning"/></svg><span class="mi-t">Relocate Team 2</span></button>
     <div class="msep"></div>
-    <button class="mitem" id="lockBtn">&#128274; <span id="lockLbl">Official mode: off</span></button>
+    <button class="mitem" id="lockBtn"><svg class="ui-icon" aria-hidden="true"><use href="assets/ui-icons.svg#lock"/></svg><span id="lockLbl">Official mode: off</span></button>
     <div class="msep"></div>
     <div class="mhint">Drag = rotate camera · Scroll = zoom<br>Shift + drag a robot = pick it up and drop it anywhere<br>(official mode locks the drag, house edit &amp; 2x)</div>
   </div>
@@ -3708,7 +3708,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       // sumo dresses its own corners: start-pose controls on the team cards,
       // and the referee button becomes the gyoji's neutral restart
       document.body.classList.toggle('sumo-setup', d.group === 'sumo');
-      $('relocRed').textContent = d.group === 'sumo' ? '🔄 Referee — restart bout (random)' : 'Relocate Team 1';
+      $('relocRed').querySelector('.mi-t').textContent = d.group === 'sumo' ? '🔄 Referee — restart bout (random)' : 'Relocate Team 1';
       $('relocBlue').style.display = d.group === 'sumo' ? 'none' : '';
       // EVERY league wears its own lobby: its own name over the door, its own
       // start call, its own palette (the lg-* classes below). "SMART HOME
@@ -4359,7 +4359,7 @@ else:                            # 7) nothing in the way -> full speed ahead
 
       wireRelocate();
       resetMatchLog();
-      paused = false; $('stopBtn').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
       fitText($('redName'), redName); fitText($('blueName'), blueName);
       $('panel').style.display = 'none'; $('results').style.display = 'none';
       $('scoreboard').style.display = 'flex';
@@ -5075,7 +5075,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('houseBtn').style.display = 'none';
       wireRelocate();
       resetMatchLog();
-      paused = false; $('stopBtn').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
       fitText($('redName'), engine.cfg.redName); fitText($('blueName'), '—');
       $('panel').style.display = 'none'; $('results').style.display = 'none';
       $('scoreboard').style.display = 'flex';
@@ -5200,10 +5200,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (live) {
         $('speedLbl').textContent = T('سرعت بازی', 'Speed') + ': ' + simSpeed + 'x';
         $('sensLbl').textContent = T('سنسورها', 'Sensors') + ': ' + (sensOn ? T('روشن', 'on') : T('خاموش', 'off'));
-        $('relocRed').textContent = T('جابه‌جایی تیم ۱', 'Relocate Team 1');
-        $('relocBlue').textContent = T('جابه‌جایی تیم ۲', 'Relocate Team 2');
-        $('endBtn').textContent = T('پایان بازی', 'End Game');
-        $('restartBtn').textContent = '\u27F2 ' + T('شروع دوباره', 'Restart match');
+        $('relocRed').querySelector('.mi-t').textContent = T('جابه‌جایی تیم ۱', 'Relocate Team 1');
+        $('relocBlue').querySelector('.mi-t').textContent = T('جابه‌جایی تیم ۲', 'Relocate Team 2');
+        $('endBtn').querySelector('.mi-t').textContent = T('پایان بازی', 'End Game');
+        $('restartBtn').querySelector('.mi-t').textContent = T('شروع دوباره', 'Restart match');
         $('helpBtn').lastChild.textContent = T('راهنما', 'Guide');
         $('dlBaseBtn').lastChild.textContent = T('کد پایه .py', 'Base code .py');
         $('lockLbl').textContent = T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off'));
@@ -5217,7 +5217,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       endMission();
       if (tutorialActive) { tutorialActive = false; $('tutorial').style.display = 'none'; }
       engine = new Engine({ map: selectedMap(), league: leagueId, kits: kits, pets: !!($('petsChk') && $('petsChk').checked), players: +(($('playersSel') && $('playersSel').value) || 2) }); renderer.buildScene(engine);
-      paused = false; $('stopBtn').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
       redErr = ''; blueErr = '';
       $('scoreboard').style.display = 'none'; $('results').style.display = 'none';
       $('runtimeErr').style.display = 'none'; $('confetti').innerHTML = ''; $('toast').style.display = 'none';
@@ -5475,10 +5475,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('housebar').style.display = on ? 'flex' : 'none';
       $('hbHint').textContent = 'drag furniture to move it';
       if (on) {
-        housePrevPaused = paused; paused = true; $('stopBtn').textContent = 'Resume';
+        housePrevPaused = paused; paused = true; $('stopBtn').querySelector('.mi-t').textContent = 'Resume';
         showToast('🛠 EDIT MODE — the clock waits while you redecorate');
       } else {
-        paused = housePrevPaused; $('stopBtn').textContent = paused ? 'Resume' : 'Stop';
+        paused = housePrevPaused; $('stopBtn').querySelector('.mi-t').textContent = paused ? 'Resume' : 'Stop';
       }
     }
     function afterHouseEdit() {
@@ -5651,10 +5651,10 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('togB').onclick = () => { showB = !showB; $('togB').classList.toggle('on', showB); };
     $('stopBtn').onclick = () => {
       paused = !paused;
-      $('stopBtn').textContent = paused ? 'Resume' : 'Stop';
+      $('stopBtn').querySelector('.mi-t').textContent = paused ? 'Resume' : 'Stop';
       if (engine.running) logEvent(paused ? 'pause' : 'resume', null, null);
     };
-    $('endBtn').onclick = () => { if (engine.running) { logEvent('end', null, 'referee'); paused = false; $('stopBtn').textContent = 'Stop'; engine.endNow(); } };
+    $('endBtn').onclick = () => { if (engine.running) { logEvent('end', null, 'referee'); paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop'; engine.endNow(); } };
 
     // ---------- interactive tutorial ----------
     // Per-DIVISION lesson sets: each division teaches its own senses on its
