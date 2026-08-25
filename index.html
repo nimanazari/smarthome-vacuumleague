@@ -1347,6 +1347,15 @@
   }
   #lobbyBar b { font-size: 15px; letter-spacing: .3px; }
   #lobbyBar span { font-size: 11px; color: var(--muted); }
+  /* the lobby's quick row: base code + helpers, one tap from the door */
+  #lobbyQuick { display: flex; gap: 7px; margin-top: 7px; pointer-events: auto; flex-wrap: wrap; justify-content: center; }
+  #lobbyQuick:empty { display: none; }
+  .lq {
+    font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+    padding: 6px 13px; border-radius: 999px; color: var(--text);
+    background: rgba(255,255,255,.07); border: 1px solid var(--line);
+  }
+  .lq:hover { border-color: var(--accent); }
   .dv-brand h1 { font-size: 40px; }
   @media (max-width: 760px) { .dv-brand h1 { font-size: 26px; } }
   .mhead {
@@ -2113,6 +2122,7 @@ else:                          # turn AND drive toward them
   <div id="lobbyBar" style="display:none">
     <b id="lobbyName"></b>
     <span id="lobbyHint"></span>
+    <div id="lobbyQuick"></div>
   </div>
 
   <div id="panel">
@@ -3869,6 +3879,23 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('lobbyName').textContent = (d.name ? T(d.name.fa || d.name.en, d.name.en || d.name.fa) : '') +
         ' — ' + T('خانه‌ی هوشمند', 'Smart Home');
       $('lobbyHint').textContent = T('همه‌چیز در منوی ☰ است', 'Everything is in the ☰ menu');
+      // the essentials, right on the door: base code + this division's helpers
+      const q = $('lobbyQuick');
+      q.innerHTML = '';
+      const pill = (label, fn) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'lq'; b.textContent = label; b.onclick = fn;
+        q.appendChild(b);
+      };
+      pill(T('⬇ کد پایه', '⬇ Base code .py'), async () => {
+        const src = await grabCode(programOf(d)) || DEF_RED;
+        download((d.id || 'robot') + '-base.py', src);
+      });
+      if (d.helper) pill(d.helperLabel ? T('📍 هلپر مسیر', '📍 Route helper') : T('🤖 هلپر AI', '🤖 AI helper'),
+        () => { location.href = d.helper + '?league=' + encodeURIComponent(d.id); });
+      if (d.helper2) pill(T('🧩 هلپر بلاکی', '🧩 Blocks helper'),
+        () => { location.href = d.helper2 + '?league=' + encodeURIComponent(d.id); });
+      pill(T('▶ حالت مسابقه', '▶ Match mode'), () => showMatchPanel());
       $('lobbyBar').style.display = 'flex';
       previewScene();
     }
