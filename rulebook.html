@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Smart Home League — Official Rulebook · کتابچه‌ی قوانین</title>
-<!-- THE OFFICIAL RULEBOOK — print-ready (Ctrl+P → Save as PDF).
+<!-- THE OFFICIAL RULEBOOK — a faithful bilingual mirror of the official
+     "Smart Home Rules" PDF (v3.1, Feb 2026), print-ready (Ctrl+P → PDF).
      The pictures are TAKEN LIVE from the game's own 3D engine when the
      page opens, so they always match the current official floor.
-     کتابچه‌ی رسمی قوانین — قابل چاپ/تبدیل به PDF؛ عکس‌ها همان لحظه از
-     موتور سه‌بعدی خود بازی گرفته می‌شوند و همیشه با زمین رسمی یکی‌اند. -->
+     کتابچه‌ی رسمی قوانین — آینه‌ی دوزبانه‌ی PDF رسمی (نسخه‌ی ۳.۱)؛ عکس‌ها
+     همان لحظه از موتور سه‌بعدی خود بازی گرفته می‌شوند. -->
 <style>
 @font-face { font-family:'Vazirmatn'; src:url('fonts/Vazirmatn-Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
 @font-face { font-family:'Vazirmatn'; src:url('fonts/Vazirmatn-Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
@@ -19,6 +20,7 @@ body { font-family:'Vazirmatn',"Segoe UI",Tahoma,sans-serif; color:#182030; back
 h1 { font-size:30px; font-weight:900; }
 h2 { font-size:20px; font-weight:800; margin:30px 0 8px; padding:8px 14px; background:#eef4ff; border-inline-start:5px solid #2e6fe0; border-radius:8px; }
 h3 { font-size:15.5px; font-weight:800; margin:16px 0 4px; color:#20437e; }
+h4 { font-size:13.8px; font-weight:800; margin:10px 0 2px; color:#2e5aa8; }
 p, li { font-size:13.8px; }
 small.en, .en { color:#5b6880; font-size:12px; direction:ltr; display:block; text-align:left; }
 table { width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:12.8px; }
@@ -28,11 +30,12 @@ code { direction:ltr; unicode-bidi:embed; background:#f0f3f9; padding:1px 6px; b
 .cover { text-align:center; padding:26px 0 8px; }
 .cover .sub { color:#5b6880; font-size:14px; margin-top:4px; }
 .cover .ver { display:inline-block; margin-top:10px; font-size:11.5px; letter-spacing:1px; background:#182030; color:#fff; border-radius:999px; padding:4px 16px; }
+.cover .auth { color:#5b6880; font-size:12px; margin-top:8px; }
 .shot { width:100%; border-radius:12px; border:1px solid #ccd4e2; margin:10px 0 4px; display:block; }
 .cap { text-align:center; color:#5b6880; font-size:11.5px; margin-bottom:10px; }
-.two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.formula { direction:ltr; text-align:center; background:#f4f8ff; border:1px solid #cfe0fb; border-radius:10px; padding:9px 12px; margin:9px 0; font-family:Consolas,monospace; font-size:13px; color:#1c3f7a; font-weight:700; }
 .note { background:#fff7e6; border:1px solid #eeddb0; border-radius:9px; padding:9px 13px; font-size:12.8px; margin:8px 0; }
-.chip { display:inline-block; border-radius:999px; padding:1px 10px; font-size:11.5px; font-weight:800; color:#fff; margin-inline-start:4px; }
+.warn { background:#fdeeee; border:1px solid #efc2c2; border-radius:9px; padding:9px 13px; font-size:12.8px; margin:8px 0; }
 ol,ul { padding-inline-start:22px; }
 li { margin:3px 0; }
 .printbtn { position:fixed; top:14px; left:14px; z-index:9; font-family:inherit; font-weight:800; font-size:13px; padding:10px 18px; border-radius:11px; border:0; background:#2e6fe0; color:#fff; cursor:pointer; box-shadow:0 6px 20px rgba(46,111,224,.35); }
@@ -51,157 +54,220 @@ li { margin:3px 0; }
 
 <div class="cover">
   <h1>Smart Home League</h1>
-  <div class="sub">لیگ خانه‌ی هوشمند — شبیه‌ساز رسمی مسابقه · The Official Simulation Rulebook</div>
-  <span class="ver">RULEBOOK · 2026</span>
+  <div class="sub">کتابچه‌ی رسمی قوانین · The Official Rulebook</div>
+  <span class="ver">VERSION 3.1 · FEBRUARY 2026</span>
+  <div class="auth">Sina Nazari · Sina Zaker · Nima Nazari</div>
   <img class="shot" id="shotHero" alt="the house, 3D view" style="margin-top:18px">
-  <div class="cap">زمین رسمی مسابقه — این عکس همین لحظه از موتور بازی گرفته شده · the official floor, rendered live by the game engine</div>
+  <div class="cap">زمین رسمی مسابقه — این عکس همین لحظه از موتور شبیه‌ساز گرفته شده · the official floor, rendered live</div>
 </div>
 
-<h2>۱ · مسابقه در یک نگاه · The game at a glance</h2>
-<p>دو تیم، هر کدام یک ربات جاروبرقی، در یک خانه‌ی هوشمند. هر کاشیِ کفی که ربات از رویش
-رد شود <b>رنگ آن تیم را می‌گیرد و یک امتیاز است</b>. «لمسِ آخر» مالک کاشی است — از روی
-کاشی حریف رد شوی، پس گرفته‌ای. مسابقه با سوت پایان تمام می‌شود و تیمی که کاشی بیشتری
-دارد برنده است. ربات‌ها <b>کاملاً خودکار</b> با برنامه‌ی پایتونِ خود تیم رانده می‌شوند؛
-هیچ کنترلی حین مسابقه مجاز نیست.</p>
-<small class="en">Two teams, one robot each, one smart home. Every floor tile you drive over turns your
-team's colour and scores one point; LAST TOUCH owns the tile. Robots run fully autonomously
-on the team's own Python — no control during the match.</small>
-<p><b>هدف آموزشی:</b> بچه‌ها با <b>سنسورها، منطق شرطی (if/elif)، ماشین حالت، جهت‌یابی با
-قطب‌نما، ناوبری با موقعیت (GPS) و مدیریت منابع (باتری)</b> آشنا می‌شوند — پله‌پله از
-کلیک تا پایتون واقعی.</p>
+<h2>چکیده · Abstract</h2>
+<p>لیگ خانه‌ی هوشمند یک مسابقه‌ی معتبر رباتیک است که بر پرورش <b>برنامه‌نویسی، حل‌مسئله و تفکر
+نقادانه</b> تمرکز دارد. مسابقه در محیط شبیه‌سازی <b>Webots</b> برگزار می‌شود و شرکت‌کننده‌ها باید
+الگوریتم‌هایی کارآمد برای ربات‌های خودمختاری بنویسند که در یک خانه‌ی هوشمند مجازی مأموریت
+انجام می‌دهند: پیمایش چند اتاق، دوری از موانع، مدیریت منابعی مثل باتری (در U19) و بهینه‌سازی
+نظافت. شرکت‌کننده‌ها علاوه بر مسابقه، در <b>چالش فنی</b> و <b>مصاحبه‌ی فنی</b> هم توان خود را نشان می‌دهند.</p>
+<small class="en">The Smart Home League is a robotics competition focused on programming,
+problem-solving and critical thinking. Held in the Webots simulation environment, it challenges
+participants to create efficient algorithms for autonomous robots in a virtual smart home —
+navigating rooms, avoiding obstacles, managing battery (U19) and optimising cleaning. Technical
+challenges and interviews complete the evaluation.</small>
+<ul>
+  <li><b>رده‌های سنی:</b> فرست‌استپ (دبستان) · U14 (پرایمری) · U19 (سکندری)</li>
+  <li><b>محیط برنامه‌نویسی:</b> فقط <b>Webots</b> + زبان <b>Python</b></li>
+  <li><b>شبیه‌ساز تمرینی:</b> همین بازی مرورگری — بدون نصب، برای یادگیری و تمرینِ همین قوانین</li>
+</ul>
 
-<h2>۲ · زمین مسابقه · The arena</h2>
+<h2>۱ · ربات‌ها و سنسورها · Robots and Sensors</h2>
+<p>ربات‌ها جاروبرقی‌های خودمختارِ مجازی‌اند؛ <b>در هر سه رده آماده‌اند</b> — کسی ربات نمی‌سازد،
+تیم فقط رنگ انتخاب می‌کند و مغز (کد پایتون) را می‌نویسد.</p>
+<h3>۱.۱ ویژگی‌های ربات · Robot features</h3>
+<ul>
+  <li><b>خودمختاری:</b> ربات فقط با برنامه‌ی پایتونی که تیم نوشته کار می‌کند — هیچ کنترل دستی‌ای در کار نیست.</li>
+  <li><b>حرکت:</b> با تنظیم سرعت چرخ چپ و راست (<code>wheelleft / wheelright</code>): جلو، عقب، چرخش.</li>
+  <li><b>طراحی مأموریت‌محور:</b> بیشترین نظافت در زمان محدود؛ کارآمدی و پرهیز از برخورد، کلید امتیاز است.</li>
+  <li><b>مدیریت انرژی (فقط U19):</b> باتری شبیه‌سازی‌شده — مصرف انرژی باید در الگوریتم دیده شود.</li>
+</ul>
+
+<h3>۱.۲ سنسورها · Sensors overview</h3>
+<table>
+<tr><th>سنسور</th><th>چه می‌کند · نامِ کد</th><th>کاربرد</th><th>رده</th></tr>
+<tr><td><b>۱.۲.۱ فاصله (Ultrasonic)</b></td><td>موج می‌فرستد و از زمان برگشت، فاصله می‌دهد.
+D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌ساز: <code>front, frontleft, frontright, left, right</code> (cm)</td>
+<td>جلوگیری از برخورد؛ مسیرِ امن</td><td>همه</td></tr>
+<tr><td><b>۱.۲.۲ بامپر (سپر)</b></td><td>تماس فیزیکی یا نزدیکی خیلی زیاد را حس می‌کند · <code>bumper, bumperfront, bumperback</code> (۰/۱)</td>
+<td>واکنش به برخورد با دیوار و مبلمان</td><td>همه</td></tr>
+<tr><td><b>۱.۲.۳ قطب‌نما</b></td><td>زاویه نسبت به شمالِ مجازی · <code>heading</code> (۰ راست، ۹۰ بالا، ۱۸۰ چپ، ۲۷۰ پایین)</td>
+<td>حفظ جهت؛ چرخش به سمت هدف</td><td>U14 · U19</td></tr>
+<tr><td><b>۱.۲.۴ شماره‌ی اتاق</b></td><td>هر اتاق یک شناسه دارد؛ ربات با ورود، شماره‌ی همان اتاق را می‌خواند · <code>room</code> (۰ هال، ۱ آشپزخانه، ۲/۳/۴ اتاق‌خواب، ۵ سرویس)</td>
+<td>نظافتِ منظم؛ مسیر بهینه‌ی اتاق‌به‌اتاق</td><td>U14</td></tr>
+<tr><td><b>۱.۲.۵ درصد تمیزی اتاق</b></td><td>سهم تمیزشده‌ی هر اتاق، به‌روزِ لحظه‌ای · <code>clean1..clean5</code> (٪)</td>
+<td>«اتاقِ تمام‌شده را ول کن، برو بعدی»</td><td>U14</td></tr>
+<tr><td><b>۱.۲.۶ سنسور رنگ</b></td><td>رنگ سطح زیر ربات از بازتاب RGB · <code>color</code> + نام‌های آماده‌ی <code>white, green, purple, …</code></td>
+<td>تشخیص فرش‌ها و نشانه‌های کف؛ رفتار شرطی با رنگ</td><td>U14 · U19</td></tr>
+<tr><td><b>۱.۲.۷ GPS</b></td><td>مختصات دقیق ربات · <code>x, y</code> (cm) + توابع <code>goto(x,y)</code>، <code>distto</code>، <code>angleto</code></td>
+<td>ناوبری نقطه‌به‌نقطه؛ مسیر بهینه تا شارژر</td><td>U19</td></tr>
+<tr><td><b>۱.۲.۸ سیستم شارژ</b></td><td>سطح باتری لحظه‌ای · <code>battery</code> (٪) + مختصات ایستگاه: <code>dockx, docky</code></td>
+<td>اولویت‌بندی کارها بر اساس انرژی؛ برنامه‌ریزی شارژ</td><td>U19</td></tr>
+</table>
+<div class="note"><b>۱.۳ خلاقیت آزاد است:</b> ترکیب داده‌ی سنسورها (مثلاً قطب‌نما + فاصله) به ناوبری
+و امتیاز بهتر می‌رسد. تیم باید از همه‌ی سنسورها و موتورها بهره‌ی کامل ببرد.</div>
+
+<h2>۲ · بستر مسابقه · Competition Platform</h2>
+<ul>
+  <li><b>۲.۱</b> مسابقه‌ی رسمی در <b>Webots</b> برگزار می‌شود: موتور فیزیک دقیق، پشتیبانی کامل سنسورها، اتصال آسان به Python.</li>
+  <li><b>۲.۲</b> نسخه‌های لازم: <b>Webots 2025a</b> و <b>Python 3.8+</b>.</li>
+  <li><b>۲.۳</b> فایل‌های مسابقه از گیت‌هاب رسمی لیگ دانلود می‌شود (پوشه‌ی <code>Smart Home\game\worlds</code>)؛
+  دنیای مربوط را در Webots باز کنید و با کد پایه تست بگیرید.</li>
+  <li><b>۲.۴</b> راهنمای نصب و آموزش‌ها در وب‌سایت رسمی لیگ.</li>
+</ul>
+<div class="note"><b>شبیه‌ساز تمرینی مرورگری:</b> همین بازی — بدون هیچ نصبی — دقیقاً با همین
+سنسورها، همین نام‌ها و همین قوانین. برای کلاس و تمرین از آن استفاده کنید؛ فایل مسابقه‌ی رسمی همان Webots است.</div>
+
+<h2>۳ · ساختار بازی · Game Structure</h2>
+<p>ربات باید در خانه‌ی شبیه‌سازی‌شده امن و کارآمد حرکت کند؛ هر سطحی که زیر ربات رد شود
+«تمیز» حساب می‌شود و <b>امتیاز نهایی قبل از هر چیز به درصدِ سطحِ تمیزشده در زمان مجاز</b>
+برمی‌گردد. سه ساب‌لیگ با پیچیدگی صعودی:</p>
 <img class="shot" id="shotTop" alt="the arena from straight above">
-<div class="cap">نمای دقیق از بالا — شماره‌ی اتاق‌ها همان است که برنامه‌ی ربات می‌خواند · straight-down view; the numbers are what the code reads</div>
-<p>خانه‌ی رسمی روی شبکه‌ی <b>۲۲×۲۲ کاشی</b> است (هر کاشی ۰٫۶۲۵ متر — کل زمین ۱۳٫۷۵×۱۳٫۷۵ متر).
-هر ناحیه یک <b>شماره</b> دارد که سنسور <code>room</code> گزارش می‌دهد:</p>
-<table>
-<tr><th><code>room</code></th><th>ناحیه · zone</th><th>یادداشت · note</th></tr>
-<tr><td><code>0</code></td><td>هال و پذیرایی · the hall / living room</td><td>فضای باز مرکزی؛ تلویزیون و مبل اینجاست</td></tr>
-<tr><td><code>1</code></td><td>آشپزخانه · kitchen</td><td>بالا-راست</td></tr>
-<tr><td><code>2</code></td><td>اتاق‌خواب ۱ · bedroom 1</td><td>بالا-چپ</td></tr>
-<tr><td><code>3</code></td><td>اتاق‌خواب ۲ · bedroom 2</td><td>پایین-چپ</td></tr>
-<tr><td><code>4</code></td><td>اتاق‌خواب ۳ · bedroom 3</td><td>وسط-چپ</td></tr>
-<tr><td><code>5</code></td><td>سرویس بهداشتی · bathroom</td><td>پایین-راست</td></tr>
-</table>
-<p>سنسورهای <code>clean1..clean5</code> می‌گویند چند درصد از کفِ هر اتاق رنگِ خودِ ربات است (۰ تا ۱۰۰).</p>
-<h3>کف‌پوش‌ها و رنگ‌ها · Floors & colours</h3>
-<table>
-<tr><th>چه چیزی</th><th><code>color</code></th><th>اثر · effect</th></tr>
-<tr><td>کف تمیزنشده · unclean floor</td><td><code>white = 0</code></td><td>یک امتیاز — بگیرش!</td></tr>
-<tr><td>کاشیِ تیم‌ها · team tiles</td><td><code>red = 1</code> · <code>blue = 2</code></td><td>لمس آخر مالک است — دزدیدن آزاد</td></tr>
-<tr><td>فرش بزرگ پذیرایی · the living-room rug</td><td><code>green = 3</code></td><td><b>نصف سرعت</b>، بدون امتیاز، تمیز نمی‌شود</td></tr>
-<tr><td>دیوار / مبلمان · wall / furniture</td><td><code>black = 4</code></td><td>مانع سفت</td></tr>
-<tr><td>فرش‌های نشانه‌ی درها · doorway markers</td><td><code>purple = 5</code> · <code>orange = 6</code> · <code>cyan = 7</code></td><td>بی‌امتیاز، سرعت کامل — تابلوی «در جلوی توست». <b>فقط FS و U14</b>؛ زمینِ U19 بدون نشانه است</td></tr>
-<tr><td>کف خیس · wet floor</td><td>(سنسور رنگ سفید می‌بیند)</td><td>دو لکه‌ی آینه‌ای؛ هر ورود <b>−۲ کاشی</b> (فقط U14/U19 — زمین FS خشک است)</td></tr>
-</table>
-<h3>در · The door</h3>
-<p>روی نقشه‌هایی که در دارند، یک اتاق پشت <b>درِ هل‌بازشو</b> است: بسته مثل دیوار است
-(سپر و سنسور فاصله می‌بینندش)؛ ربات حدود <b>ربع ثانیه</b> فشار بدهد باز می‌شود، حدود
-<b>۸ ثانیه</b> باز می‌ماند و بعد خودش بسته می‌شود — هیچ‌وقت روی رباتِ داخل چارچوب بسته نمی‌شود.</p>
-<h3>مبلمانِ پایه‌دار · Leg-only furniture</h3>
-<p>میز جلوی تلویزیون، میز ناهارخوری، میز کامپیوتر و نیمکت فقط <b>پایه‌هایشان</b> مانع‌اند —
-ربات از زیرشان رد می‌شود و کاشی زیرشان تمیزشدنی است.</p>
-<p>کاشی‌های قابل تمیز شدن روی زمین رسمی: <b>FS = ۴۲۹</b> · <b>U14/U19 = ۴۲۵</b>
-(اختلاف، همان چهار کاشیِ خیس است).</p>
+<div class="cap">نمای بالای زمین رسمی — دقیقاً همان نقشه‌ای که هلپر مسیر U19 استفاده می‌کند · straight-down view</div>
 
-<h2>۳ · ربات و سنسورها · The robot & its senses</h2>
-<p>ربات دو چرخ محرک دارد؛ برنامه در هر گام مقدار
-<code>wheelleft</code> و <code>wheelright</code> را بین <b>−۲۵ تا ۲۵</b> می‌گذارد
-(۲۵ = تمام‌سرعت ≈ ۱ متر بر ثانیه). برنامه‌ی هر تیم <b>۱۰ بار در ثانیه</b>، از بالا به
-پایین اجرا می‌شود؛ حرکت‌های طولانی با <code>timer</code>/<code>movetime</code> یا
-حرکت‌های آسان (<code>forward(s)</code>، <code>backward(s)</code>،
-<code>turnleft(s)</code>، <code>turnright(s)</code>، <code>stop(s)</code> — عدد،
-ثانیه‌ی واقعی است) ادامه پیدا می‌کنند.</p>
-<small class="en">Two driven wheels, −25..25 each; the program runs 10× per second, top to bottom.
-Long moves persist via timer / movetime or the easy-move calls (the number is real seconds).</small>
-<table>
-<tr><th>سنسور · sensor</th><th>python</th><th>چه می‌گوید · what it reads</th><th>رده · league</th></tr>
-<tr><td>سنسور فاصله (اولتراسونیک) · ultrasonic distance</td><td><code>front, frontleft, frontright</code></td><td>فاصله تا مانع به سانتی‌متر؛ کوچک‌تر = نزدیک‌تر؛ بیشینه ۲۰۰</td><td>همه · all</td></tr>
-<tr><td>حلقه‌ی سپر · the bumper ring</td><td><code>bumperfront, bumperback, bumper</code></td><td>کدام نیمه‌ی حلقه فشرده شده (۰/۱)</td><td>همه · all</td></tr>
-<tr><td>سنسور رنگ · colour sensor</td><td><code>color</code></td><td>رنگ کفِ درست جلوی ربات (جدول بخش ۲)</td><td>همه · all</td></tr>
-<tr><td>اتاق و تمیزی · room & clean-%</td><td><code>room, clean1..clean5</code></td><td>شماره‌ی اتاق فعلی و درصد تمیزی هر اتاق برای من</td><td>همه · all</td></tr>
-<tr><td>قطب‌نما · compass</td><td><code>heading</code></td><td>جهت، ۰..۳۵۹ درجه — <b>۰ راست، ۹۰ بالا، ۱۸۰ چپ، ۲۷۰ پایین</b></td><td>U14 · U19</td></tr>
-<tr><td>موقعیت (GPS) · position</td><td><code>x, y, goto(x,y), atgoal, distto, angleto, stopgoto()</code></td><td>مختصات سانتی‌متری (پایین-چپ = 0,0)؛ <code>goto</code> خطِ مستقیم می‌راند و <b>از دیوار رد نمی‌شود</b></td><td>U19</td></tr>
-<tr><td>باتری و پد شارژ · battery & dock</td><td><code>battery, dockx, docky</code></td><td>۱۰۰٪ ≈ ۶۰ ثانیه‌ی تمام‌سرعت؛ روی پد <b>+۲۵٪ بر ثانیه</b>؛ باتریِ صفر = توقف دائم تا پایان مسابقه</td><td>U19</td></tr>
-<tr><td>سطل خاک · the dust bin</td><td><code>dust, dustmax, dustfull, dumpx, dumpy</code></td><td>حالت تک‌نفره: ۳۰ کاشی، بعد برو ایستگاه تخلیه</td><td>U19 (1P)</td></tr>
-<tr><td>اطلاعات مسابقه · match info</td><td><code>mytiles, rivaltiles, timeleft</code></td><td>کاشی‌های من/حریف و ثانیه‌های مانده</td><td>همه · all</td></tr>
-</table>
-<div class="note">ربات FS <b>ثابت</b> است (همه یک ربات؛ فقط رنگ تیم انتخاب می‌شود).
-در U14 و U19 تیم ربات را در «Robot builder» خودش می‌سازد؛ هر قطعه‌ای که نصب نشود
-<code>-1</code> می‌خواند.</div>
+<h3>۳.۱ ساب‌لیگ فرست‌استپ · First Step</h3>
+<ul>
+  <li>ربات باید خودمختار حرکت کند، از دیوار و مبلمان و موانع دوری کند و بیشترین سطح ممکن را در زمان مجاز تمیز کند.</li>
+  <li>امتیاز فقط بر پایه‌ی درصدِ نظافت است — هیچ عنصر جایزه‌ای وجود ندارد.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning % × K) − (Relocates × K) &nbsp;&nbsp;|&nbsp;&nbsp; K = scoring factor (e.g. 40)</div>
 
-<h2>۴ · رده‌ها · The sub-leagues</h2>
-<table>
-<tr><th></th><th>FS <span class="chip" style="background:#4fc3f7">۸–۱۱</span></th><th>U14 <span class="chip" style="background:#e0b13b">۱۱–۱۴</span></th><th>U19 <span class="chip" style="background:#9a6bf0">۱۴–۱۹</span></th></tr>
-<tr><td>مدت مسابقه · match length</td><td><b>۱۲۰ ثانیه</b></td><td><b>۱۸۰ ثانیه</b></td><td><b>۱۸۰ ثانیه</b></td></tr>
-<tr><td>گربه و سگ (مانع متحرک)</td><td>—</td><td>✓</td><td>✓</td></tr>
-<tr><td>کف خیس (−۲ هر ورود)</td><td>—</td><td>✓</td><td>✓</td></tr>
-<tr><td>فرش‌های نشانه‌ی درها</td><td>✓</td><td>✓</td><td>— (با موقعیت می‌رود)</td></tr>
-<tr><td>جریمه‌ی جابه‌جایی داور</td><td>−۲ کاشی</td><td>−۵ کاشی</td><td>−۵ کاشی</td></tr>
-<tr><td>قطب‌نما</td><td>—</td><td>✓</td><td>✓</td></tr>
-<tr><td>GPS + goto</td><td>—</td><td>—</td><td>✓</td></tr>
-<tr><td>باتری + پد شارژ</td><td>—</td><td>—</td><td>✓</td></tr>
-<tr><td>ربات‌ساز</td><td>— (ربات ثابت)</td><td>✓</td><td>✓</td></tr>
-<tr><td>ابزار برنامه‌نویسی · tools</td><td>🤖 هلپر AI + 🧩 هلپر بلاکی + ادیتور</td><td>🤖 هلپر AI (قطب‌نما/اتاق/چرخش تا °) + ادیتور</td><td>📍 هلپر مسیر (نقطه‌به‌نقطه + گارد باتری) + ادیتور</td></tr>
-<tr><td>مفهوم مرکزی · the lesson</td><td>قانون: اگر حسگر → حرکت</td><td>حالت و جهت: قطب‌نما، پلان چندمرحله‌ای</td><td>موقعیت و منابع: goto، مسیر، باتری</td></tr>
-</table>
+<h3>۳.۲ ساب‌لیگ U14 (پرایمری)</h3>
+<ul>
+  <li>هدف همان فرست‌استپ است + سنسورهای بیشتر: <b>رنگ، شماره‌ی اتاق، درصد تمیزی اتاق</b> (و قطب‌نما).</li>
+  <li><b>ایستگاه‌های بوست (Boost Station):</b> یک یا چند ناحیه روی زمین که ورود به آن‌ها امتیاز جایزه می‌دهد —
+  هر ایستگاه برای هر ربات فقط <b>یک بار</b>؛ ورود دوباره امتیازی ندارد.</li>
+  <li><b>نقطه‌ی شروع پویا:</b> جای استارت ممکن است هر راند عوض شود؛ ولی در یک راند برای همه‌ی تیم‌ها یکسان است.</li>
+  <li><b>حالت Light View:</b> ممکن است فقط ساختار کلی زمین از قبل معلوم باشد و جای دقیق دیوارها، اتاق‌ها و بوست‌ها اعلام نشود.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning % × K) − (Relocates × K) + (Boost Activations × 4K)</div>
 
-<h2>۵ · روند مسابقه · Match procedure</h2>
+<h3>۳.۳ ساب‌لیگ U19 (سکندری)</h3>
+<ul>
+  <li>هدف اصلی همان است + <b>چالش مدیریت انرژی</b>: ظرفیت باتری محدود است و باید در طول مسابقه هوشمندانه خرج شود.</li>
+  <li><b>ایستگاه‌های شارژ</b> روی زمین ثابت‌اند؛ ربات باید خودش، سرِ وقتِ درست، برای شارژ به ایستگاه برود — زمان‌بندیِ شارژ بخشی از استراتژی است.</li>
+  <li><b>Light View:</b> ممکن است فقط ساختار کلی معلوم باشد؛ جای دیوارها، درها، شارژرها و حتی نقطه‌ی استارت از قبل قطعی نیست.</li>
+  <li><b>اختلال GPS:</b> در بعضی اتاق‌ها ممکن است GPS موقتاً قطع یا ناکارا شود — الگوریتم باید مقاوم و تطبیق‌پذیر باشد.</li>
+  <li>شرایط نقشه و سنسورها در طول یک راند برای همه‌ی تیم‌ها ثابت است.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning % × K) − (Relocates × K)</div>
+<div class="note"><b>قواعد زمین در شبیه‌ساز (U19):</b> باتری ۰٪ = ربات نمی‌میرد، با <b>۱۵٪ سرعت می‌خزد</b>
+و اگر به پد برسد دوباره شارژ می‌شود · <b>صف شارژر قانونی است</b> — رباتِ کم‌باتری که پشت پد منتظر است
+«گیرکرده» حساب نمی‌شود؛ رباتِ پُر که پد را اشغال کند با ناظرِ ۱۵ثانیه‌ای جابه‌جا می‌شود · تخلیه‌ی زباله فعلاً غیرفعال است.</div>
+
+<h3>۳.۴ امتیازدهی · Scoring</h3>
+<h4>۳.۴.۱ درصد نظافت</h4>
+<p>امتیاز بر اساس درصد سطح تمیزشده — هدف: بیشترین پوشش در زمان مجاز. سیستم خودکار محاسبه می‌کند.</p>
+<h4>۳.۴.۲ چالش‌های فنی · Technical Challenges</h4>
+<p>مأموریت‌هایی جدا از نظافت عادی، برای سنجش مهارت برنامه‌نویسی و خلاقیت. نمونه‌ها:</p>
+<ul>
+  <li><b>دیوارگَردی (Wall Following):</b> دور محیط اتاق با فاصله‌ی ثابت از دیوار.</li>
+  <li><b>ناوبری اتاق:</b> رفتن از اتاق A به اتاق Z با توقفِ مثلاً ۱۰ ثانیه‌ای در میانه.</li>
+  <li><b>دوری از مانع متحرک:</b> تشخیص و دورزدنِ شیءِ درحال حرکت.</li>
+</ul>
+<h4>۳.۴.۳ مصاحبه‌ی فنی · Technical Interview</h4>
+<ul>
+  <li><b>فهم کد:</b> هر عضو باید همه‌ی بخش‌های الگوریتم را شفاف توضیح بدهد.</li>
+  <li><b>نوآوری و حل‌مسئله</b> و <b>تقسیم کار تیمی</b>.</li>
+  <li><b>کتابخانه‌های خارجی:</b> همه‌ی اعضا باید بدانند هر کتابخانه چه می‌کند و چطور کار می‌کند.</li>
+  <li><b>ابزارهای کمکی:</b> سورس هر ابزار کمکی (از جمله هلپرها) باید توسط خود تیم قابل توضیح باشد.</li>
+</ul>
+
+<h2>۴ · قوانین و ضوابط · Rules and Guidelines</h2>
+<h3>۴.۱ قوانین عمومی</h3>
 <ol>
-<li>هر مسابقه <b>دو تیم</b> دارد؛ <b>شیر یا خط</b> روی صفحه‌ی آماده‌سازی تعیین می‌کند چه
-کسی کدام گوشه را می‌گیرد (تیم ۱ پایین-چپ، تیم ۲ بالا-راست).</li>
-<li>برنامه‌ی پایتون هر تیم قبل از شروع بارگذاری می‌شود؛ بعد از شمارش ۳-۲-۱ ربات‌ها
-<b>کاملاً خودکار</b>اند — لمس صفحه‌کلید حین مسابقه ممنوع.</li>
-<li>پایان وقت، هر طرف کاشی بیشتری دارد برنده است. <b>تساوی؟</b> بازی نمی‌ایستد:
-<b>+۱۰ ثانیه</b>، بعد هر بار <b>+۵ ثانیه</b> — تا سقف ۳۵ ثانیه وقت اضافه. اگر باز هم
-مساوی بود، تساوی ثبت می‌شود (در بازی حذفی، ادامه تا برنده).</li>
-<li><b>نتیجه‌ی رسمی فقط از رایانه‌ی داور</b> خوانده می‌شود؛ داور می‌تواند بذر (seed)
-مسابقه را ثبت کند تا مسابقه ۱۰۰٪ قابل بازتولید باشد.</li>
-<li>خطای برنامه (کرش) چرخ‌ها را صفر می‌کند؛ خطای مکرر = اخطار داور تا باخت فنی.</li>
+  <li>هر تیم <b>۲ تا ۶ نفر</b>.</li>
+  <li>ربات‌ها فقط با برنامه‌ی پایتونِ خودِ تیم، خودمختار کار می‌کنند.</li>
+  <li>پیروی از برنامه‌ی زمانی مسابقه و دستور داورها الزامی است.</li>
+  <li>رأی داور نهایی و لازم‌الاجراست؛ اعتراض فقط از مسیر مکتوب و رسمی.</li>
+  <li>احترام به تیم‌ها، داورها و برگزارکننده‌ها در تمام رویداد.</li>
+  <li><b>همه‌ی اشیای دنیا پویا هستند</b> و ممکن است در مسابقه تغییر کنند یا جابه‌جا شوند.</li>
+  <li>تغییر الگوریتم در طول مسابقه باید به کمیته‌ی فنی اطلاع داده شود؛ وگرنه مصاحبه‌ی سخت‌گیرانه یا حتی حذف.</li>
+  <li>کمیته‌ی فنی مسئول مشکلات نرم‌افزاری تیم‌ها نیست؛ فقط تضمین می‌کند در FS و U14 دست‌کم یک لپ‌تاپ هر تیم Webots و آخرین نسخه‌ی نرم‌افزار لیگ را اجرا کند.</li>
+  <li>استفاده از هر نرم‌افزار کمکی خارجی آزاد است — ولی مشمول مصاحبه‌ی فنی (۳.۴.۳) می‌شود.</li>
+  <li>استفاده از کتابخانه‌های خارجی آزاد است — مشمول همان بند.</li>
 </ol>
 
-<h2>۶ · امتیاز و جریمه · Scoring & penalties</h2>
+<h3>۴.۲ الزامات تیم‌ها</h3>
+<h4>۴.۲.۱ تحویل کد</h4>
 <ul>
-<li><b>+۱ کاشی</b> برای هر کاشیِ کف که رنگ تو شود؛ <b>لمس آخر مالک است</b>.</li>
-<li>رباتی که <b>۱۰ ثانیه</b> در یک دایره‌ی کوچک پیشروی نکند، داور به نقطه‌ای
-تصادفیِ کاملاً باز جابه‌جایش می‌کند و جریمه (FS −۲ / بقیه −۵) کم می‌شود. جابه‌جایی
-دستی داور همان جریمه را دارد.</li>
-<li><b>کف خیس</b> (U14/U19): هر ورود −۲ کاشی — و هر ورودِ دوباره، دوباره.</li>
-<li><b>باتری صفر</b> (U19): ربات همان‌جا برای همیشه خاموش می‌ماند. قاعده‌ی سرانگشتی:
-همیشه بیش از <code>distto(dockx, docky) / 30</code> درصد شارژ نگه دار.</li>
-<li>حالت FINAL (فقط فینال‌ها، به تشخیص داور): گربه از روی هر کاشی رنگی رد شود،
-سفیدش می‌کند.</li>
+  <li>سورس‌کد باید <b>دقیقاً سرِ زمان اعلام‌شده</b> پیش از مسابقه تحویل شود؛ فلش USB در ظرفِ محل تحویل گذاشته می‌شود.</li>
+  <li>تأخیر یا نام‌گذاری غلط، مشمول جریمه است.</li>
+  <li><b>قالب نام فایل</b> را داور پیش از هر مسابقه اعلام می‌کند — معمولاً: شماره‌ی راند + نام تیم + پسوند <code>.py</code>.
+  مثال: تیم «Sweeper» در راند ۲ ← <code>R2-Sweeper.py</code></li>
+</ul>
+<h4>۴.۲.۲ قرنطینه</h4>
+<ul>
+  <li>ابتدای هر قرنطینه، نسخه‌ی کامل نقشه‌ی همان راند به تیم‌ها داده می‌شود.</li>
+  <li>زمانِ مشخصی (متغیر در هر رویداد) برای نوشتن/اصلاح کد در محیط کنترل‌شده هست.</li>
+  <li>داخل قرنطینه: هیچ وسیله‌ی ارتباطی (موبایل، تبلت، ساعت هوشمند، اینترنت) و هیچ منبع بیرونی — تخلف = جریمه تا حذف. ورود و خروج ممنوع.</li>
+</ul>
+<h4>۴.۲.۳ تجهیزات</h4>
+<ul><li>چندراهی برق + لپ‌تاپِ کاملاً شارژ با شارژر سالم.</li></ul>
+<h4>۴.۲.۴ الزامات USB</h4>
+<ul>
+  <li>فرمت‌شده و آماده؛ نام روی فلش = نامِ روی جدول امتیازها؛ برچسبِ خوانا با نام تیم؛ فقط کدِ همان راند.</li>
+</ul>
+<h4>۴.۲.۵ رفتار مربی</h4>
+<ul>
+  <li>مربی در طول قرنطینه حق ارتباط با دانش‌آموزها را ندارد؛ تخلف = جریمه تا حذفِ همان راند.</li>
+  <li>اعتراض فقط مکتوب و حرفه‌ای؛ رفتار غیرحرفه‌ای = تعلیق مربی یا حذف تیم.</li>
 </ul>
 
-<h2>۷ · قوانین عمومی · General rules</h2>
+<h3>۴.۳ سیستم امتیازدهی</h3>
 <ul>
-<li>هر تیم <b>۲ تا ۶</b> عضو دارد؛ حین مسابقه فقط اعضای تیم پشت میزند.</li>
-<li>ربات‌ها فقط با برنامه‌ی پایتونِ خودِ تیم می‌رانند — برنامه از قبل نوشته و
-تحویل می‌شود؛ کمکِ مربی حین مسابقه ممنوع.</li>
-<li>همه‌ی تیم‌ها به برنامه‌ی زمانی، داوران و تیم‌های دیگر احترام می‌گذارند؛
-تصمیم داور در زمین نهایی است.</li>
-<li>هر شیء دنیا می‌تواند بین راندها جابه‌جا شود — برنامه‌ای بنویس که به
-سنسورها تکیه کند، نه به حفظِ نقشه.</li>
-<li>کمیته‌ی فنی مسئول خطاهای نرم‌افزاری سمت تیم (فایل خراب، نسخه‌ی اشتباه) نیست —
-قبل از راند، کد را در قرنطینه تست کنید.</li>
+  <li><b>جمع راندها:</b> امتیاز کل، مجموع امتیاز راندهاست (جزئیات در هر رویداد ممکن است فرق کند).</li>
+  <li><b>درصد نظافت:</b> خودکار توسط سیستم محاسبه می‌شود.</li>
+  <li>چالش فنی و مصاحبه‌ی فنی: طبق بخش ۳.۴.</li>
 </ul>
 
-<h2>۸ · با چه چیزهایی آشنا می‌شوند · What they learn</h2>
+<h3>۴.۴ جابه‌جایی و ری‌استارت · Relocation &amp; Restart</h3>
+<ol>
+  <li>هر تیم تا <b>۳ درخواست جابه‌جایی</b> در هر مسابقه (در رویدادهای مختلف ممکن است فرق کند).</li>
+  <li>جابه‌جایی فقط وقتی مجاز است که ربات به دیوار گیر کرده یا در حلقه افتاده باشد — با تأیید داور.</li>
+  <li>تیم باید بلافاصله به داور اطلاع بدهد.</li>
+  <li><b>حالت خاص:</b> اگر ربات به‌خاطر باگ شبیه‌سازی در زمین فرو برود یا چرخ‌هایش قفل شود:
+  درخواستِ بیرون‌کشیدن در همان نقطه، یا <b>یک بار</b> ری‌استارت کامل مسابقه با نظر کمیته‌ی فنی.</li>
+</ol>
+<div class="note"><b>ناظرِ خودکارِ شبیه‌ساز:</b> رباتی که <b>۱۵ ثانیه</b> در یک دایره‌ی کوچک پیشروی نکند،
+خودکار به نقطه‌ای باز جابه‌جا می‌شود و جریمه می‌خورد. استثنا: رباتِ درحال شارژ و رباتِ کم‌باتریِ منتظر در صفِ پد.</div>
+
+<h3>۴.۵ رویداد سوپرتیم (اختیاری)</h3>
+<p>اگر زمان اجازه بدهد، تیم‌ها با هم «سوپرتیم» تشکیل می‌دهند و یک مأموریت مشترک — که همان روز
+اعلام می‌شود — حل می‌کنند. سوپرتیمِ برنده <b>گواهی افتخار</b> می‌گیرد.</p>
+
+<h3>۴.۶ جریمه‌ها · Penalties</h3>
 <table>
-<tr><th>رده</th><th>مسیر یادگیری · the ladder</th></tr>
-<tr><td><b>FS</b></td><td>حسگر → قانون (اگر/آنگاه) → ترتیب قانون‌ها → عدد به‌جای حس → خواندن پایتون تولیدشده. با هلپر بلاکی شروع می‌کند، با هلپر AI عمیق می‌شود، با ادیتور تمام می‌کند.</td></tr>
-<tr><td><b>U14</b></td><td>حالت (state) و حافظه‌ی بین گام‌ها → قطب‌نما و چرخش مطلق (Turn-to-°) → شماره‌ی اتاق و درصد تمیزی → پلانِ چندمرحله‌ای («اتاقِ تمام‌شده را ترک کن»).</td></tr>
-<tr><td><b>U19</b></td><td>مختصات و goto → ماشین حالت نقطه‌به‌نقطه → عبور از درگاه‌ها → مدیریت باتری (کی بروم شارژ؟) → مصالحه‌ی امتیاز/بقا.</td></tr>
+<tr><th>تخلف</th><th>پیامد</th></tr>
+<tr><td>دست‌کاری غیرمجاز سرور یا تنظیمات بازی</td><td>جریمه‌ی سنگین برای همان راند</td></tr>
+<tr><td>تحویل دیرهنگام فایل</td><td><b>−۵٪ امتیاز به‌ازای هر دقیقه</b> تأخیر (ممکن است در هر رویداد فرق کند)</td></tr>
+<tr><td>USB: نام نامطابق با جدول، بدون برچسب، ویروسی، یا حاوی فایل نامربوط</td><td><b>حذف از همان راند</b></td></tr>
+<tr><td>جابه‌جایی بیش از سقف ۳ بار</td><td>هر بارِ اضافه <b>−۵٪ از امتیاز کل</b></td></tr>
 </table>
 
-<p style="margin-top:26px;text-align:center;color:#5b6880;font-size:12px">
-Smart Home League · Simulation Rulebook — هر عددِ این سند مستقیم از کد بازی خوانده و
-با اجرای واقعی مسابقه تأیید شده است. متن فنی کامل: <code>RULES.md</code> کنار بازی.
-</p>
+<h3>۴.۷ نکات پایانی</h3>
+<ul>
+  <li>فقط فایل‌ها و محیط‌های رسمیِ برگزارکننده مجاز است.</li>
+  <li>رأی داور نهایی است و قابل اعتراض نیست؛ اعتراضِ غیرحرفه‌ای می‌تواند به تعلیق منجر شود.</li>
+  <li>قوانین را پیش از مسابقه کامل بخوانید و ابهام‌ها را زودتر بپرسید.</li>
+</ul>
+
+<h3>۴.۸ راه‌های ارتباط با کمیته‌ی فنی</h3>
+<ul>
+  <li><b>Discord:</b> سرور اختصاصی برای اعلان‌های لحظه‌ای، پرسش فنی و گفت‌وگو.</li>
+  <li><b>Telegram:</b> گروه رسمی برای خبرهای سریع و ارتباط مستقیم در طول رویداد.</li>
+  <li><b>Website:</b> وب‌سایت رسمی لیگ — قوانین، آموزش‌ها، دانلود فایل‌ها و ابزارها.</li>
+</ul>
+
+<div class="cap" style="margin-top:22px">Smart Home League · Official Rulebook v3.1 — این کتابچه آینه‌ی PDF رسمی است؛ در تعارض، متن PDF رسمی ملاک است.</div>
 </div>
 
-<!-- the live photographers: the game's own 3D pipeline -->
 <script src="leagues/vacuum/maps/rooms.js"></script>
 <script src="leagues/vacuum/maps/grown-rooms.js"></script>
 <script src="vendor/three.min.js"></script>
