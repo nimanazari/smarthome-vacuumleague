@@ -97,7 +97,11 @@ of robotics and algorithms.</p>
   participants must account for energy consumption in their algorithms.</li>
 </ul>
 
+<img class="shot" id="shotRobot" alt="Figure 2 — the competition robot">
+<div class="cap">Figure 2 — The competition robot on the official field</div>
 <h3>1.2 Sensors overview</h3>
+<img class="shot" id="shotSensors" alt="Figure 3 — sensor placement">
+<div class="cap">Figure 3 — Sensor placement: distance sensors D1–D4, the front bumper, and the drive wheels</div>
 <table>
 <tr><th>Sensor</th><th>Function · variable names</th><th>Application</th><th>Leagues</th></tr>
 <tr><td><b>1.2.1 Distance sensors</b></td>
@@ -163,9 +167,11 @@ across the field, the surface it covers is considered cleaned, and the final sco
 based on the <b>percentage of area successfully covered within the given time limit</b>. The
 competition is structured into three sub-leagues of increasing complexity.</p>
 <img class="shot" id="shotTop" alt="Figure 2 — the official field, orthographic top view">
-<div class="cap">Figure 2 — The official field, orthographic top view (rendered by the official simulator)</div>
+<div class="cap">Figure 4 — The official field, orthographic top view</div>
 
 <h3>3.1 First Step sub-league</h3>
+<img class="shot" id="shotFS" alt="Figure 5 — the First Step field">
+<div class="cap">Figure 5 — The First Step field: coloured marker rugs (purple, orange, cyan) identify each doorway</div>
 <ul>
   <li>The robot must autonomously navigate the field, avoid walls, furniture, and obstacles, and
   maximise the cleaned surface within the time limit.</li>
@@ -186,6 +192,8 @@ competition is structured into three sub-leagues of increasing complexity.</p>
   structure of the environment is known in advance; the exact locations of walls, rooms, and Boost
   Stations are not fully specified.</li>
 </ul>
+<img class="shot" id="shotU14" alt="Figure 6 — the U14 field with room numbers">
+<div class="cap">Figure 6 — The U14 field: numbered rooms (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom) with doorway marker rugs</div>
 <div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K) + (Number of Boost Activations × 4K)</div>
 
 <h3>3.3 U19 sub-league</h3>
@@ -206,6 +214,8 @@ competition is structured into three sub-leagues of increasing complexity.</p>
   <li>The map and sensor conditions are fixed for all teams within a round and do not change
   between matches of that round.</li>
 </ul>
+<img class="shot" id="shotU19" alt="Figure 7 — the U19 field with the charging station">
+<div class="cap">Figure 7 — The U19 field: no doorway marker rugs (navigation is coordinate-based); the charging station is highlighted</div>
 <div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K)</div>
 <div class="note"><b>Simulator field rules (U19).</b> A battery at 0% does not terminate the
 robot: it continues at 15% speed and resumes charging if it reaches the pad. Queueing behind an
@@ -399,30 +409,146 @@ in the event of any discrepancy, the official PDF document prevails.</div>
 <script>
 (function shoot() {
   try {
+    const RB_EN = document.documentElement.lang !== 'fa';
     let MAP = null;
     try { MAP = JSON.parse(localStorage.getItem('shl_defmap_u14') || 'null'); } catch (e) { /* private mode */ }
     if (!MAP || !MAP.cols) MAP = self.VacuumMaps.GROWN_ROOMS;
-    const W = MAP.cols * MAP.tileSize, H = MAP.rows * MAP.tileSize;
     const hider = document.createElement('div');
     hider.style.cssText = 'position:fixed;left:-4000px;top:0;width:1200px;height:900px';
     document.body.appendChild(hider);
-    const eng = new Engine({ map: MAP, matchSeconds: 60, players: 2, seed: 1 });
-    const r3 = new Renderer3D(hider);
-    r3.buildScene(eng);
-    r3.sync(eng);
-    r3.renderer.setSize(1200, 700);
-    r3.render();
-    document.getElementById('shotHero').src = r3.renderer.domElement.toDataURL('image/png');
-    const camO = new THREE.OrthographicCamera(-W / 2 - 0.4, W / 2 + 0.4, H / 2 + 0.4, -H / 2 - 0.4, 0.1, 90);
-    camO.position.set(0, 45, 0); camO.up.set(0, 0, 1); camO.lookAt(0, 0, 0);
-    r3.scene.fog = null;
-    r3.renderer.setSize(1100, 1100);
-    r3.renderer.render(r3.scene, camO);
-    document.getElementById('shotTop').src = r3.renderer.domElement.toDataURL('image/png');
-    r3.renderer.dispose();
+
+    const put = (id, url) => { const el = document.getElementById(id); if (el) el.src = url; };
+
+    // ---- one top shot of a map, with optional annotations ----
+    const topShot = (map, annotate) => {
+      const W = map.cols * map.tileSize, H = map.rows * map.tileSize;
+      const eng = new Engine({ map, matchSeconds: 60, players: 2, seed: 1 });
+      const r3 = new Renderer3D(hider);
+      r3.buildScene(eng); r3.sync(eng);
+      const camO = new THREE.OrthographicCamera(-W / 2 - 0.4, W / 2 + 0.4, H / 2 + 0.4, -H / 2 - 0.4, 0.1, 90);
+      camO.position.set(0, 45, 0); camO.up.set(0, 0, 1); camO.lookAt(0, 0, 0);
+      r3.scene.fog = null;
+      const S = 1000;
+      r3.renderer.setSize(S, S);
+      r3.renderer.render(r3.scene, camO);
+      const c2 = document.createElement('canvas'); c2.width = S; c2.height = S;
+      const g = c2.getContext('2d');
+      g.drawImage(r3.renderer.domElement, 0, 0);
+      // world metres -> image pixels (the ortho frame above)
+      // world metres (0..W, 0..H) -> image pixels of the ortho frame
+      const px = (x) => (x + 0.4) / (W + 0.8) * S;
+      const pyy = (y) => (H + 0.4 - y) / (H + 0.8) * S;
+      if (annotate) annotate(g, (x) => px(x), (y) => pyy(y), map, eng);
+      const url = c2.toDataURL('image/png');
+      r3.renderer.dispose();
+      return { url, eng, r3 };
+    };
+
+    const label = (g, x, y, text, color) => {
+      g.beginPath(); g.arc(x, y, 20, 0, Math.PI * 2);
+      g.fillStyle = color; g.fill();
+      g.lineWidth = 3; g.strokeStyle = '#ffffff'; g.stroke();
+      g.fillStyle = '#ffffff'; g.font = '800 20px "Segoe UI", sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(text, x, y + 1);
+    };
+
+    // hero + robot close-up (the players' 2.5D look)
+    (function () {
+      const W = MAP.cols * MAP.tileSize, H = MAP.rows * MAP.tileSize;
+      const eng = new Engine({ map: MAP, matchSeconds: 60, players: 2, seed: 1 });
+      const r3 = new Renderer3D(hider);
+      r3.buildScene(eng); r3.sync(eng);
+      r3.renderer.setSize(1200, 700);
+      r3.render();
+      put('shotHero', r3.renderer.domElement.toDataURL('image/png'));
+      // the robot, up close
+      const rb = eng.robots.red, ox = -W / 2, oz = -H / 2;
+      const rx = ox + rb.x, rz = oz + rb.y;
+      r3.camera.fov = 42; r3.camera.aspect = 1200 / 640; r3.camera.updateProjectionMatrix();
+      r3.camera.position.set(rx + 1.5, 1.0, rz + 1.5);
+      r3.camera.lookAt(rx, 0.1, rz);
+      r3.renderer.setSize(1200, 640);
+      r3.renderer.render(r3.scene, r3.camera);
+      put('shotRobot', r3.renderer.domElement.toDataURL('image/png'));
+      r3.renderer.dispose();
+    })();
+
+    // sensor placement schematic (drawn, not rendered)
+    (function () {
+      const S = 1000, c = document.createElement('canvas'); c.width = S; c.height = 620;
+      const g = c.getContext('2d');
+      g.fillStyle = '#f7f9fd'; g.fillRect(0, 0, S, 620);
+      const cx = S / 2, cy = 330, R = 150;
+      // beams first
+      const beam = (ang, len, color) => {
+        const a = ang * Math.PI / 180;
+        g.beginPath();
+        g.moveTo(cx + Math.cos(a - 0.16) * R, cy - Math.sin(a - 0.16) * R);
+        g.lineTo(cx + Math.cos(a) * (R + len), cy - Math.sin(a) * (R + len));
+        g.lineTo(cx + Math.cos(a + 0.16) * R, cy - Math.sin(a + 0.16) * R);
+        g.closePath();
+        g.fillStyle = color; g.fill();
+      };
+      beam(115, 190, 'rgba(46,111,224,.18)');   // D1 front-left
+      beam(65, 190, 'rgba(46,111,224,.18)');    // D2 front-right
+      beam(0, 150, 'rgba(34,197,94,.18)');      // D3 right
+      beam(180, 150, 'rgba(34,197,94,.18)');    // D4 left
+      // shell
+      g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
+      g.fillStyle = '#dfe7f4'; g.fill(); g.lineWidth = 5; g.strokeStyle = '#8fa3c4'; g.stroke();
+      // bumper arc (front)
+      g.beginPath(); g.arc(cx, cy, R + 9, -Math.PI * 0.78, -Math.PI * 0.22);
+      g.lineWidth = 12; g.strokeStyle = '#f59e0b'; g.stroke();
+      // wheels
+      g.fillStyle = '#5b6880';
+      g.fillRect(cx - R - 4, cy - 42, 16, 84); g.fillRect(cx + R - 12, cy - 42, 16, 84);
+      // sensor dots + labels
+      const dot = (ang, name, color) => {
+        const a = ang * Math.PI / 180;
+        const x = cx + Math.cos(a) * R, y = cy - Math.sin(a) * R;
+        label(g, x, y, name, color);
+      };
+      dot(115, 'D1', '#2e6fe0'); dot(65, 'D2', '#2e6fe0'); dot(0, 'D3', '#16a34a'); dot(180, 'D4', '#16a34a');
+      // caption texts
+      g.fillStyle = '#20437e'; g.font = '700 24px "Segoe UI", sans-serif'; g.textAlign = 'center';
+      g.fillText(RB_EN ? 'front' : 'جلو', cx, 68);
+      g.fillStyle = '#b45309';
+      g.fillText(RB_EN ? 'bumper' : 'بامپر (سپر)', cx, 130);
+      g.fillStyle = '#374a68'; g.font = '600 20px "Segoe UI", sans-serif';
+      g.fillText(RB_EN ? 'D1 front-left · D2 front-right · D3 right · D4 left · colour sensor underneath'
+                       : 'D1 جلو-چپ · D2 جلو-راست · D3 راست · D4 چپ · سنسور رنگ زیر بدنه', cx, 585);
+      put('shotSensors', c.toDataURL('image/png'));
+    })();
+
+    // per-sub-league fields
+    const fsMap = (Leagues.get('fs') && Leagues.get('fs').map) || MAP;
+    const u14Map = (Leagues.get('u14') && Leagues.get('u14').map) || MAP;
+    const u19Map = (Leagues.get('u19') && Leagues.get('u19').map) || MAP;
+
+    put('shotTop', topShot(u14Map).url);
+    put('shotFS', topShot(fsMap).url);
+    put('shotU14', topShot(u14Map, (g, PX, PY, map) => {
+      for (const rm of (map.rooms || [])) {
+        label(g, PX((rm.x1 + rm.x2) / 2), PY((rm.y1 + rm.y2) / 2), String(rm.id), '#16a34a');
+      }
+      // the hall is room 0 — mark it near the centre of the map
+      label(g, PX(map.cols * map.tileSize * 0.5), PY(map.rows * map.tileSize * 0.44), '0', '#16a34a');
+    }).url);
+    put('shotU19', topShot(u19Map, (g, PX, PY, map) => {
+      const dock = (map.objects || []).filter((o) => o.t === 'dock')[0];
+      if (dock) {
+        const x = PX(dock.x), y = PY(dock.y);
+        g.beginPath(); g.arc(x, y, 34, 0, Math.PI * 2);
+        g.lineWidth = 6; g.strokeStyle = '#f59e0b'; g.stroke();
+        g.fillStyle = '#b45309'; g.font = '800 22px "Segoe UI", sans-serif'; g.textAlign = 'center';
+        g.fillText(RB_EN ? 'charging station' : 'ایستگاه شارژ', x, y - 46);
+      }
+    }).url);
+
     hider.remove();
   } catch (e) {
-    document.querySelectorAll('.shot').forEach((el) => { el.style.display = 'none'; });
+    document.querySelectorAll('.shot').forEach((el) => { if (!el.src) el.style.display = 'none'; });
   }
 })();
 </script>
