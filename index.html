@@ -26,6 +26,19 @@
 
   /* ---------- scoreboard ---------- */
   #scoreboard { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 22px; z-index: 5; }
+  /* mid-match: the floor belongs to the ROBOTS — scores and clock are
+     recorded, not shown. The last 10 s are the reveal. */
+  body.midmatch #scoreboard { display: none !important; }
+  #winTint { position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .6s; }
+  body.finale #winTint { opacity: 1; }
+  /* the finale: cards fly to the DARK side bands, the clock turns countdown */
+  body.finale .sbrow { display: contents; }
+  body.finale #teamRed { position: fixed; left: 16px; top: 50%; transform: translateY(-50%); z-index: 6; }
+  body.finale #teamBlue { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 6; }
+  body.finale #timer { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); z-index: 6; }
+  body.finale #timer .clock { font-size: 84px; color: #ffd166; text-shadow: 0 0 34px rgba(255, 209, 102, .45); animation: finalePulse 1s infinite; }
+  body.finale #tug { display: none; }
+  @keyframes finalePulse { 50% { transform: scale(1.12); } }
   .sbrow { display: flex; gap: 30px; align-items: flex-start; }
   .team { background: rgba(23,27,34,.86); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 16px; padding: 10px 22px; min-width: 168px; text-align: center; box-shadow: 0 6px 22px rgba(0,0,0,.4); }
   .team.red { border-top: 4px solid var(--red); } .team.blue { border-top: 4px solid var(--blue); }
@@ -1416,6 +1429,7 @@
   <div id="scene"></div>
   <div id="vignette"></div>
 
+  <div id="winTint"></div>
   <div id="scoreboard">
     <div class="sbrow">
       <div class="team red" id="teamRed">
@@ -3647,6 +3661,21 @@ else:                            # 7) nothing in the way -> full speed ahead
             () => $('mapFileIn').click());
           mkBtn('&#128465; <span class="fa">برگشت به مپ اصلی</span>', 'forget the saved map — the shipped floor returns',
             () => clearDefaultMap());
+          // ---- wall colour: pick it, SEE it, keep it ----
+          const wallRow = document.createElement('div');
+          wallRow.className = 'setcell';
+          wallRow.title = 'Wall colour — applies live and is remembered';
+          let savedWall = '#1f242e';
+          try { savedWall = localStorage.getItem('shl_wallcolor') || savedWall; } catch (e) { /* private */ }
+          wallRow.innerHTML = '<label for="wallColorIn">&#129521; <span class="fa">رنگ دیوار</span></label>' +
+            '<input id="wallColorIn" type="color" value="' + savedWall + '" style="width:46px;height:28px;border:none;background:none;cursor:pointer">' +
+            '<button type="button" id="wallColorReset" class="smallbtn">&#8634;</button>';
+          ov.querySelector('.vs-body').appendChild(wallRow);
+          wallRow.querySelector('#wallColorIn').oninput = (e2) => renderer.setWallColor(e2.target.value);
+          wallRow.querySelector('#wallColorReset').onclick = () => {
+            wallRow.querySelector('#wallColorIn').value = '#1f242e';
+            renderer.setWallColor('#1f242e');
+          };
           const fin = document.createElement('input');
           fin.type = 'file'; fin.id = 'mapFileIn'; fin.accept = '.json,application/json'; fin.style.display = 'none';
           fin.onchange = () => {
@@ -6016,6 +6045,23 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('clock').textContent = mmss(left);
       $('timeLbl').textContent = engine.overtimeCount > 0 ? 'OVERTIME' : 'TIME LEFT';
       endDrama(left);
+      // scores and clock stay OFF the floor while the match runs; the last
+      // 10 seconds are the reveal — countdown + the backdrop leaning toward
+      // whoever is winning (an even split on a draw)
+      if (!engine.arena) {
+        const live = engine.running && !engine.finished;
+        const finale = live && left <= 10 && left > 0;
+        document.body.classList.toggle('midmatch', live && !finale);
+        document.body.classList.toggle('finale', finale);
+        if (finale) {
+          const r = engine.scores.red, b = engine.scores.blue, tot = Math.max(1, r + b);
+          const ar = (0.10 + 0.30 * (r / tot)).toFixed(3);
+          const ab = (0.10 + 0.30 * (b / tot)).toFixed(3);
+          $('winTint').style.background =
+            'linear-gradient(90deg, rgba(255,64,54,' + ar + '), transparent 42%, transparent 58%, rgba(64,120,255,' + ab + '))';
+        }
+        if (!live) { document.body.classList.remove('midmatch'); document.body.classList.remove('finale'); }
+      }
       // the hall-sized PAUSED banner: nobody should have to guess the clock
       const pb = (paused && engine.running && !engine.finished) ? 'flex' : 'none';
       if ($('pausedBanner').style.display !== pb) $('pausedBanner').style.display = pb;

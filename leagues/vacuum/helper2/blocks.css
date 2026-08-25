@@ -330,3 +330,10 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
   border-top-left-radius: 22px; border-top-right-radius: 22px;
   padding-top: 11px;
 }
+
+
+/* the CODE side of the page is LEFT-TO-RIGHT like the Python it writes:
+   if sits on the left, then-blocks hang left underneath */
+#stacks, .stkcol, .brow, .pal, .blk { direction: ltr; text-align: left; }
+.stkcol { align-items: flex-start; }
+.brow { align-self: flex-start; }

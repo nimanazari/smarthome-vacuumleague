@@ -112,6 +112,7 @@
     while (i < L.length && L[i].indent === indent) {
       const ln = L[i];
       if (/^(if|while)\b/.test(ln.text)) { const r = parseCompound(L, i, indent); stmts.push(r[0]); i = r[1]; }
+      else if (/^def\b/.test(ln.text)) { const r = parseDef(L, i, indent); stmts.push(r[0]); i = r[1]; }
       else if (/^(elif|else)\b/.test(ln.text)) { throw { line: ln.line, msg: "'" + ln.text.match(/^\w+/)[0] + "' without matching 'if'" }; }
       else { stmts.push(parseSimple(ln)); i++; }
       if (i < L.length && L[i].indent > indent) throw { line: L[i].line, msg: 'unexpected indentation' };
@@ -152,8 +153,23 @@
     return [{ t: 'if', clauses }, i];
   }
 
+  // def name(a, b):  — a NAMED BLOCK: define once, call anywhere.
+  function parseDef(L, i, indent) {
+    const head = L[i];
+    const m = head.text.match(/^def\s+([A-Za-z_]\w*)\s*\(([^)]*)\)\s*:$/);
+    if (!m) throw { line: head.line, msg: "a function looks like:  def myname():" };
+    const params = m[2].trim() === '' ? [] : m[2].split(',').map((x) => x.trim());
+    for (const pm of params) if (!/^[A-Za-z_]\w*$/.test(pm)) throw { line: head.line, msg: "bad parameter name '" + pm + "'" };
+    i++;
+    if (i >= L.length || L[i].indent <= indent) throw { line: head.line, msg: 'expected an indented block after def' };
+    const r = parseSuite(L, i, L[i].indent);
+    return [{ t: 'def', name: m[1], params, body: r[0], line: head.line }, r[1]];
+  }
+
   function parseSimple(ln) {
     if (ln.text === 'pass') return { t: 'pass' };
+    const rm = ln.text.match(/^return\b\s*(.*)$/);
+    if (rm) return { t: 'return', expr: rm[1].trim() === '' ? null : parseExpr(rm[1], ln.line), line: ln.line };
     const m = ln.text.match(/^([A-Za-z_]\w*)\s*(\+=|-=|\*=|\/=|=)(?!=)\s*(.*)$/);
     if (m) {
       if (m[3].trim() === '') throw { line: ln.line, msg: "expected a value after '" + m[2] + "'" };
@@ -251,6 +267,28 @@
             return node.name === 'roomx' ? rm.x : rm.y;
           }
         }
+        // ---- the team's OWN functions: def name(...) earlier in the file ----
+        const defs = vars._defs;
+        const fn = defs && defs[node.name];
+        if (fn) {
+          if ((vars._callDepth || 0) > 24) throw { runtime: true, msg: 'functions calling each other too deep' };
+          vars._callDepth = (vars._callDepth || 0) + 1;
+          // simple scoping: remember what the parameter names held, lend them
+          // to the call, put them back after — good enough to TEACH with
+          const saved = {};
+          fn.params.forEach((pm, k) => {
+            saved[pm] = Object.prototype.hasOwnProperty.call(vars, pm) ? vars[pm] : undefined;
+            vars[pm] = a[k] !== undefined ? a[k] : 0;
+          });
+          let ret = 0;
+          try { execBlock(fn.body, vars, { ops: 0, depth: 1 }); }
+          catch (r) { if (r && r._return !== undefined) ret = r._return; else { vars._callDepth--; throw r; } }
+          fn.params.forEach((pm) => {
+            if (saved[pm] === undefined) delete vars[pm]; else vars[pm] = saved[pm];
+          });
+          vars._callDepth--;
+          return ret;
+        }
         throw { runtime: true, msg: "unknown function '" + node.name + "()'" };
       }
     }
@@ -283,6 +321,11 @@
             break;
           }
         }
+      } else if (st.t === 'def') {
+        if (!vars._defs) vars._defs = {};
+        vars._defs[st.name] = { params: st.params, body: st.body };
+      } else if (st.t === 'return') {
+        throw { _return: st.expr ? evalNode(st.expr, vars) : 0 };
       } else if (st.t === 'while') {
         let guard = 0;
         ctx.depth++;

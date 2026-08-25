@@ -254,79 +254,94 @@
     let nextIdx = N;
     CP.chains.forEach((c) => { chainStart.push(nextIdx); nextIdx += c.length; });
     const DOCK_IDX = nextIdx;
-    if (ROUTE.batt === false) {
-      // no guard: the jump table never fires
-      P(cmt('if battery < -1:', 'battery guard is OFF in the helper'));
-      P('    charging = 1');
-    } else
-    P(cmt('if battery < ' + ROUTE.low + ' and charging == 0:', 'battery low - drop everything'));
-    P(cmt('    charging = 1', 'jump onto MY safe path to the pad'));
-    pts.forEach((w, i) => {
-      const c = CP.chains[i];
-      const first = c.length ? chainStart[i] : DOCK_IDX;
-      const fx = c.length ? Math.round(c[0].x * 100) : 'dockx';
-      const fy = c.length ? Math.round(c[0].y * 100) : 'docky';
-      P('    ' + (i ? 'elif' : 'if') + ' wp == ' + i + ':');
-      P('        wp = ' + first);
-      P('        goto(' + fx + ', ' + fy + ')');
-    });
-    P('');
+    // The file is built around TWO NAMED FUNCTIONS, defined first and
+    // called at the very bottom — rename a def AND its call and nothing
+    // breaks. That is the whole functions lesson.
+    const IND = '    ';
+    const F = (line) => P(IND + line);          // a line INSIDE a def
+
+    P(cmt('def follow_route():', 'THE ROUTE - my numbered points, door via-points included'));
     pts.forEach((w, i) => {
       const last = i === pts.length - 1;
       const firstMain = pts.findIndex((q) => q.target);
       const nxt = last ? (ROUTE.loop ? firstMain : i + 1) : i + 1;
       const nw = pts[nxt];
       const label = w.target ? 'MY point ' + w.n : 'via a doorway';
-      P(cmt('elif wp == ' + i + ':', label));
-      P(cmt('    if atgoal == 1:', 'reached it?'));
-      P(cmt('        wp = ' + nxt, last && !ROUTE.loop ? 'route done - hold' : 'next stop'));
+      F(cmt((i ? 'elif' : 'if') + ' wp == ' + i + ':', label));
+      F(cmt('    if atgoal == 1:', 'reached it?'));
+      F(cmt('        wp = ' + nxt, last && !ROUTE.loop ? 'route done - hold' : 'next stop'));
       if (nw) {
         // start the next leg in the SAME step — goto() clears atgoal, so
         // the chain never spins through every point while standing still
-        P('        goto(' + Math.round(nw.x * 100) + ', ' + Math.round(nw.y * 100) + ')');
+        F('        goto(' + Math.round(nw.x * 100) + ', ' + Math.round(nw.y * 100) + ')');
       }
-      P('    else:');
-      P('        goto(' + Math.round(w.x * 100) + ', ' + Math.round(w.y * 100) + ')');
+      F('    else:');
+      F('        goto(' + Math.round(w.x * 100) + ', ' + Math.round(w.y * 100) + ')');
     });
     if (!ROUTE.loop) {
-      P(cmt('elif wp == ' + pts.length + ':', 'route finished'));
-      P(cmt('    wheelleft = 0', 'stand where the last point is'));
-      P('    wheelright = 0');
+      F(cmt('elif wp == ' + pts.length + ':', 'route finished'));
+      F(cmt('    wheelleft = 0', 'stand where the last point is'));
+      F('    wheelright = 0');
     }
-    // ---- the charge chains: pre-planned, one per route node ----
+    P('');
+    P(cmt('def go_charge():', 'THE TRIP HOME - the safe chain to the pad, then drink'));
+    let wroteChain = false;
     CP.chains.forEach((c, i) => {
       c.forEach((v, k) => {
         const idx = chainStart[i] + k;
         const nIdx = (k + 1 < c.length) ? idx + 1 : DOCK_IDX;
         const nx = (k + 1 < c.length) ? Math.round(c[k + 1].x * 100) : 'dockx';
         const ny = (k + 1 < c.length) ? Math.round(c[k + 1].y * 100) : 'docky';
-        P(cmt('elif wp == ' + idx + ':', 'to the pad, from point zone ' + i));
-        P('    if atgoal == 1:');
-        P('        wp = ' + nIdx);
-        P('        goto(' + nx + ', ' + ny + ')');
-        P('    else:');
-        P('        goto(' + Math.round(v.x * 100) + ', ' + Math.round(v.y * 100) + ')');
+        F(cmt((wroteChain ? 'elif' : 'if') + ' wp == ' + idx + ':', 'to the pad, from point zone ' + i));
+        wroteChain = true;
+        F('    if atgoal == 1:');
+        F('        wp = ' + nIdx);
+        F('        goto(' + nx + ', ' + ny + ')');
+        F('    else:');
+        F('        goto(' + Math.round(v.x * 100) + ', ' + Math.round(v.y * 100) + ')');
       });
     });
     const A = CP.anchor;
-    P(cmt('elif wp == ' + DOCK_IDX + ':', 'ON the pad - drink up'));
-    P('    goto(dockx, docky)');
-    P(cmt('    if distto(dockx, docky) < 60 and atgoal == 0:', 'the pad is TAKEN - wait in line'));
-    P(cmt('        gotoslow(dockx, docky)', 'nudge forward at walking pace'));
+    F(cmt((wroteChain ? 'elif' : 'if') + ' wp == ' + DOCK_IDX + ':', 'ON the pad - drink up'));
+    F('    goto(dockx, docky)');
+    F(cmt('    if distto(dockx, docky) < 60 and atgoal == 0:', 'the pad is TAKEN - wait in line'));
+    F(cmt('        gotoslow(dockx, docky)', 'nudge forward at walking pace'));
     if (ROUTE.stay === 'secs') {
-      P(cmt('    if atgoal == 1:', 'count the seconds ON the pad'));
-      P(cmt('        timer = timer + 1', '10 steps = one second'));
-      P(cmt('    if timer > ' + (Math.round(ROUTE.staySecs * 10)) + ':', ROUTE.staySecs + ' s of charging done'));
-      P('        timer = 0');
-      P('        charging = 0');
-      P(cmt('        wp = ' + A, 'at the node the pad can see'));
-      P('        goto(' + Math.round(pts[A].x * 100) + ', ' + Math.round(pts[A].y * 100) + ')');
+      F(cmt('    if atgoal == 1:', 'count the seconds ON the pad'));
+      F(cmt('        timer = timer + 1', '10 steps = one second'));
+      F(cmt('    if timer > ' + (Math.round(ROUTE.staySecs * 10)) + ':', ROUTE.staySecs + ' s of charging done'));
+      F('        timer = 0');
+      F('        charging = 0');
+      F(cmt('        wp = ' + A, 'at the node the pad can see'));
+      F('        goto(' + Math.round(pts[A].x * 100) + ', ' + Math.round(pts[A].y * 100) + ')');
     } else {
-      P(cmt('    if battery > ' + ROUTE.full + ':', 'full - rejoin the route'));
-      P('        charging = 0');
-      P(cmt('        wp = ' + A, 'at the node the pad can see'));
-      P('        goto(' + Math.round(pts[A].x * 100) + ', ' + Math.round(pts[A].y * 100) + ')');
+      F(cmt('    if battery > ' + ROUTE.full + ':', 'full - rejoin the route'));
+      F('        charging = 0');
+      F(cmt('        wp = ' + A, 'at the node the pad can see'));
+      F('        goto(' + Math.round(pts[A].x * 100) + ', ' + Math.round(pts[A].y * 100) + ')');
     }
+    P('');
+    P('# ---- the match runs THIS part 10x a second ----');
+    if (ROUTE.batt === false) {
+      P(cmt('if battery < -1:', 'battery guard is OFF in the helper'));
+      P('    charging = 1');
+    } else {
+      P(cmt('if battery < ' + ROUTE.low + ' and charging == 0:', 'battery low - drop everything'));
+      P(cmt('    charging = 1', 'jump onto MY safe path to the pad'));
+      pts.forEach((w, i) => {
+        const c = CP.chains[i];
+        const first = c.length ? chainStart[i] : DOCK_IDX;
+        const fx = c.length ? Math.round(c[0].x * 100) : 'dockx';
+        const fy = c.length ? Math.round(c[0].y * 100) : 'docky';
+        P('    ' + (i ? 'elif' : 'if') + ' wp == ' + i + ':');
+        P('        wp = ' + first);
+        P('        goto(' + fx + ', ' + fy + ')');
+      });
+    }
+    P(cmt('if charging == 1:', 'two functions, one choice a tick'));
+    P('    go_charge()');
+    P('else:');
+    P('    follow_route()');
     P('');
     return L.join('\n');
   }

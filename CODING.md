@@ -407,3 +407,21 @@ else:                                           # روی پد
 بچه‌های **FS** به‌جای ویرایشگر، دکمه‌ی **🤖 AI** را می‌زنند: یک تصویر از ربات،
 و برای هر سنسور یک سؤال — «این چشم چیزی دید، کدام طرف بروم؟». خروجی همین
 پایتونی است که در این سند توضیح داده شد.
+
+
+## Functions · تابع‌ها (all divisions)
+
+```python
+def name(a, b):        # define ONCE — the name is yours, rename freely
+    return a + b       # return hands a value back (optional)
+
+total = name(2, 3)     # CALL it anywhere, as many times as you like
+```
+- A function only runs when it is CALLED.
+- Parameters are simple: they hold the call's values while the body runs.
+- The Route helper's generated file is built on two of them:
+  `follow_route()` and `go_charge()` — defined on top, called at the bottom.
+
+فارسی: تابع یک بلوکِ نام‌دار است — یک بار با `def` تعریفش کن و هر جا
+خواستی صدایش بزن؛ اسم را عوض کنی و جای صدازدن را هم عوض کنی، هیچ‌چیز
+نمی‌شکند. فایل هلپر مسیر روی دو تابع ساخته شده تا همین درس داده شود.

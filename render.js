@@ -68,6 +68,12 @@ class Renderer3D {
 
   setView(name) { const v = VIEWS[name]; if (!v) return; this.tAz = v.az; this.tPol = v.pol; this.tRad = v.rad; this.tFov = v.fov; this.anim = true; }
   // top → 3d → 2.5d → a slow 360° orbit → the ROBOT'S OWN EYES (team 1)
+  // live wall recolour from the settings panel
+  setWallColor(hex) {
+    try { localStorage.setItem('shl_wallcolor', hex); } catch (e) { /* private mode */ }
+    if (this._wallMat) this._wallMat.color.setHex(parseInt(hex.slice(1), 16));
+  }
+
   cycleView() {
     const keys = ['top', '3d', '2.5d', 'spin', 'pov', 'cine'];
     this._vi = ((this._vi || 0) + 1) % keys.length;
@@ -365,7 +371,12 @@ class Renderer3D {
       }
     }
 
-    const wallMat = this._mat(COL.wall, 0.85);
+    // wall colour: dark by default so walls READ as walls from above; the
+    // settings panel can pick any colour, saved and applied live
+    let wallHex = 0x1f242e;
+    try { const wc = localStorage.getItem('shl_wallcolor'); if (wc) wallHex = parseInt(wc.slice(1), 16); } catch (e) { /* private mode */ }
+    const wallMat = this._mat(wallHex, 0.85);
+    this._wallMat = wallMat;
     const capMat = this._mat(COL.wallCap, 0.6);
     const wall = (w, d, x, z) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.7, d), wallMat); m.position.set(x, 0.35, z); m.castShadow = true; m.receiveShadow = true; this.dyn.add(m);
