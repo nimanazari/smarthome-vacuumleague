@@ -26,18 +26,33 @@
 
   /* ---------- scoreboard ---------- */
   #scoreboard { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; gap: 22px; z-index: 5; }
-  /* mid-match: the floor belongs to the ROBOTS — scores and clock are
-     recorded, not shown. The last 10 s are the reveal. */
-  body.midmatch #scoreboard { display: none !important; }
+  /* THE TOP BAR: during a house match the 3D scene starts BELOW a fixed
+     strip that owns the score and the clock — zoom all you like, they can
+     never fall onto the floor. */
+  body.sidescore #scene, body.finale #scene { top: 108px; }
+  body.sidescore #scoreboard, body.finale #scoreboard { display: contents !important; }
+  body.sidescore .sbrow, body.finale .sbrow { display: contents; }
+  body.sidescore #teamRed, body.finale #teamRed { position: fixed; left: 12px; top: 8px; z-index: 6; }
+  body.sidescore #teamBlue, body.finale #teamBlue { position: fixed; right: 12px; top: 8px; z-index: 6; }
+  body.sidescore #timer, body.finale #timer { position: fixed; left: 50%; top: 6px; transform: translateX(-50%); z-index: 6; }
+  /* compact cards so the whole bar fits in 92px */
+  body.sidescore .team, body.finale .team { padding: 7px 16px; min-width: 150px; }
+  body.sidescore .team .score, body.finale .team .score { font-size: 26px; }
+  body.sidescore .team .name, body.finale .team .name { font-size: 12.5px; margin-bottom: 2px; }
+  body.sidescore .pctrow, body.finale .pctrow { display: none; }
+  /* the timer sheds its extra lines inside the bar and the clock fits */
+  body.sidescore #houseClean, body.finale #houseClean,
+  body.sidescore #padChip, body.finale #padChip { display: none; }
+  body.sidescore #timer .clock { font-size: 30px; }
+  body.sidescore #timer, body.finale #timer { padding: 6px 18px; }
+  body.sidescore #teamRed, body.sidescore #teamBlue { top: 6px; }
+  /* the red/blue tug line stays OFF this layout — the side cards say it all */
+  body.sidescore #tug, body.finale #tug { display: none; }
   #winTint { position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .6s; }
   body.finale #winTint { opacity: 1; }
-  /* the finale: cards fly to the DARK side bands, the clock turns countdown */
-  body.finale .sbrow { display: contents; }
-  body.finale #teamRed { position: fixed; left: 16px; top: 50%; transform: translateY(-50%); z-index: 6; }
-  body.finale #teamBlue { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 6; }
-  body.finale #timer { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); z-index: 6; }
-  body.finale #timer .clock { font-size: 84px; color: #ffd166; text-shadow: 0 0 34px rgba(255, 209, 102, .45); animation: finalePulse 1s infinite; }
-  body.finale #tug { display: none; }
+  /* the finale: same top bar, the clock turns countdown gold */
+  body.finale #timer.huge { top: 6px !important; transform: translateX(-50%) !important; }
+  body.finale #timer.huge .clock, body.finale #timer .clock { font-size: 40px !important; color: #ffd166; text-shadow: 0 0 30px rgba(255, 209, 102, .45); animation: finalePulse 1s infinite; }
   @keyframes finalePulse { 50% { transform: scale(1.12); } }
   .sbrow { display: flex; gap: 30px; align-items: flex-start; }
   .team { background: rgba(23,27,34,.86); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 16px; padding: 10px 22px; min-width: 168px; text-align: center; box-shadow: 0 6px 22px rgba(0,0,0,.4); }
@@ -6051,8 +6066,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (!engine.arena) {
         const live = engine.running && !engine.finished;
         const finale = live && left <= 10 && left > 0;
-        document.body.classList.toggle('midmatch', live && !finale);
+        const hadBar = document.body.classList.contains('sidescore') || document.body.classList.contains('finale');
+        document.body.classList.toggle('sidescore', live);
         document.body.classList.toggle('finale', finale);
+        const hasBar = document.body.classList.contains('sidescore') || document.body.classList.contains('finale');
+        if (hadBar !== hasBar) window.dispatchEvent(new Event('resize'));
         if (finale) {
           const r = engine.scores.red, b = engine.scores.blue, tot = Math.max(1, r + b);
           const ar = (0.10 + 0.30 * (r / tot)).toFixed(3);
@@ -6060,7 +6078,7 @@ else:                            # 7) nothing in the way -> full speed ahead
           $('winTint').style.background =
             'linear-gradient(90deg, rgba(255,64,54,' + ar + '), transparent 42%, transparent 58%, rgba(64,120,255,' + ab + '))';
         }
-        if (!live) { document.body.classList.remove('midmatch'); document.body.classList.remove('finale'); }
+        if (!live) { document.body.classList.remove('sidescore'); document.body.classList.remove('finale'); }
       }
       // the hall-sized PAUSED banner: nobody should have to guess the clock
       const pb = (paused && engine.running && !engine.finished) ? 'flex' : 'none';

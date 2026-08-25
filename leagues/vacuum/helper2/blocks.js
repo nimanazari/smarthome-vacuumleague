@@ -398,6 +398,31 @@
           col.appendChild(c);
         });
       }
+      // just dropped a condition? ask what comes next, blinking
+      if (justAdded && justAdded.indexOf('cond:' + i + ':') === 0) {
+        const ask = document.createElement('div');
+        ask.className = 'asknext';
+        const q = document.createElement('span');
+        q.textContent = T('حالا چی اضافه می‌کنی؟', 'What do you add next?');
+        ask.appendChild(q);
+        const mk = (label, palId) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.textContent = label;
+          b.onclick = (ev) => {
+            ev.stopPropagation();
+            const pal = $(palId);
+            pal.classList.remove('palglow'); void pal.offsetWidth;
+            pal.classList.add('palglow');
+            pal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => pal.classList.remove('palglow'), 2400);
+          };
+          ask.appendChild(b);
+          return b;
+        };
+        mk(T('یک شرط دیگر', 'another condition'), 'palSens');
+        mk(T('یک دستور', 'a move'), 'palActs');
+        col.appendChild(ask);
+      }
       col.appendChild(moveChip(r, false));
       if (r.act2) col.appendChild(moveChip(r, true));
       else {
@@ -433,7 +458,7 @@
     box.appendChild(el);
   }
 
-  function addRule() { FILE.rules.push(newRule()); sel = FILE.rules.length - 1; }
+  function addRule() { FILE.rules.unshift(newRule()); sel = 0; }
 
   /* ================================================================
      WIRING

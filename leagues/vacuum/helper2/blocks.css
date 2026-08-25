@@ -338,3 +338,21 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
 /* the "…" peek: the python name hides until you ask for it */
 .blk .pyt { opacity: .45; font-weight: 900; letter-spacing: 1px; padding: 0 5px; border-radius: 6px; cursor: pointer; }
 .blk .pyt:hover { opacity: 1; background: rgba(255,255,255,.14); }
+
+/* the blinking "what next?" asker + the palette glow it points at */
+.asknext {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 6px 0 4px; padding: 8px 12px; border-radius: 11px;
+  font-size: 12.5px; font-weight: 800;
+  border: 2px dashed var(--acc, #4fc3f7);
+  animation: askblink 1.1s infinite;
+  align-self: flex-start;
+}
+.asknext button {
+  font: 800 12px inherit; font-family: inherit; cursor: pointer;
+  padding: 5px 12px; border-radius: 999px;
+  border: 1px solid var(--acc, #4fc3f7); background: transparent; color: var(--acc, #4fc3f7);
+}
+.asknext button:hover { background: var(--acc, #4fc3f7); color: #06210f; }
+@keyframes askblink { 50% { border-color: transparent; } }
+.palglow { outline: 3px solid var(--acc, #4fc3f7); outline-offset: 4px; border-radius: 12px; animation: askblink 1.1s 2; }
