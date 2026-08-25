@@ -49,7 +49,7 @@ html, body { height: 100%; }
 body {
   background: var(--bg); color: var(--text);
   font-family: Vazirmatn, "Segoe UI", Tahoma, sans-serif;
-  direction: rtl; padding-bottom: 92px;
+  padding-bottom: 92px;   /* direction comes from html[dir] — set per language */
 }
 body::before {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -332,11 +332,8 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
 }
 
 
-/* the CODE side of the page is LEFT-TO-RIGHT like the Python it writes:
-   if sits on the left, then-blocks hang left underneath */
-#stacks, .stkcol, .brow, .pal, .blk { direction: ltr; text-align: left; }
-.stkcol { align-items: flex-start; }
-.brow { align-self: flex-start; }
+/* code fragments read left-to-right in BOTH languages */
+.blk small, .mypy, pre, code, textarea { direction: ltr; }
 
 /* the "…" peek: the python name hides until you ask for it */
 .blk .pyt { opacity: .45; font-weight: 900; letter-spacing: 1px; padding: 0 5px; border-radius: 6px; cursor: pointer; }

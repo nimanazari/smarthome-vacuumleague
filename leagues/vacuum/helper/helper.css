@@ -497,3 +497,6 @@ body.light .bar { background: rgba(248, 250, 253, .92); }
 body.lang-en .i18n-fa { display: none !important; }
 body.lang-fa .i18n-en { display: none !important; }
 body.lang-fa .bridge .en { display: none; }
+
+/* code reads left-to-right in BOTH page directions */
+#code, .mypy, pre, code { direction: ltr; text-align: left; }

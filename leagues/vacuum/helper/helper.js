@@ -47,6 +47,8 @@
   let PAGE_LANG = 'en';
   try { PAGE_LANG = localStorage.getItem('shl_lang') || 'en'; } catch (e) { /* private mode */ }
   document.body.classList.add(PAGE_LANG === 'fa' ? 'lang-fa' : 'lang-en');
+  document.documentElement.lang = PAGE_LANG === 'fa' ? 'fa' : 'en';
+  document.documentElement.dir = PAGE_LANG === 'fa' ? 'rtl' : 'ltr';
   if (PAGE_LANG === 'fa') {
     document.querySelectorAll('[data-fa]').forEach((el) => { el.textContent = el.getAttribute('data-fa'); });
   }

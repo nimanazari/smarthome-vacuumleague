@@ -16,6 +16,12 @@
   'use strict';
 
   const $ = (id) => document.getElementById(id);
+  // the page direction follows the game's language: English LTR, Persian RTL
+  try {
+    const lg = localStorage.getItem('shl_lang') || 'fa';
+    document.documentElement.lang = lg === 'fa' ? 'fa' : 'en';
+    document.documentElement.dir = lg === 'fa' ? 'rtl' : 'ltr';
+  } catch (e) { /* private mode */ }
   const Q = new URLSearchParams(location.search);
   const LEAGUE = Q.get('league') || 'u19';
   const SAVE_KEY = 'shl_route_' + LEAGUE;
