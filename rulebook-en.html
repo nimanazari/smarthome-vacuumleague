@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Home League — Official Rulebook (English)</title>
+<!-- THE OFFICIAL RULEBOOK, ENGLISH EDITION — a faithful mirror of the
+     official "Smart Home Rules" document (v3.1, February 2026).
+     Print-ready: Ctrl+P → Save as PDF. Figures are rendered by the
+     official simulator so they always match the current field. -->
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:"Segoe UI",system-ui,Tahoma,sans-serif; color:#182030; background:#eef1f6; line-height:1.75; }
+.page { max-width:860px; margin:0 auto; background:#fff; padding:34px 46px; }
+h1 { font-size:30px; font-weight:800; }
+h2 { font-size:20px; font-weight:800; margin:30px 0 8px; padding:8px 14px; background:#eef4ff; border-left:5px solid #2e6fe0; border-radius:8px; }
+h3 { font-size:15.5px; font-weight:700; margin:16px 0 4px; color:#20437e; }
+h4 { font-size:13.8px; font-weight:700; margin:10px 0 2px; color:#2e5aa8; }
+p, li { font-size:13.8px; }
+table { width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:12.8px; }
+th, td { border:1px solid #ccd4e2; padding:6px 9px; text-align:left; vertical-align:top; }
+th { background:#f2f6fd; font-weight:700; }
+code { background:#f0f3f9; padding:1px 6px; border-radius:5px; font-family:Consolas,monospace; font-size:12px; color:#1c3f7a; }
+.cover { text-align:center; padding:26px 0 8px; }
+.cover .sub { color:#5b6880; font-size:14px; margin-top:4px; }
+.cover .ver { display:inline-block; margin-top:10px; font-size:11.5px; letter-spacing:1px; background:#182030; color:#fff; border-radius:999px; padding:4px 16px; }
+.cover .auth { color:#5b6880; font-size:12px; margin-top:8px; }
+.shot { width:100%; border-radius:12px; border:1px solid #ccd4e2; margin:10px 0 4px; display:block; }
+.cap { text-align:center; color:#5b6880; font-size:11.5px; margin-bottom:10px; }
+.formula { text-align:center; background:#f4f8ff; border:1px solid #cfe0fb; border-radius:10px; padding:9px 12px; margin:9px 0; font-family:Consolas,monospace; font-size:13px; color:#1c3f7a; font-weight:700; }
+.note { background:#fff7e6; border:1px solid #eeddb0; border-radius:9px; padding:9px 13px; font-size:12.8px; margin:8px 0; }
+ol,ul { padding-left:22px; }
+li { margin:3px 0; }
+.printbtn, .langbtn { position:fixed; top:14px; z-index:9; font-family:inherit; font-weight:700; font-size:13px; padding:10px 18px; border-radius:11px; border:0; color:#fff; cursor:pointer; text-decoration:none; }
+.printbtn { right:14px; background:#2e6fe0; box-shadow:0 6px 20px rgba(46,111,224,.35); }
+.langbtn { right:190px; background:#182030; }
+@media print {
+  body { background:#fff; }
+  .page { max-width:none; padding:10mm 12mm; }
+  .printbtn, .langbtn { display:none; }
+  h2 { break-after:avoid; }
+  table, .shot { break-inside:avoid; }
+}
+</style>
+</head>
+<body>
+<button class="printbtn" onclick="print()">🖨 Print / Save as PDF</button>
+<a class="langbtn" href="rulebook.html">نسخه‌ی فارسی</a>
+<div class="page">
+
+<div class="cover">
+  <h1>Smart Home League</h1>
+  <div class="sub">Official Rulebook — English Edition</div>
+  <span class="ver">VERSION 3.1 · FEBRUARY 2026</span>
+  <div class="auth">Sina Nazari · Sina Zaker · Nima Nazari</div>
+  <img class="shot" id="shotHero" alt="Figure 1 — the official competition field" style="margin-top:18px">
+  <div class="cap">Figure 1 — The official competition field (rendered by the official simulator)</div>
+</div>
+
+<h2>Abstract</h2>
+<p>The Smart Home League is a prestigious robotics competition that focuses on developing
+programming, problem-solving, and critical thinking skills in participants. Held within the
+<b>Webots</b> simulation environment, the competition challenges participants to create efficient
+algorithms for autonomous robots capable of performing specific tasks in a virtual smart home.</p>
+<p>The competition fosters innovation by encouraging participants to solve real-world challenges
+in a simulated environment. Robots are programmed to navigate multiple rooms, avoid obstacles,
+manage resources such as battery life (in U19), and optimise cleaning tasks. In addition,
+participants take part in technical challenges and interviews to demonstrate their understanding
+of robotics and algorithms.</p>
+<h3>Key features</h3>
+<ul>
+  <li><b>Educational objectives:</b> enhancing algorithmic thinking and programming proficiency;
+  hands-on experience with automation and smart technologies; teamwork and collaboration in a
+  competitive yet supportive setting.</li>
+  <li><b>Competition scope:</b> developing autonomous cleaning robots that efficiently navigate
+  and clean home environments — identifying rooms accurately, tracking cleaning progress, and
+  avoiding obstacles while optimising performance.</li>
+  <li><b>Age categories:</b> First Step (Elementary School) · U14 (Primary) · U19 (Secondary).</li>
+  <li><b>Programming environment:</b> the competition exclusively uses the <b>Webots</b> simulation
+  platform; all programs are written in <b>Python</b>.</li>
+</ul>
+
+<h2>1 · Robots and Sensors</h2>
+<p>The robots are virtual autonomous vacuum robots. In every sub-league the robot is provided
+<b>ready-made</b>: teams select a team colour and write the control program only.</p>
+<h3>1.1 Robot features</h3>
+<ul>
+  <li><b>Autonomous behaviour:</b> the robots operate autonomously, controlled exclusively by the
+  Python programs written by the participants; they execute tasks based on sensor inputs and the
+  team's algorithms.</li>
+  <li><b>Mobility:</b> equipped with two driven wheels, the robots move in all directions (forward,
+  backward, turning). Movement is controlled by setting velocity values for the left and right
+  wheels (<code>wheelleft</code> / <code>wheelright</code>).</li>
+  <li><b>Task-oriented design:</b> the robots are optimised for cleaning floor area within a
+  limited time frame; efficiency and collision avoidance are key to a high score.</li>
+  <li><b>Energy management (U19 only):</b> U19 robots include a simulated battery system;
+  participants must account for energy consumption in their algorithms.</li>
+</ul>
+
+<h3>1.2 Sensors overview</h3>
+<table>
+<tr><th>Sensor</th><th>Function · variable names</th><th>Application</th><th>Leagues</th></tr>
+<tr><td><b>1.2.1 Distance sensors</b></td>
+<td>Emit signals and measure the reflection time, providing distance data. Placement: D1 front-left,
+D2 front-right, D3 right, D4 left. Simulator names: <code>front, frontleft, frontright, left, right</code> (cm).</td>
+<td>Collision prevention; path planning and safe navigation.</td><td>All</td></tr>
+<tr><td><b>1.2.2 Bumper sensor</b></td>
+<td>Detects physical contact or immediate proximity to obstacles and reports it to the control
+program. Names: <code>bumper, bumperfront, bumperback</code> (0/1).</td>
+<td>Collision handling with walls and furniture; obstacle avoidance.</td><td>All</td></tr>
+<tr><td><b>1.2.3 Compass sensor</b></td>
+<td>Provides directional data relative to the virtual north as an angular value.
+Name: <code>heading</code> (0 = east, 90 = north, 180 = west, 270 = south).</td>
+<td>Maintaining direction; orienting toward a specific target.</td><td>U14 · U19</td></tr>
+<tr><td><b>1.2.4 Room number</b></td>
+<td>Each room carries a unique identifier; upon entry the robot reads the corresponding number in
+real time. Name: <code>room</code> (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom).</td>
+<td>Organised cleaning; following an optimised room-by-room path.</td><td>U14</td></tr>
+<tr><td><b>1.2.5 Room cleaning percentage</b></td>
+<td>Measures how much of each room has been cleaned, updated in real time.
+Names: <code>clean1 … clean5</code> (%).</td>
+<td>Tracking progress; leaving a finished room for the next one.</td><td>U14</td></tr>
+<tr><td><b>1.2.6 Colour sensor</b></td>
+<td>Measures the reflected RGB intensity beneath the robot and reports the surface colour.
+Name: <code>color</code>, with the predefined constants <code>white, green, purple, black, red, blue, orange, cyan</code>.</td>
+<td>Classifying floor markings; triggering behaviour on a detected colour.</td><td>U14 · U19</td></tr>
+<tr><td><b>1.2.7 GPS sensor</b></td>
+<td>Reports the robot's precise coordinates. Names: <code>x, y</code> (cm), together with the
+navigation functions <code>goto(x, y)</code>, <code>distto(x, y)</code>, <code>angleto(x, y)</code>.</td>
+<td>Point-to-point navigation; route optimisation, including trips to the charging station.</td><td>U19</td></tr>
+<tr><td><b>1.2.8 Charging system</b></td>
+<td>Reports the remaining energy level. Names: <code>battery</code> (%), and the station
+coordinates <code>dockx, docky</code>, provided to both robots from the start of the match.</td>
+<td>Task prioritisation by available energy; recharge planning.</td><td>U19</td></tr>
+</table>
+<div class="note"><b>1.3 Customisation.</b> Participants are expected to design algorithms that
+make full use of the sensors and motors provided. Creativity in combining sensor data — for
+example the compass together with the distance sensors — results in more efficient navigation
+and a higher score.</div>
+
+<h2>2 · Competition Platform</h2>
+<ul>
+  <li><b>2.1 About Webots.</b> The official competition operates within the Webots simulation
+  environment: a high-precision physics engine, integrated sensor and actuator support, and
+  straightforward integration with Python.</li>
+  <li><b>2.2 Required versions.</b> Participants must use <b>Webots 2025a</b> and
+  <b>Python 3.8 or higher</b>.</li>
+  <li><b>2.3 Competition files.</b> The competition files are downloaded from the official
+  Smart Home League repository; the world files are located under
+  <code>Smart Home\game\worlds</code>. Load the appropriate world in Webots and verify your robot
+  with the provided base code.</li>
+  <li><b>2.4 Additional resources.</b> Installation guides and tutorials are available on the
+  official Smart Home League website.</li>
+</ul>
+<div class="note"><b>Browser training simulator.</b> The league additionally provides a
+zero-installation browser simulator implementing the same sensors, the same variable names, and
+the same rules. It is intended for teaching and practice; official matches are conducted in Webots.</div>
+
+<h2>3 · Game Structure</h2>
+<p>Teams must design algorithms that enable their robots to move safely and efficiently while
+detecting and avoiding walls, furniture, and other obstacles within the home. As the robot moves
+across the field, the surface it covers is considered cleaned, and the final score is primarily
+based on the <b>percentage of area successfully covered within the given time limit</b>. The
+competition is structured into three sub-leagues of increasing complexity.</p>
+<img class="shot" id="shotTop" alt="Figure 2 — the official field, orthographic top view">
+<div class="cap">Figure 2 — The official field, orthographic top view (rendered by the official simulator)</div>
+
+<h3>3.1 First Step sub-league</h3>
+<ul>
+  <li>The robot must autonomously navigate the field, avoid walls, furniture, and obstacles, and
+  maximise the cleaned surface within the time limit.</li>
+  <li>Scoring is based solely on the total cleaning percentage; no bonus elements are included.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K)<br>K = scoring factor (for example K = 40)</div>
+
+<h3>3.2 U14 sub-league</h3>
+<ul>
+  <li>The objectives are identical to First Step; in addition, the robots are equipped with the
+  <b>colour sensor</b>, the <b>room number</b>, and the <b>room cleaning percentage</b> sensors.</li>
+  <li><b>Boost Stations.</b> One or more Boost Stations are placed on the field. Entering a Boost
+  Station area grants bonus points; each station grants its bonus <b>only once per robot</b> —
+  re-entering the same station yields no additional points.</li>
+  <li><b>Dynamic starting position.</b> The starting position may change in each round; within a
+  given round it is identical for all teams to ensure fairness.</li>
+  <li><b>Light View mode.</b> The field may be presented in Light View, in which only the general
+  structure of the environment is known in advance; the exact locations of walls, rooms, and Boost
+  Stations are not fully specified.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K) + (Number of Boost Activations × 4K)</div>
+
+<h3>3.3 U19 sub-league</h3>
+<ul>
+  <li>The primary objective remains unchanged; in addition, the robots operate under an advanced
+  <b>energy-management challenge</b>: each robot has a limited battery capacity that must be
+  managed efficiently throughout the match.</li>
+  <li><b>Charging stations.</b> Designated charging stations are placed on the field. The robot
+  must autonomously travel to a charging station when necessary; strategic timing of recharging is
+  essential for optimal cleaning performance.</li>
+  <li><b>Light View mode.</b> The map may be provided in Light View: only the general structure of
+  the house is known in advance, and the exact positions of walls, doors, charging stations, and
+  even the starting point may vary.</li>
+  <li><b>GPS disruptions.</b> Connection issues may occur in certain rooms; in such areas the GPS
+  sensor may become temporarily unavailable. Teams must design robust, adaptive algorithms that
+  handle partial map information and intermittent sensor disruption while balancing cleaning
+  efficiency against energy consumption.</li>
+  <li>The map and sensor conditions are fixed for all teams within a round and do not change
+  between matches of that round.</li>
+</ul>
+<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K)</div>
+<div class="note"><b>Simulator field rules (U19).</b> A battery at 0% does not terminate the
+robot: it continues at 15% speed and resumes charging if it reaches the pad. Queueing behind an
+occupied charging pad is legitimate: a low-battery robot waiting beside the pad is not considered
+stuck, whereas a fully charged robot occupying the pad is subject to the automatic 15-second
+relocation watchdog. Waste disposal is currently disabled.</div>
+
+<h3>3.4 Scoring</h3>
+<h4>3.4.1 Cleaning percentage</h4>
+<p>Points are awarded based on the percentage of cleaned surface. The objective is to cover as
+much of the environment as possible within the time limit; the value is computed automatically by
+the system.</p>
+<h4>3.4.2 Technical challenges</h4>
+<p>Participants are given specific tasks that test programming skill and creativity beyond
+standard robot behaviour. Examples include:</p>
+<ul>
+  <li><b>Wall following:</b> the robot follows the perimeter of a room while maintaining a
+  consistent distance from the wall.</li>
+  <li><b>Room navigation:</b> travelling from Room A to Room Z, stopping for a specified duration
+  (for example, ten seconds) before proceeding.</li>
+  <li><b>Dynamic obstacle avoidance:</b> detecting and avoiding moving objects placed in the
+  environment.</li>
+</ul>
+<h4>3.4.3 Technical interview</h4>
+<ul>
+  <li><b>Understanding of the code:</b> participants must be able to explain every part of their
+  algorithm clearly.</li>
+  <li><b>Innovation and problem-solving:</b> creativity in addressing unique challenges.</li>
+  <li><b>Team collaboration:</b> how responsibilities and tasks were distributed within the team.</li>
+  <li><b>External libraries:</b> all team members must know what each external library used in
+  their algorithm does and how it works.</li>
+  <li><b>Extension tools:</b> all team members must be able to present and explain the source code
+  of every helping tool they use, if any.</li>
+</ul>
+
+<h2>4 · Rules and Guidelines</h2>
+<h3>4.1 General rules</h3>
+<ol>
+  <li>Teams must consist of <b>2–6 participants</b>.</li>
+  <li>Robots must operate autonomously, using the Python programs written by the participants.</li>
+  <li>All participants must adhere to the competition schedule and the instructions of the judges.</li>
+  <li>The judges' decisions are final and binding; any dispute must follow the official written
+  procedure and be submitted professionally.</li>
+  <li>Teams must respect other teams, the judges, and the organisers throughout the event.</li>
+  <li>Every object in the world is dynamic and may change or be repositioned during the
+  competition.</li>
+  <li>A team that changes its algorithm during the competition must inform the Technical
+  Committee; failure to do so subjects all team members to a rigorous technical interview or
+  disqualification.</li>
+  <li>The Technical Committee is not responsible for software issues within the teams; it only
+  ensures that at least one laptop per team can run Webots and the latest version of the Smart
+  Home software in the U14 and First Step sub-leagues.</li>
+  <li>The use of external helping software is not restricted; any such tool is subject to
+  section 3.4.3.</li>
+  <li>The use of external libraries is not restricted; such libraries are subject to
+  section 3.4.3.</li>
+</ol>
+
+<h3>4.2 Team requirements</h3>
+<h4>4.2.1 Code submission</h4>
+<ul>
+  <li>Teams must submit their source code at the exact designated time before their match, placing
+  the USB drive containing the files into the designated container at the submission point.</li>
+  <li>Late submission or incorrect naming on the USB drive incurs the penalties defined for the
+  event.</li>
+  <li><b>File naming.</b> Before each match the judges announce the required naming format,
+  typically comprising the round number, the team name, and the <code>.py</code> extension.
+  Example: the team <i>Sweeper</i> playing in Round 2 submits <code>R2-Sweeper.py</code>.</li>
+</ul>
+<h4>4.2.2 Quarantine rules</h4>
+<ul>
+  <li>Teams receive the full map of the round at the start of each quarantine.</li>
+  <li>Teams have a fixed period, which varies per event, to write or modify their code in a
+  controlled quarantine environment before their match.</li>
+  <li>During quarantine, no communication devices (phones, tablets, smart watches, internet
+  access) or external resources are permitted. Violations, including communication with
+  individuals outside the quarantine, result in penalties or disqualification. Entering or
+  leaving the environment is forbidden.</li>
+</ul>
+<h4>4.2.3 Equipment requirements</h4>
+<ul>
+  <li>Teams must bring power strips (multi-plugs) and laptops that are fully charged and
+  accompanied by a functional charger.</li>
+</ul>
+<h4>4.2.4 USB drive requirements</h4>
+<ul>
+  <li>USB drives used for submission must be formatted and ready for use; must match the team name
+  displayed on the scoreboard; must carry a clearly written label with the team's name; and must
+  contain only the code related to the round.</li>
+</ul>
+<h4>4.2.5 Mentor behaviour</h4>
+<ul>
+  <li>Mentors must not communicate with students during quarantine; violations result in
+  penalties, including disqualification of the team for that round.</li>
+  <li>Complaints and objections must be submitted in writing and professionally; unprofessional
+  behaviour may result in mentor suspension or team disqualification.</li>
+</ul>
+
+<h3>4.3 Scoring system</h3>
+<ul>
+  <li><b>Scoring across rounds:</b> the scores from all rounds are accumulated; the total score is
+  the sum of the points earned across the rounds (the exact calculation may vary per event).</li>
+  <li><b>Cleaning percentage:</b> computed automatically by the system for each round.</li>
+  <li>Technical challenge and technical interview: refer to sections 3.4.2 and 3.4.3.</li>
+</ul>
+
+<h3>4.4 Relocation and restart rules</h3>
+<ol>
+  <li>Each team is allowed up to <b>3 relocation requests</b> per match (this may vary per
+  event).</li>
+  <li>Relocation is permitted only if the robot is stuck against a wall or trapped in a looped
+  position, as verified by the judges.</li>
+  <li>Teams must notify the judges immediately to request a relocation.</li>
+  <li><b>Special case.</b> If the robot sinks into the ground or its wheels become stuck owing to
+  a simulation issue, the team may request that the referee extract the robot at the same
+  position, or request a full match restart once, subject to the decision of the Technical
+  Committee.</li>
+</ol>
+<div class="note"><b>Automatic watchdog (simulator).</b> A robot that fails to progress beyond a
+small circle for <b>15 seconds</b> is automatically relocated to an open position with the
+applicable penalty. Exceptions: a robot taking on charge, and a low-battery robot queueing beside
+the charging pad.</div>
+
+<h3>4.5 Super Team event (optional)</h3>
+<p>If time permits, an optional Super Team event may be organised. Teams collaborate to form
+larger super teams and solve a shared task announced on the day of the competition; the tasks may
+differ from the standard challenges and are designed to test creativity and teamwork. The winning
+super team receives a certificate of achievement.</p>
+
+<h3>4.6 Penalties</h3>
+<table>
+<tr><th>Violation</th><th>Consequence</th></tr>
+<tr><td>Unauthorised intervention in, or modification of, the server or game settings</td>
+<td>Severe penalties for the team in that round</td></tr>
+<tr><td>Late file submission</td><td>Loss of <b>5% of the score per minute</b> of delay (may vary per event)</td></tr>
+<tr><td>USB violations: name not matching the scoreboard; missing label; the drive contains
+viruses; the drive is not empty or includes irrelevant files</td>
+<td><b>Disqualification for the relevant round</b></td></tr>
+<tr><td>Exceeding the relocation limit</td><td>Each additional relocation beyond the allowed three:
+<b>5% deduction from the total score</b></td></tr>
+</table>
+
+<h3>4.7 Additional notes</h3>
+<ul>
+  <li>Teams must use only the official competition files and environments provided by the
+  organisers.</li>
+  <li>The judges' decisions are final and cannot be contested; a team that submits an objection in
+  an unprofessional or inappropriate manner may face suspension at the discretion of the judges.</li>
+  <li>Participants are encouraged to review the rules thoroughly and clarify any doubts before the
+  competition.</li>
+</ul>
+
+<h3>4.8 Contacting the Technical Committee</h3>
+<ul>
+  <li><b>Discord:</b> a dedicated server for real-time announcements, technical queries, and
+  community discussion.</li>
+  <li><b>Telegram:</b> the official group for updates, reminders, and direct communication during
+  the competition.</li>
+  <li><b>Website:</b> the official Smart Home League website — rules and resources, tutorials and
+  guides, and downloads of the competition files and tools.</li>
+</ul>
+
+<div class="cap" style="margin-top:22px">Smart Home League · Official Rulebook, Version 3.1 —
+in the event of any discrepancy, the official PDF document prevails.</div>
+</div>
+
+<script src="leagues/vacuum/maps/rooms.js"></script>
+<script src="leagues/vacuum/maps/grown-rooms.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="homeobjects.js"></script>
+<script src="sensors.js"></script>
+<script src="robot-parts.js"></script>
+<script src="physics.js"></script>
+<script src="robot-battery.js"></script>
+<script src="leagues.js"></script>
+<script src="leagues/manifest.js"></script>
+<script>
+  (function () {
+    const tag = (src) => document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    for (const L of (self.LEAGUE_MANIFEST || [])) {
+      for (const x of (L.pre || [])) tag('leagues/' + L.id + '/' + x);
+      tag('leagues/' + L.id + '/robot.js');
+      tag('leagues/' + L.id + '/league.js');
+      for (const e of (L.extra || [])) tag('leagues/' + L.id + '/' + e);
+      for (const d of L.divisions) tag('leagues/' + L.id + '/' + d + '/rules.js');
+    }
+  })();
+</script>
+<script src="engine.js"></script>
+<script src="render.js"></script>
+<script>
+(function shoot() {
+  try {
+    let MAP = null;
+    try { MAP = JSON.parse(localStorage.getItem('shl_defmap_u14') || 'null'); } catch (e) { /* private mode */ }
+    if (!MAP || !MAP.cols) MAP = self.VacuumMaps.GROWN_ROOMS;
+    const W = MAP.cols * MAP.tileSize, H = MAP.rows * MAP.tileSize;
+    const hider = document.createElement('div');
+    hider.style.cssText = 'position:fixed;left:-4000px;top:0;width:1200px;height:900px';
+    document.body.appendChild(hider);
+    const eng = new Engine({ map: MAP, matchSeconds: 60, players: 2, seed: 1 });
+    const r3 = new Renderer3D(hider);
+    r3.buildScene(eng);
+    r3.sync(eng);
+    r3.renderer.setSize(1200, 700);
+    r3.render();
+    document.getElementById('shotHero').src = r3.renderer.domElement.toDataURL('image/png');
+    const camO = new THREE.OrthographicCamera(-W / 2 - 0.4, W / 2 + 0.4, H / 2 + 0.4, -H / 2 - 0.4, 0.1, 90);
+    camO.position.set(0, 45, 0); camO.up.set(0, 0, 1); camO.lookAt(0, 0, 0);
+    r3.scene.fog = null;
+    r3.renderer.setSize(1100, 1100);
+    r3.renderer.render(r3.scene, camO);
+    document.getElementById('shotTop').src = r3.renderer.domElement.toDataURL('image/png');
+    r3.renderer.dispose();
+    hider.remove();
+  } catch (e) {
+    document.querySelectorAll('.shot').forEach((el) => { el.style.display = 'none'; });
+  }
+})();
+</script>
+</body>
+</html>

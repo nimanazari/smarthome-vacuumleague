@@ -38,7 +38,9 @@ code { direction:ltr; unicode-bidi:embed; background:#f0f3f9; padding:1px 6px; b
 .warn { background:#fdeeee; border:1px solid #efc2c2; border-radius:9px; padding:9px 13px; font-size:12.8px; margin:8px 0; }
 ol,ul { padding-inline-start:22px; }
 li { margin:3px 0; }
-.printbtn { position:fixed; top:14px; left:14px; z-index:9; font-family:inherit; font-weight:800; font-size:13px; padding:10px 18px; border-radius:11px; border:0; background:#2e6fe0; color:#fff; cursor:pointer; box-shadow:0 6px 20px rgba(46,111,224,.35); }
+.printbtn, .langbtn { position:fixed; top:14px; z-index:9; font-family:inherit; font-weight:800; font-size:13px; padding:10px 18px; border-radius:11px; border:0; color:#fff; cursor:pointer; text-decoration:none; }
+.printbtn { left:14px; background:#2e6fe0; box-shadow:0 6px 20px rgba(46,111,224,.35); }
+.langbtn { left:210px; background:#182030; }
 @media print {
   body { background:#fff; }
   .page { max-width:none; padding:10mm 12mm; }
@@ -49,39 +51,35 @@ li { margin:3px 0; }
 </style>
 </head>
 <body>
-<button class="printbtn" onclick="print()">🖨 Print / Save as PDF</button>
+<button class="printbtn" onclick="print()">🖨 چاپ / ذخیره‌ی PDF</button>
+<a class="langbtn" href="rulebook-en.html">English edition</a>
 <div class="page">
 
 <div class="cover">
   <h1>Smart Home League</h1>
-  <div class="sub">کتابچه‌ی رسمی قوانین · The Official Rulebook</div>
+  <div class="sub">کتابچه‌ی رسمی قوانین — نسخه‌ی فارسی</div>
   <span class="ver">VERSION 3.1 · FEBRUARY 2026</span>
   <div class="auth">Sina Nazari · Sina Zaker · Nima Nazari</div>
   <img class="shot" id="shotHero" alt="the house, 3D view" style="margin-top:18px">
-  <div class="cap">زمین رسمی مسابقه — این عکس همین لحظه از موتور شبیه‌ساز گرفته شده · the official floor, rendered live</div>
+  <div class="cap">تصویر ۱ — زمین رسمی مسابقه (رندرشده توسط شبیه‌ساز رسمی)</div>
 </div>
 
-<h2>چکیده · Abstract</h2>
+<h2>چکیده</h2>
 <p>لیگ خانه‌ی هوشمند یک مسابقه‌ی معتبر رباتیک است که بر پرورش <b>برنامه‌نویسی، حل‌مسئله و تفکر
 نقادانه</b> تمرکز دارد. مسابقه در محیط شبیه‌سازی <b>Webots</b> برگزار می‌شود و شرکت‌کننده‌ها باید
 الگوریتم‌هایی کارآمد برای ربات‌های خودمختاری بنویسند که در یک خانه‌ی هوشمند مجازی مأموریت
 انجام می‌دهند: پیمایش چند اتاق، دوری از موانع، مدیریت منابعی مثل باتری (در U19) و بهینه‌سازی
 نظافت. شرکت‌کننده‌ها علاوه بر مسابقه، در <b>چالش فنی</b> و <b>مصاحبه‌ی فنی</b> هم توان خود را نشان می‌دهند.</p>
-<small class="en">The Smart Home League is a robotics competition focused on programming,
-problem-solving and critical thinking. Held in the Webots simulation environment, it challenges
-participants to create efficient algorithms for autonomous robots in a virtual smart home —
-navigating rooms, avoiding obstacles, managing battery (U19) and optimising cleaning. Technical
-challenges and interviews complete the evaluation.</small>
 <ul>
   <li><b>رده‌های سنی:</b> فرست‌استپ (دبستان) · U14 (پرایمری) · U19 (سکندری)</li>
   <li><b>محیط برنامه‌نویسی:</b> فقط <b>Webots</b> + زبان <b>Python</b></li>
   <li><b>شبیه‌ساز تمرینی:</b> همین بازی مرورگری — بدون نصب، برای یادگیری و تمرینِ همین قوانین</li>
 </ul>
 
-<h2>۱ · ربات‌ها و سنسورها · Robots and Sensors</h2>
+<h2>۱ · ربات‌ها و سنسورها</h2>
 <p>ربات‌ها جاروبرقی‌های خودمختارِ مجازی‌اند؛ <b>در هر سه رده آماده‌اند</b> — کسی ربات نمی‌سازد،
 تیم فقط رنگ انتخاب می‌کند و مغز (کد پایتون) را می‌نویسد.</p>
-<h3>۱.۱ ویژگی‌های ربات · Robot features</h3>
+<h3>۱.۱ ویژگی‌های ربات</h3>
 <ul>
   <li><b>خودمختاری:</b> ربات فقط با برنامه‌ی پایتونی که تیم نوشته کار می‌کند — هیچ کنترل دستی‌ای در کار نیست.</li>
   <li><b>حرکت:</b> با تنظیم سرعت چرخ چپ و راست (<code>wheelleft / wheelright</code>): جلو، عقب، چرخش.</li>
@@ -89,7 +87,7 @@ challenges and interviews complete the evaluation.</small>
   <li><b>مدیریت انرژی (فقط U19):</b> باتری شبیه‌سازی‌شده — مصرف انرژی باید در الگوریتم دیده شود.</li>
 </ul>
 
-<h3>۱.۲ سنسورها · Sensors overview</h3>
+<h3>۱.۲ سنسورها</h3>
 <table>
 <tr><th>سنسور</th><th>چه می‌کند · نامِ کد</th><th>کاربرد</th><th>رده</th></tr>
 <tr><td><b>۱.۲.۱ فاصله (Ultrasonic)</b></td><td>موج می‌فرستد و از زمان برگشت، فاصله می‌دهد.
@@ -113,7 +111,7 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
 <div class="note"><b>۱.۳ خلاقیت آزاد است:</b> ترکیب داده‌ی سنسورها (مثلاً قطب‌نما + فاصله) به ناوبری
 و امتیاز بهتر می‌رسد. تیم باید از همه‌ی سنسورها و موتورها بهره‌ی کامل ببرد.</div>
 
-<h2>۲ · بستر مسابقه · Competition Platform</h2>
+<h2>۲ · بستر مسابقه</h2>
 <ul>
   <li><b>۲.۱</b> مسابقه‌ی رسمی در <b>Webots</b> برگزار می‌شود: موتور فیزیک دقیق، پشتیبانی کامل سنسورها، اتصال آسان به Python.</li>
   <li><b>۲.۲</b> نسخه‌های لازم: <b>Webots 2025a</b> و <b>Python 3.8+</b>.</li>
@@ -124,14 +122,14 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
 <div class="note"><b>شبیه‌ساز تمرینی مرورگری:</b> همین بازی — بدون هیچ نصبی — دقیقاً با همین
 سنسورها، همین نام‌ها و همین قوانین. برای کلاس و تمرین از آن استفاده کنید؛ فایل مسابقه‌ی رسمی همان Webots است.</div>
 
-<h2>۳ · ساختار بازی · Game Structure</h2>
+<h2>۳ · ساختار بازی</h2>
 <p>ربات باید در خانه‌ی شبیه‌سازی‌شده امن و کارآمد حرکت کند؛ هر سطحی که زیر ربات رد شود
 «تمیز» حساب می‌شود و <b>امتیاز نهایی قبل از هر چیز به درصدِ سطحِ تمیزشده در زمان مجاز</b>
 برمی‌گردد. سه ساب‌لیگ با پیچیدگی صعودی:</p>
 <img class="shot" id="shotTop" alt="the arena from straight above">
-<div class="cap">نمای بالای زمین رسمی — دقیقاً همان نقشه‌ای که هلپر مسیر U19 استفاده می‌کند · straight-down view</div>
+<div class="cap">تصویر ۲ — نمای قائم (از بالا) زمین رسمی (رندرشده توسط شبیه‌ساز رسمی)</div>
 
-<h3>۳.۱ ساب‌لیگ فرست‌استپ · First Step</h3>
+<h3>۳.۱ ساب‌لیگ فرست‌استپ</h3>
 <ul>
   <li>ربات باید خودمختار حرکت کند، از دیوار و مبلمان و موانع دوری کند و بیشترین سطح ممکن را در زمان مجاز تمیز کند.</li>
   <li>امتیاز فقط بر پایه‌ی درصدِ نظافت است — هیچ عنصر جایزه‌ای وجود ندارد.</li>
@@ -161,17 +159,17 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
 و اگر به پد برسد دوباره شارژ می‌شود · <b>صف شارژر قانونی است</b> — رباتِ کم‌باتری که پشت پد منتظر است
 «گیرکرده» حساب نمی‌شود؛ رباتِ پُر که پد را اشغال کند با ناظرِ ۱۵ثانیه‌ای جابه‌جا می‌شود · تخلیه‌ی زباله فعلاً غیرفعال است.</div>
 
-<h3>۳.۴ امتیازدهی · Scoring</h3>
+<h3>۳.۴ امتیازدهی</h3>
 <h4>۳.۴.۱ درصد نظافت</h4>
 <p>امتیاز بر اساس درصد سطح تمیزشده — هدف: بیشترین پوشش در زمان مجاز. سیستم خودکار محاسبه می‌کند.</p>
-<h4>۳.۴.۲ چالش‌های فنی · Technical Challenges</h4>
+<h4>۳.۴.۲ چالش‌های فنی</h4>
 <p>مأموریت‌هایی جدا از نظافت عادی، برای سنجش مهارت برنامه‌نویسی و خلاقیت. نمونه‌ها:</p>
 <ul>
   <li><b>دیوارگَردی (Wall Following):</b> دور محیط اتاق با فاصله‌ی ثابت از دیوار.</li>
   <li><b>ناوبری اتاق:</b> رفتن از اتاق A به اتاق Z با توقفِ مثلاً ۱۰ ثانیه‌ای در میانه.</li>
   <li><b>دوری از مانع متحرک:</b> تشخیص و دورزدنِ شیءِ درحال حرکت.</li>
 </ul>
-<h4>۳.۴.۳ مصاحبه‌ی فنی · Technical Interview</h4>
+<h4>۳.۴.۳ مصاحبه‌ی فنی</h4>
 <ul>
   <li><b>فهم کد:</b> هر عضو باید همه‌ی بخش‌های الگوریتم را شفاف توضیح بدهد.</li>
   <li><b>نوآوری و حل‌مسئله</b> و <b>تقسیم کار تیمی</b>.</li>
@@ -179,7 +177,7 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
   <li><b>ابزارهای کمکی:</b> سورس هر ابزار کمکی (از جمله هلپرها) باید توسط خود تیم قابل توضیح باشد.</li>
 </ul>
 
-<h2>۴ · قوانین و ضوابط · Rules and Guidelines</h2>
+<h2>۴ · قوانین و ضوابط</h2>
 <h3>۴.۱ قوانین عمومی</h3>
 <ol>
   <li>هر تیم <b>۲ تا ۶ نفر</b>.</li>
@@ -227,7 +225,7 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
   <li>چالش فنی و مصاحبه‌ی فنی: طبق بخش ۳.۴.</li>
 </ul>
 
-<h3>۴.۴ جابه‌جایی و ری‌استارت · Relocation &amp; Restart</h3>
+<h3>۴.۴ جابه‌جایی و ری‌استارت</h3>
 <ol>
   <li>هر تیم تا <b>۳ درخواست جابه‌جایی</b> در هر مسابقه (در رویدادهای مختلف ممکن است فرق کند).</li>
   <li>جابه‌جایی فقط وقتی مجاز است که ربات به دیوار گیر کرده یا در حلقه افتاده باشد — با تأیید داور.</li>
@@ -242,7 +240,7 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
 <p>اگر زمان اجازه بدهد، تیم‌ها با هم «سوپرتیم» تشکیل می‌دهند و یک مأموریت مشترک — که همان روز
 اعلام می‌شود — حل می‌کنند. سوپرتیمِ برنده <b>گواهی افتخار</b> می‌گیرد.</p>
 
-<h3>۴.۶ جریمه‌ها · Penalties</h3>
+<h3>۴.۶ جریمه‌ها</h3>
 <table>
 <tr><th>تخلف</th><th>پیامد</th></tr>
 <tr><td>دست‌کاری غیرمجاز سرور یا تنظیمات بازی</td><td>جریمه‌ی سنگین برای همان راند</td></tr>
@@ -265,7 +263,7 @@ D1 جلو-چپ، D2 جلو-راست، D3 راست، D4 چپ · در شبیه‌�
   <li><b>Website:</b> وب‌سایت رسمی لیگ — قوانین، آموزش‌ها، دانلود فایل‌ها و ابزارها.</li>
 </ul>
 
-<div class="cap" style="margin-top:22px">Smart Home League · Official Rulebook v3.1 — این کتابچه آینه‌ی PDF رسمی است؛ در تعارض، متن PDF رسمی ملاک است.</div>
+<div class="cap" style="margin-top:22px">لیگ خانه‌ی هوشمند · کتابچه‌ی رسمی قوانین، نسخه‌ی ۳٫۱ — در صورت هرگونه مغایرت، متن سند رسمی PDF ملاک است.</div>
 </div>
 
 <script src="leagues/vacuum/maps/rooms.js"></script>
