@@ -253,7 +253,13 @@
       const s = SENSORS[id];
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'blk sens';
-      b.innerHTML = '<span class="bic">' + s.ic + '</span> ' + T('اگر ', 'if ') + esc(label(s)) + ' <small>' + esc(s.py) + '</small>';
+      b.innerHTML = '<span class="bic">' + s.ic + '</span> ' + T('اگر ', 'if ') + esc(label(s)) +
+        ' <span class="pyt" title="' + T('اسمش در پایتون', 'its Python name') + '">…</span><small style="display:none">' + esc(s.py) + '</small>';
+      b.querySelector('.pyt').onclick = (ev) => {
+        ev.stopPropagation();
+        const sm = b.querySelector('small');
+        sm.style.display = sm.style.display === 'none' ? '' : 'none';
+      };
       b.onclick = () => {
         if (!R().length) addRule();
         const r = R()[sel];

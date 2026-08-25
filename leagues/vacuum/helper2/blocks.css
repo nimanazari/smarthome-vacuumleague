@@ -337,3 +337,7 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
 #stacks, .stkcol, .brow, .pal, .blk { direction: ltr; text-align: left; }
 .stkcol { align-items: flex-start; }
 .brow { align-self: flex-start; }
+
+/* the "…" peek: the python name hides until you ask for it */
+.blk .pyt { opacity: .45; font-weight: 900; letter-spacing: 1px; padding: 0 5px; border-radius: 6px; cursor: pointer; }
+.blk .pyt:hover { opacity: 1; background: rgba(255,255,255,.14); }
