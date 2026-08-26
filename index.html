@@ -3788,9 +3788,13 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('heroSub').style.display = d.group === 'sumo' ? 'none' : '';
       // sumo loads FIGHTERS, and its cards wear the wedge — not the house robot
       const loadLbl = d.group === 'sumo' ? '&#129355; Load your rikishi .py'
-        : d.group === 'vacuum' ? '<span class="fa">&#128193; بارگذاری ربات (.py)</span>' : 'Load robot .py';
+        : d.group === 'vacuum' ? ('<span class="fa">&#128193; ' + T('بارگذاری ربات (.py)', 'Load robot .py') + '</span>') : 'Load robot .py';
       $('loadRed').innerHTML = loadLbl;
       $('loadBlue').innerHTML = loadLbl;
+      // the colour label under each card follows the language too
+      document.querySelectorAll('.swlabel').forEach((el) => {
+        el.innerHTML = T('رنگ ربات', 'robot colour');
+      });
       (function sumoIcons(on) {
         const f = pickLeague._sumoIconState || (pickLeague._sumoIconState = {});
         if (on && !f._on) {
@@ -3869,8 +3873,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       // the tutorial wears the lobby's language: per-division Persian lessons
       // for the vacuum divisions, the classic card everywhere else
       if (!pickLeague._tutHTML) { pickLeague._tutHTML = $('tutBtn').innerHTML; pickLeague._tutRunHTML = $('tutRun').innerHTML; }
-      $('tutBtn').innerHTML = d.group === 'vacuum' ? '&#127891; <span class="fa">آموزش</span>' : pickLeague._tutHTML;
-      $('tutRun').innerHTML = d.group === 'vacuum' ? '&#9654; <span class="fa">اجرای کد من</span>' : pickLeague._tutRunHTML;
+      $('tutBtn').innerHTML = d.group === 'vacuum' ? ('&#127891; <span class="fa">' + T('آموزش', 'Tutorial') + '</span>') : pickLeague._tutHTML;
+      $('tutRun').innerHTML = d.group === 'vacuum' ? ('&#9654; <span class="fa">' + T('اجرای کد من', 'Run my code') + '</span>') : pickLeague._tutRunHTML;
       $('mapCell').style.display = d.arena ? 'none' : 'flex';     // an arena has no map
       $('petsCell').style.display = d.arena ? 'none' : 'flex';    // and no pets either
       $('playersCell').style.display = d.arena ? 'none' : 'flex'; // sumo is 2P by nature
@@ -3900,7 +3904,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         : d.arena
           ? ['TEAM 1 &middot; one side of the platform', 'TEAM 2 &middot; the other side']
           : d.group === 'vacuum'
-            ? ['<span class="fa">تیم ۱ &middot; شروع از گوشه‌ی پایین-چپ</span>', '<span class="fa">تیم ۲ &middot; شروع از گوشه‌ی بالا-راست</span>']
+            ? ['<span class="fa">' + T('تیم ۱ · شروع از گوشه‌ی پایین-چپ', 'TEAM 1 · starts bottom-left') + '</span>', '<span class="fa">' + T('تیم ۲ · شروع از گوشه‌ی بالا-راست', 'TEAM 2 · starts top-right') + '</span>']
             : ['TEAM 1 &middot; starts bottom-left', 'TEAM 2 &middot; starts top-right'];
       $('hintRed').innerHTML = corners[0];
       $('hintBlue').innerHTML = corners[1];
