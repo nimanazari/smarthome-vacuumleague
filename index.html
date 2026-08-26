@@ -3408,7 +3408,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     // The choice is remembered and the page RELOADS so every screen is
     // rebuilt in the picked language from the very start.
     let LANG = 'en';
-    try { LANG = localStorage.getItem('shl_lang') || 'en'; } catch (e) { /* private mode */ }
+    try { LANG = localStorage.getItem('shl_lang') || 'fa'; } catch (e) { /* private mode */ }
     if (LANG !== 'fa') LANG = 'en';
     const T = (fa, en) => (LANG === 'fa' ? fa : en);
     document.documentElement.lang = LANG;
@@ -5759,49 +5759,73 @@ else:                            # 7) nothing in the way -> full speed ahead
       {
         fa: true, solo: true,
         title: 'درس ۱ — چشم‌های فاصله',
-        body: 'ربات FS سه چشم رو به جلو دارد که فاصله را به سانتی‌متر می‌گویند: <b>frontleft</b> و <b>front</b> و <b>frontright</b>. عدد کوچک‌تر یعنی نزدیک‌تر (بیشینه ۲۰۰). این ربات دارد به سمت قفسه می‌راند — بهش بگو دیوار که نزدیک شد چه کند، بعد ▶ را بزن و در پنل پایین عددِ front را تماشا کن که آب می‌رود.<br><small>EN: three forward eyes measure distance in cm — smaller is closer.</small>',
+        body: 'ربات FS سه چشم رو به جلو دارد که فاصله را به سانتی‌متر می‌گویند: <b>frontleft</b> و <b>front</b> و <b>frontright</b>. عدد کوچک‌تر یعنی نزدیک‌تر (بیشینه ۲۰۰). این ربات دارد به سمت قفسه می‌راند — بهش بگو دیوار که نزدیک شد چه کند، بعد ▶ را بزن و در پنل پایین عددِ front را تماشا کن که آب می‌رود.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif front < 50:        # دیوار نزدیک‌تر از ۵۰ سانتی‌متر\n    wheelleft = 0     # -> بایست\n    wheelright = 0\n',
         expect: 'باید ببینی: ربات به سمت شرق می‌راند و حدود نیم متر مانده به قفسه می‌ایستد. به‌جای 50 عدد 80 یا 25 بگذار و دوباره اجرا کن — زودتر یا دیرتر می‌ایستد.',
+        en: { title: 'Lesson 1 — The distance eyes',
+          body: 'The FS robot has three forward eyes that report distance in centimetres: <b>frontleft</b>, <b>front</b> and <b>frontright</b>. A smaller number means closer (200 is the maximum). This robot is driving toward the wardrobe — tell it what to do when the wall gets close, press ▶ and watch the <b>front</b> number fall in the panel below.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif front < 50:        # a wall closer than 50 cm\n    wheelleft = 0     # -> stop\n    wheelright = 0\n',
+          expect: 'You should see: the robot drives east and stops about half a metre before the wardrobe. Replace 50 with 80 or 25 and run again — it stops earlier or later.' },
         setup(eng) { const r = eng.robots.red; r.x = 5.5; r.y = 5.0; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۲ — چپ و راست را جدا ببین',
-        body: 'چشمِ وسط همه‌چیز را نمی‌بیند! <b>frontleft</b> مایل به چپ و <b>frontright</b> مایل به راست نگاه می‌کنند. با این دو می‌توانی به‌جای ایستادن، «فرمان بدهی»: هرطرف که مانع دید، به طرفِ دیگر قوس بزن.<br><small>EN: steer away from whichever side sees an obstacle.</small>',
+        body: 'چشمِ وسط همه‌چیز را نمی‌بیند! <b>frontleft</b> مایل به چپ و <b>frontright</b> مایل به راست نگاه می‌کنند. با این دو می‌توانی به‌جای ایستادن، «فرمان بدهی»: هرطرف که مانع دید، به طرفِ دیگر قوس بزن.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif front < 55:          # روبه‌رو بسته است\n    wheelleft = 18      # -> چرخش درجا به راست\n    wheelright = -18\nelif frontleft < 45:    # مانع سمت چپ\n    wheelleft = 25      # -> قوس به راست\n    wheelright = 8\nelif frontright < 45:   # مانع سمت راست\n    wheelleft = 8       # -> قوس به چپ\n    wheelright = 25\n',
         expect: 'باید ببینی: ربات بدون توقف در خانه می‌چرخد و از کنار مبل‌ها قوس می‌گیرد. عددهای 45 را بزرگ‌تر کن (مثلاً 70) — محتاط‌تر می‌شود ولی کاشیِ کمتری می‌گیرد. همین موازنه، قلبِ مسابقه است!',
+        en: { title: 'Lesson 2 — See left and right separately',
+          body: 'The middle eye cannot see everything! <b>frontleft</b> looks slightly left and <b>frontright</b> slightly right. With these two you can STEER instead of stopping: whichever side sees an obstacle, curve away to the other side.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif front < 55:          # blocked straight ahead\n    wheelleft = 18      # -> spin right on the spot\n    wheelright = -18\nelif frontleft < 45:    # obstacle on the left\n    wheelleft = 25      # -> curve right\n    wheelright = 8\nelif frontright < 45:   # obstacle on the right\n    wheelleft = 8       # -> curve left\n    wheelright = 25\n',
+          expect: 'You should see: the robot tours the house without stopping, curving past the furniture. Raise the 45s to 70 — it grows more cautious but paints fewer tiles. That trade-off is the heart of the match!' },
         setup(eng) { const r = eng.robots.red; r.x = 5.0; r.y = 3.2; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۳ — سنسور رنگ',
-        body: 'زیر دماغه‌ی ربات یک سنسور رنگ است که کفِ درست جلوی ربات را می‌خواند. با اسم‌ها مقایسه‌اش کن: <b>white</b> (کف کثیف — امتیاز!)، <b>red / blue</b> (قبلاً تمیز شده)، <b>green</b> (فرش بزرگ)، <b>purple</b> (فرش کوچک)، <b>black</b> (دیوار). این ربات رو به فرش سبز ایستاده — کاری کن لحظه‌ای که سبز دید، واکنش نشان دهد.<br><small>EN: the nose colour sensor reads the floor just ahead.</small>',
+        body: 'زیر دماغه‌ی ربات یک سنسور رنگ است که کفِ درست جلوی ربات را می‌خواند. با اسم‌ها مقایسه‌اش کن: <b>white</b> (کف کثیف — امتیاز!)، <b>red / blue</b> (قبلاً تمیز شده)، <b>green</b> (فرش بزرگ)، <b>purple</b> (فرش کوچک)، <b>black</b> (دیوار). این ربات رو به فرش سبز ایستاده — کاری کن لحظه‌ای که سبز دید، واکنش نشان دهد.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif color == green:     # فرش سبز درست جلوست\n    wheelleft = 25     # -> بچرخ و ازش دور شو\n    wheelright = -25\n',
         expect: 'باید ببینی: ربات به سمت شمال می‌راند و همان لحظه که در پنل، color سبز شد، از فرش رو می‌گرداند. حالا -25 و 25 را جابه‌جا کن تا به چپ بچرخد. دقت کن: چرخش فقط تا وقتی ادامه دارد که سبز جلوی سنسور است — برای حرکتِ ماندگار، درس بعدی را ببین!',
+        en: { title: 'Lesson 3 — The colour sensor',
+          body: "Under the robot's nose sits a colour sensor that reads the floor just ahead. Compare it with the ready-made names: <b>white</b> (dirty floor — points!), <b>red / blue</b> (already cleaned), <b>green</b> (the big rug), <b>purple</b> (a small rug), <b>black</b> (a wall). This robot faces the green rug — make it react the moment it sees green.",
+          code: 'wheelleft = 25\nwheelright = 25\n\nif color == green:     # the green rug is right ahead\n    wheelleft = 25     # -> turn away from it\n    wheelright = -25\n',
+          expect: 'You should see: the robot drives north and, the instant the panel says green, it turns away from the rug. Swap -25 and 25 to turn left instead. Note the turn only lasts WHILE green is ahead — for a move that keeps going, see the next lesson!' },
         setup(eng) { const r = eng.robots.red; r.x = 4.0; r.y = 4.6; r.heading = Math.PI / 2; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۴ — سپرِ دو نیمه',
-        body: 'حلقه‌ی دور ربات لمس را حس می‌کند و می‌گوید کدام نیمه خورده: <b>bumperfront</b> یعنی با جلو کوبیدم، <b>bumperback</b> یعنی از پشت خوردم. قانون طلایی FS: اگر از پشت خوردی، دنده‌عقب فقط محکم‌ترت می‌چسباند — راه نجات <b>جلو</b> است! این ربات کور می‌راند؛ فقط با سپر نجاتش بده.<br><small>EN: the two bumper halves tell WHICH side touched.</small>',
+        body: 'حلقه‌ی دور ربات لمس را حس می‌کند و می‌گوید کدام نیمه خورده: <b>bumperfront</b> یعنی با جلو کوبیدم، <b>bumperback</b> یعنی از پشت خوردم. قانون طلایی FS: اگر از پشت خوردی، دنده‌عقب فقط محکم‌ترت می‌چسباند — راه نجات <b>جلو</b> است! این ربات کور می‌راند؛ فقط با سپر نجاتش بده.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:            # هنوز مشغول مانورم\n    timer -= 1\n    if state == 2:\n        wheelleft = -25  # دنده‌عقبِ کج\n        wheelright = -8\n    else:\n        wheelleft = 25   # جلو + چرخش\n        wheelright = -10\n\nelif bumperfront == 1:   # با جلو کوبیدم\n    state = 2            # -> عقب بکش\n    timer = 7\n\nelif bumperback == 1:    # از پشت خوردم\n    state = 1            # -> فرار به جلو!\n    timer = 6\n',
         expect: 'باید ببینی: ربات به چیزی می‌کوبد، bumperfront در پنل ۱ می‌شود و ربات با قوس عقب می‌کشد. اگر روزی از پشت گیر کرد، به جای له‌شدن، جلو می‌رود. timer = 7 را بزرگ‌تر کن تا مانور طولانی‌تر شود.',
+        en: { title: 'Lesson 4 — The two-half bumper',
+          body: 'The ring around the robot feels touch and says WHICH half was hit: <b>bumperfront</b> means I hit with my front, <b>bumperback</b> means I was hit from behind. The FS golden rule: hit from behind, reversing only pins you harder — the escape is FORWARD! This robot drives blind; rescue it with the bumper alone.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:            # still mid-manoeuvre\n    timer -= 1\n    if state == 2:\n        wheelleft = -25  # curved reverse\n        wheelright = -8\n    else:\n        wheelleft = 25   # forward + turn\n        wheelright = -10\n\nelif bumperfront == 1:   # I hit with my front\n    state = 2            # -> back away\n    timer = 7\n\nelif bumperback == 1:    # hit from behind\n    state = 1            # -> escape FORWARD!\n    timer = 6\n',
+          expect: 'You should see: the robot bumps into something, bumperfront flips to 1 in the panel, and it backs away in a curve. If it is ever hit from behind, it escapes forward instead of being crushed. Make timer = 7 bigger for a longer manoeuvre.' },
         setup(eng) { const r = eng.robots.red; r.x = 4.5; r.y = 5.0; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۵ — تایمر: حرکتی که ادامه دارد',
-        body: 'مقدار دادن به چرخ‌ها فقط <b>یک قدم</b> (۰٫۱ ثانیه) دوام دارد — قدم بعد، کدت دوباره از بالا اجرا می‌شود! برای حرکتِ ماندگار: عددی در <b>timer</b> بگذار و بلوک «if timer > 0:» بالای منطق، همان حرکت را قدم‌به‌قدم ادامه می‌دهد. ۱۰ قدم = ۱ ثانیه.<br><small>EN: timer + the countdown block keeps a move going; 10 steps = 1 s.</small>',
+        body: 'مقدار دادن به چرخ‌ها فقط <b>یک قدم</b> (۰٫۱ ثانیه) دوام دارد — قدم بعد، کدت دوباره از بالا اجرا می‌شود! برای حرکتِ ماندگار: عددی در <b>timer</b> بگذار و بلوک «if timer > 0:» بالای منطق، همان حرکت را قدم‌به‌قدم ادامه می‌دهد. ۱۰ قدم = ۱ ثانیه.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:           # هنوز دنده‌عقبم\n    timer -= 1\n    wheelleft = -25\n    wheelright = -18    # عقبِ کج\n\nelif color == green:    # فرش سبز!\n    timer = 10          # ۱۰ قدم = ۱ ثانیه عقب\n    wheelleft = -25\n    wheelright = -18\n',
         expect: 'باید ببینی: به فرش که رسید، دقیقاً ۱ ثانیه‌ی کامل عقب می‌کشد — حتی وقتی دیگر سبز جلوی سنسور نیست. timer = 10 را بکن 30 و تفاوت را ببین. عدد timer را هم می‌توانی زنده در پنل پایین تماشا کنی.',
+        en: { title: 'Lesson 5 — timer: a move that lasts',
+          body: 'Setting the wheels lasts only ONE step (0.1 s) — next step your code runs again from the top! For a lasting move: put a number in <b>timer</b>, and the "if timer > 0:" block above the logic keeps that same move going step by step. 10 steps = 1 second.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:           # still reversing\n    timer -= 1\n    wheelleft = -25\n    wheelright = -18    # curved reverse\n\nelif color == green:    # the green rug!\n    timer = 10          # 10 steps = 1 second of reverse\n    wheelleft = -25\n    wheelright = -18\n',
+          expect: 'You should see: at the rug it reverses for one FULL second — even after green has left the sensor. Change timer = 10 to 30 and see the difference. Watch timer count down live in the panel.' },
         setup(eng) { const r = eng.robots.red; r.x = 4.0; r.y = 4.6; r.heading = Math.PI / 2; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۶ — حرکت‌های آسان',
-        body: 'ساده‌ترین راه: یک دستور، کلِ حرکت — و عددش <b>ثانیه‌ی واقعی</b> است. <b>backward(2)</b> یعنی دقیقاً ۲ ثانیه دنده‌عقب. <b>forward(1)</b>، <b>turnleft(1)</b>، <b>turnright(1)</b> و <b>stop(1)</b> هم هستند. تا حرکتی تمام نشده، خط‌های چرخِ تو نادیده گرفته می‌شوند و بعدش کدِ عادی‌ات دوباره فرمان می‌گیرد.<br><small>EN: easy moves — one call is the whole move; the number is seconds.</small>',
+        body: 'ساده‌ترین راه: یک دستور، کلِ حرکت — و عددش <b>ثانیه‌ی واقعی</b> است. <b>backward(2)</b> یعنی دقیقاً ۲ ثانیه دنده‌عقب. <b>forward(1)</b>، <b>turnleft(1)</b>، <b>turnright(1)</b> و <b>stop(1)</b> هم هستند. تا حرکتی تمام نشده، خط‌های چرخِ تو نادیده گرفته می‌شوند و بعدش کدِ عادی‌ات دوباره فرمان می‌گیرد.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif color == green:      # فرش سبز جلوست\n    backward(2)         # دو ثانیه‌ی واقعی عقب\n\nelif bumper == 1:       # خوردم به چیزی\n    backward(1)\n\nelif front < 50:        # دیوار نزدیک است\n    turnright(1)        # یک ثانیه چرخش به راست\n',
         expect: 'باید ببینی: به فرش که رسید backward(2) دو ثانیه‌ی کامل عقب می‌بَرَد؛ نزدیک دیوار turnright(1) می‌چرخاند. عددها را عوض کن: backward(5) یا turnright(0.5) — نیم هم می‌شود، عدد همیشه ثانیه است!',
+        en: { title: 'Lesson 6 — Easy moves',
+          body: 'The simplest way: ONE call is the whole move, and its number is REAL SECONDS. <b>backward(2)</b> means exactly two seconds of reverse. You also have <b>forward(1)</b>, <b>turnleft(1)</b>, <b>turnright(1)</b> and <b>stop(1)</b>. While a move runs, your wheel lines are ignored; when it ends, your normal code takes over again.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif color == green:      # the green rug ahead\n    backward(2)         # two real seconds of reverse\n\nelif bumper == 1:       # I hit something\n    backward(1)\n\nelif front < 50:        # a wall is close\n    turnright(1)        # spin right for one second\n',
+          expect: 'You should see: at the rug, backward(2) reverses for two full seconds; near walls turnright(1) spins it away. Change the numbers: backward(5), turnright(0.5) — halves work too, the number is always seconds!' },
         setup(eng) { const r = eng.robots.red; r.x = 4.0; r.y = 4.6; r.heading = Math.PI / 2; }
       },
     ];
@@ -5809,49 +5833,73 @@ else:                            # 7) nothing in the way -> full speed ahead
       {
         fa: true, solo: true,
         title: 'درس ۱ — سه چشم، بدون توقف',
-        body: 'خانه‌ی U14 بزرگ‌تر است و وقت طلاست: به‌جای «بایست و بچرخ»، با سه چشمِ جلو <b>فرمان بده</b>. مانعِ چپ؟ قوس به راست. مانعِ راست؟ قوس به چپ. روبه‌رو بسته؟ چرخش درجا. چرخ‌هایی که نمی‌ایستند یعنی کاشی‌هایی که پشت‌سرهم رنگ می‌شوند.<br><small>EN: steer with the three eyes — wheels that never stop paint more tiles.</small>',
+        body: 'خانه‌ی U14 بزرگ‌تر است و وقت طلاست: به‌جای «بایست و بچرخ»، با سه چشمِ جلو <b>فرمان بده</b>. مانعِ چپ؟ قوس به راست. مانعِ راست؟ قوس به چپ. روبه‌رو بسته؟ چرخش درجا. چرخ‌هایی که نمی‌ایستند یعنی کاشی‌هایی که پشت‌سرهم رنگ می‌شوند.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif front < 60:          # روبه‌رو بسته\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 50:    # مانع سمت چپ\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 50:   # مانع سمت راست\n    wheelleft = 8\n    wheelright = 25\n',
         expect: 'باید ببینی: ربات بدون ایست در خانه‌ی بزرگ می‌گردد و از کنار مبل‌ها سُر می‌خورد. حواست باشد: قوسِ پیوسته دور یک پایه‌ی صندلی می‌تواند «مدار» شود — درس ۶ راه‌حلش را دارد.',
+        en: { title: 'Lesson 1 — Three eyes, no stopping',
+          body: 'The U14 house is bigger and time is money: instead of "stop and turn", STEER with the three front eyes. Obstacle left? Curve right. Obstacle right? Curve left. Blocked ahead? Spin on the spot. Wheels that never stop mean tiles painted back to back.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif front < 60:          # blocked ahead\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 50:    # obstacle on the left\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 50:   # obstacle on the right\n    wheelleft = 8\n    wheelright = 25\n',
+          expect: 'You should see: the robot tours the big house without a stop, gliding past the furniture. Beware: a continuous curve around one chair leg can become an ORBIT — lesson 6 has the cure.' },
         setup(eng) { const r = eng.robots.red; r.x = 6.9; r.y = 4.5; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۲ — فرش‌ها پول نمی‌دهند',
-        body: 'سنسور رنگ فرش را <b>قبل از ورود</b> می‌بیند: <b>green</b> فرش بزرگ است — نصف سرعت و صفر امتیاز؛ <b>purple</b> فرش کوچک — صفر امتیاز. در U14 کفِ خیس هم هست که ۲ کاشی جریمه دارد و از رنگ دیده نمی‌شود — پس عادتِ دورماندن از فرش‌ها مسیرهای امن‌تر هم می‌سازد.<br><small>EN: rugs give no points; green even halves your speed — turn back.</small>',
+        body: 'سنسور رنگ فرش را <b>قبل از ورود</b> می‌بیند: <b>green</b> فرش بزرگ است — نصف سرعت و صفر امتیاز؛ <b>purple</b> فرش کوچک — صفر امتیاز. در U14 کفِ خیس هم هست که ۲ کاشی جریمه دارد و از رنگ دیده نمی‌شود — پس عادتِ دورماندن از فرش‌ها مسیرهای امن‌تر هم می‌سازد.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -8     # عقبِ کج: هم دور می‌شوی هم می‌چرخی\n\nelif color == green:    # فرش بزرگ\n    timer = 8\n\nelif color == purple:   # فرش کوچک\n    timer = 5\n',
         expect: 'باید ببینی: نرسیده به فرش سبز، با قوسِ عقب‌گرد ازش جدا می‌شود و مسیر تازه می‌گیرد. timer فرش سبز عمداً بلندتر است (۸ در برابر ۵) — سبز گران‌تر است!',
+        en: { title: 'Lesson 2 — Rugs pay nothing',
+          body: 'The colour sensor sees a rug BEFORE you enter: <b>green</b> is the big rug — half speed and zero points; <b>purple</b> is a small rug — zero points. U14 also has wet floor, a 2-tile fine the colour sensor cannot see — so the habit of avoiding rugs also builds safer routes.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -8     # curved reverse: leave AND turn\n\nelif color == green:    # the big rug\n    timer = 8\n\nelif color == purple:   # a small rug\n    timer = 5\n',
+          expect: 'You should see: just before the green rug it peels away with a curved reverse and picks a fresh path. The green timer is deliberately longer (8 vs 5) — green costs more!' },
         setup(eng) { const r = eng.robots.red; r.x = 5.6; r.y = 8.7; r.heading = Math.PI / 2; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۳ — تایمر و state: مانورِ چندتکه',
-        body: 'گاهی یک مانور دو تکه دارد: «عقب بکش، بعد بچرخ». <b>timer</b> می‌گوید چقدر، و <b>state</b> یادش می‌ماند <b>کدام</b> تکه‌ایم: state = 2 دنده‌عقب، state = 1 چرخش به راست. بلوک بالای منطق با همین دو عدد، مانور را قدم‌به‌قدم پیش می‌برد.<br><small>EN: timer says how long, state remembers WHICH move.</small>',
+        body: 'گاهی یک مانور دو تکه دارد: «عقب بکش، بعد بچرخ». <b>timer</b> می‌گوید چقدر، و <b>state</b> یادش می‌ماند <b>کدام</b> تکه‌ایم: state = 2 دنده‌عقب، state = 1 چرخش به راست. بلوک بالای منطق با همین دو عدد، مانور را قدم‌به‌قدم پیش می‌برد.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    if state == 2:      # تکه‌ی ۱: عقب\n        wheelleft = -25\n        wheelright = -25\n        if timer == 0:  # عقب تمام شد؟\n            state = 1   # -> تکه‌ی ۲: چرخش\n            timer = 4\n    else:               # state == 1\n        wheelleft = 18\n        wheelright = -18\n\nelif bumper == 1:       # خوردم!\n    state = 2           # اول عقب...\n    timer = 5\n',
         expect: 'باید ببینی: بعد از هر برخورد، اول نیم‌ثانیه عقب می‌کشد و «بعد» می‌چرخد — دو تکه، پشت‌سرهم، بدون گیج‌بازی. timer = 4 چرخش را کوتاه و بلند کن تا زاویه عوض شود.',
+        en: { title: 'Lesson 3 — timer + state: a two-part manoeuvre',
+          body: 'Some manoeuvres have two parts: "back up, THEN turn". <b>timer</b> says how long, and <b>state</b> remembers WHICH part we are in: state = 2 reversing, state = 1 turning right. The block above the logic walks the manoeuvre through, step by step, with just those two numbers.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    if state == 2:      # part 1: reverse\n        wheelleft = -25\n        wheelright = -25\n        if timer == 0:  # reverse done?\n            state = 1   # -> part 2: turn\n            timer = 4\n    else:               # state == 1\n        wheelleft = 18\n        wheelright = -18\n\nelif bumper == 1:       # I hit something!\n    state = 2           # reverse first...\n    timer = 5\n',
+          expect: 'You should see: after every bump it first backs up for half a second and THEN turns — two parts, in order, no confusion. Change timer = 4 to tune the turning angle.' },
         setup(eng) { const r = eng.robots.red; r.x = 6.2; r.y = 6.9; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۴ — سه سبک برای حرکتِ ماندگار',
-        body: 'سه ابزار داری: <b>سبک ۱</b> timer + بلوک شمارش (خودت می‌شماری). <b>سبک ۲</b> movetime — چرخ‌ها را تنظیم کن و بگو چند قدم نگهشان دارد؛ شمارش خودکار است. <b>سبک ۳</b> حرکت‌های آسان — backward(2) و دوستانش؛ عدد = ثانیه. کد پایین سبک ۱ را اجرا می‌کند؛ کامنت‌ها ۲ و ۳ را نشان می‌دهند.<br><small>EN: three styles — timer, movetime, easy moves.</small>',
+        body: 'سه ابزار داری: <b>سبک ۱</b> timer + بلوک شمارش (خودت می‌شماری). <b>سبک ۲</b> movetime — چرخ‌ها را تنظیم کن و بگو چند قدم نگهشان دارد؛ شمارش خودکار است. <b>سبک ۳</b> حرکت‌های آسان — backward(2) و دوستانش؛ عدد = ثانیه. کد پایین سبک ۱ را اجرا می‌کند؛ کامنت‌ها ۲ و ۳ را نشان می‌دهند.',
         code: 'wheelleft = 25\nwheelright = 25\n\n# سبک ۱: تایمر\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -25\nelif color == green:\n    timer = 20          # ۲۰ قدم = ۲ ثانیه\n    wheelleft = -25\n    wheelright = -25\n\n# سبک ۲: movetime — بالا را پاک کن و امتحان کن:\n#     if color == green:\n#         wheelleft = -25\n#         wheelright = -25\n#         movetime = seconds(2)\n\n# سبک ۳: حرکت آسان — کوتاه‌ترین:\n#     if color == green:\n#         backward(2)\n',
         expect: 'هر سه سبک همان یک کار را می‌کنند: ~۲ ثانیه عقب وقتی سبز پیدا شد. اول سبک ۱ را اجرا کن، بعد دوتای دیگر را از کامنت دربیاور — و شمارشِ timer / movetime را زنده در پنل ببین.',
+        en: { title: 'Lesson 4 — Three styles for a lasting move',
+          body: 'You have three tools. <b>Style 1</b>: timer + the countdown block (you count yourself). <b>Style 2</b>: movetime — set the wheels and say how many steps to hold them; the countdown is automatic. <b>Style 3</b>: easy moves — backward(2) and friends; the number is seconds. The code below runs style 1; the comments show 2 and 3.',
+          code: 'wheelleft = 25\nwheelright = 25\n\n# STYLE 1: the timer\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -25\nelif color == green:\n    timer = 20          # 20 steps = 2 seconds\n    wheelleft = -25\n    wheelright = -25\n\n# STYLE 2: movetime - delete the block above and try:\n#     if color == green:\n#         wheelleft = -25\n#         wheelright = -25\n#         movetime = seconds(2)\n\n# STYLE 3: easy moves - the shortest:\n#     if color == green:\n#         backward(2)\n',
+          expect: 'All three styles do the same thing: ~2 seconds of reverse when green appears. Run style 1 first, then un-comment 2 and 3 — and watch timer / movetime count down live in the panel.' },
         setup(eng) { const r = eng.robots.red; r.x = 5.6; r.y = 8.7; r.heading = Math.PI / 2; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۵ — قطب‌نما (heading)',
-        body: 'چیزی که U14 دارد و FS ندارد: <b>heading</b> — جهتِ ربات از ۰ تا ۳۵۹ درجه (۰ = شرق، ۹۰ = شمال، ۱۸۰ = غرب، ۲۷۰ = جنوب). با آن می‌توانی «رو به شمال شو» بنویسی، مسیرت را بعد از ده مانور دوباره پیدا کنی، یا نیمه‌ی حریف را نشانه بگیری.<br><small>EN: heading, 0–359° — 0 east, 90 north.</small>',
+        body: 'چیزی که U14 دارد و FS ندارد: <b>heading</b> — جهتِ ربات از ۰ تا ۳۵۹ درجه (۰ = شرق، ۹۰ = شمال، ۱۸۰ = غرب، ۲۷۰ = جنوب). با آن می‌توانی «رو به شمال شو» بنویسی، مسیرت را بعد از ده مانور دوباره پیدا کنی، یا نیمه‌ی حریف را نشانه بگیری.',
         code: 'wheelleft = 25\nwheelright = 25\n\n# رو به شمال (۹۰ درجه) شو، بعد مستقیم برو\nif heading < 82 or heading > 98:\n    wheelleft = -12      # بچرخ تا شمالی شوی\n    wheelright = 12\nelse:\n    wheelleft = 25       # شمالی هستی -> بران\n    wheelright = 25\n\nif bumper == 1:          # به چیزی خوردی؟\n    backward(1)          # عقب — و باز رو به شمال\n',
         expect: 'باید ببینی: ربات اول درجا می‌چرخد تا heading در پنل حدود ۹۰ شود، بعد صاف به سمت شمال می‌راند؛ بعد از هر برخورد هم دوباره شمال را پیدا می‌کند. 90 را بکن 0 تا شرق‌رو شود.',
+        en: { title: 'Lesson 5 — The compass (heading)',
+          body: 'What U14 has and FS does not: <b>heading</b> — the robot\'s direction from 0 to 359 degrees (0 = east, 90 = north, 180 = west, 270 = south). With it you can write "face north", re-find your path after ten manoeuvres, or aim at the rival\'s half.',
+          code: 'wheelleft = 25\nwheelright = 25\n\n# face north (90 degrees), then drive straight\nif heading < 82 or heading > 98:\n    wheelleft = -12      # turn until you face north\n    wheelright = 12\nelse:\n    wheelleft = 25       # facing north -> drive\n    wheelright = 25\n\nif bumper == 1:          # hit something?\n    backward(1)          # back off - then find north again\n',
+          expect: 'You should see: the robot first spins until heading reads about 90 in the panel, then drives straight north; after every bump it finds north again. Change 90 to 0 to face east.' },
         setup(eng) { const r = eng.robots.red; r.x = 6.9; r.y = 3.4; r.heading = 3.6; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۶ — کنج، و درسِ «همیشه یک‌طرف»',
-        body: 'وقتی <b>هر سه چشم</b> عدد کوچک می‌گویند، در کنجی — تکان‌های کوچک برت می‌گردانند همان‌جا؛ یک چرخش حسابی لازم است. و یک یافته‌ی اندازه‌گیری‌شده از کد قهرمان: فرارِ «هر بار یک‌طرف» ربات را بین دو مانع موج می‌اندازد. در آزمایش ما، همیشه-راست ۱۴۲ کاشی گرفت و فرارِ متغیر فقط ۵۴!<br><small>EN: corners need one big turn; consistent-side escapes beat clever ones (142 vs 54 tiles).</small>',
+        body: 'وقتی <b>هر سه چشم</b> عدد کوچک می‌گویند، در کنجی — تکان‌های کوچک برت می‌گردانند همان‌جا؛ یک چرخش حسابی لازم است. و یک یافته‌ی اندازه‌گیری‌شده از کد قهرمان: فرارِ «هر بار یک‌طرف» ربات را بین دو مانع موج می‌اندازد. در آزمایش ما، همیشه-راست ۱۴۲ کاشی گرفت و فرارِ متغیر فقط ۵۴!',
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = 18      # چرخش به راست — همیشه راست!\n    wheelright = -18\n\nelif front < 55 and frontleft < 55 and frontright < 55:\n    timer = 8           # کنج: چرخش بزرگ (~۱۳۰ درجه)\n\nelif front < 70:\n    timer = 3           # دیوار: چرخش کوتاه\n',
         expect: 'باید ببینی: در فضای باز صاف می‌راند، کنارِ دیوار چرخش کوتاه می‌زند و در کنج‌ها یک‌باره ~۱۳۰ درجه می‌چرخد و آزاد می‌شود. حالا کد کامل «🏆 قهرمان U14» را از منوی ربات‌ها بردار و مقایسه کن — همین درس‌ها آنجا کنار هم‌اند.',
+        en: { title: 'Lesson 6 — Corners, and the one-side rule',
+          body: 'When ALL THREE eyes read small numbers you are in a corner — tiny wiggles just put you back; one big turn is needed. And a measured finding from the champion code: escapes that alternate sides make the robot ping-pong between two obstacles. In our test, always-right took 142 tiles and the variable escape only 54!',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = 18      # turn right - ALWAYS right!\n    wheelright = -18\n\nelif front < 55 and frontleft < 55 and frontright < 55:\n    timer = 8           # a corner: one big turn (~130 deg)\n\nelif front < 70:\n    timer = 3           # a wall: a short turn\n',
+          expect: 'You should see: straight lines in the open, short turns at walls, and one big ~130-degree turn that frees it from corners. Now open the U14 champion from the robots menu and compare — these very lessons sit side by side in it.' },
         setup(eng) { const r = eng.robots.red; r.x = 1.7; r.y = 1.7; r.heading = Math.PI; }
       },
     ];
@@ -5859,41 +5907,61 @@ else:                            # 7) nothing in the way -> full speed ahead
       {
         fa: true, solo: true,
         title: 'درس ۱ — باتری: سوختِ مسابقه',
-        body: 'در U19 هر چرخشِ چرخ، شارژ می‌سوزاند: <b>battery</b> از ۱۰۰ شروع می‌شود و با تمام‌سرعت حدود ۱٫۷٪ در ثانیه پایین می‌آید — یعنی ۱۰۰٪ فقط ~۶۰ ثانیه راندن است. در <b>صفر</b>، ربات همان‌جا برای همیشه خاموش می‌شود. این کد فقط می‌راند؛ تو عقربه را تماشا کن.<br><small>EN: full-throttle burns ~1.7%/s; 0% is final.</small>',
+        body: 'در U19 هر چرخشِ چرخ، شارژ می‌سوزاند: <b>battery</b> از ۱۰۰ شروع می‌شود و با تمام‌سرعت حدود ۱٫۷٪ در ثانیه پایین می‌آید — یعنی ۱۰۰٪ فقط ~۶۰ ثانیه راندن است. در <b>صفر</b>، ربات همان‌جا برای همیشه خاموش می‌شود. این کد فقط می‌راند؛ تو عقربه را تماشا کن.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif front < 55:          # فقط دیوارها را رد کن\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
         expect: 'پنل پایین را نگاه کن: battery پله‌پله پایین می‌آید. با این آهنگ، کل مسابقه‌ی ۳ دقیقه‌ای یعنی دست‌کم دو سفرِ شارژ. درس بعد: خودِ ایستگاه.',
+        en: { title: 'Lesson 1 — The battery: match fuel',
+          body: 'In U19 every wheel turn burns charge: <b>battery</b> starts at 100 and falls about 1.7% a second at full throttle — 100% is only ~60 seconds of driving. This code just drives; you watch the gauge.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif front < 55:          # just dodge the walls\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
+          expect: 'Watch the panel: battery falls step by step. At this rate a 3-minute match means at least two charging trips. Next lesson: the station itself.' },
         setup(eng) { const r = eng.robots.red; r.x = 6.9; r.y = 4.5; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۲ — ایستگاه شارژ و goto',
-        body: 'جای ایستگاه ثابت است و به کدت داده می‌شود: <b>dockx</b> و <b>docky</b> (سانتی‌متر). <b>goto(x, y)</b> خودش می‌چرخد، می‌راند و همان‌جا می‌ایستد؛ <b>atgoal</b> که ۱ شد یعنی رسیده‌ای. روی پد، شارژ +۲۵٪ در ثانیه پر می‌شود. حواست باشد: goto مبل و سگ را دور نمی‌زند — سپر را بپا!<br><small>EN: goto(dockx, docky) drives itself; the pad refills +25%/s.</small>',
+        body: 'جای ایستگاه ثابت است و به کدت داده می‌شود: <b>dockx</b> و <b>docky</b> (سانتی‌متر). <b>goto(x, y)</b> خودش می‌چرخد، می‌راند و همان‌جا می‌ایستد؛ <b>atgoal</b> که ۱ شد یعنی رسیده‌ای. روی پد، شارژ +۲۵٪ در ثانیه پر می‌شود. حواست باشد: goto مبل و سگ را دور نمی‌زند — سپر را بپا!',
         code: 'if state == 0:          # یک بار در شروع\n    state = 1\n    goto(dockx, docky)  # -> برو ایستگاه\n\nif bumper == 1:         # goto مانع را دور نمی‌زند\n    stopgoto()\n    backward(1)\n    state = 0           # دوباره تلاش کن\n\nif atgoal == 1:         # رسیدیم: بایست و بنوش\n    wheelleft = 0\n    wheelright = 0\n',
         expect: 'باید ببینی: ربات رو به ایستگاه می‌چرخد، مسیرِ مستقیم را می‌راند و روی پد می‌ایستد — و در پنل، battery شروع می‌کند به بالا رفتن. بعد از برخوردها هم دوباره راه می‌افتد.',
+        en: { title: 'Lesson 2 — The charging station and goto',
+          body: 'The station has a fixed home, given to your code as <b>dockx</b> and <b>docky</b> (cm). <b>goto(x, y)</b> turns, drives and stops there by itself; <b>atgoal</b> turns 1 on arrival. On the pad, charge refills at +25% a second. Careful: goto does not dodge sofas or dogs — watch the bumper!',
+          code: 'if state == 0:          # once, at the start\n    state = 1\n    goto(dockx, docky)  # -> head to the station\n\nif bumper == 1:         # goto does not dodge obstacles\n    stopgoto()\n    backward(1)\n    state = 0           # try again\n\nif atgoal == 1:         # arrived: stand and drink\n    wheelleft = 0\n    wheelright = 0\n',
+          expect: 'You should see: the robot turns toward the station, drives the straight line and parks on the pad — and in the panel, battery starts climbing. After bumps it sets off again.' },
         setup(eng) { const r = eng.robots.red; r.x = 5.4; r.y = 8.2; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۳ — قانون بودجه',
-        body: 'کی برگردیم؟ سفرِ خانه حدوداً <b>home / 25</b> درصد شارژ می‌خواهد (home = فاصله تا داک به سانتی‌متر). قهرمان ۲۲ واحد هم حاشیه می‌گذارد: <b>needed = home / 25 + 22</b> — فرشِ کند، دورزدن مبل و برخوردها را هم حساب کرده. شارژت زیر needed رفت؟ همان لحظه راه بیفت.<br><small>EN: needed = distto(dock)/25 + fat margin; leave the moment you dip below it.</small>',
+        body: 'کی برگردیم؟ سفرِ خانه حدوداً <b>home / 25</b> درصد شارژ می‌خواهد (home = فاصله تا داک به سانتی‌متر). قهرمان ۲۲ واحد هم حاشیه می‌گذارد: <b>needed = home / 25 + 22</b> — فرشِ کند، دورزدن مبل و برخوردها را هم حساب کرده. شارژت زیر needed رفت؟ همان لحظه راه بیفت.',
         code: 'home = distto(dockx, docky)\nneeded = home / 25 + 22\n\nwheelleft = 25\nwheelright = 25\n\nif state == 1:           # در راه خانه\n    if atgoal == 1:\n        wheelleft = 0    # روی پد بمان تا پر شوی\n        wheelright = 0\n        if battery > 95:\n            state = 0    # پر شد -> برگرد سر کار\nelif battery < needed:   # وقتِ رفتن است!\n    state = 1\n    goto(dockx, docky)\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\n',
         expect: 'بگذار بدود: هر بار که battery به زیرِ needed می‌رسد خودش راهی خانه می‌شود، تا ۹۵٪ می‌نوشد و برمی‌گردد — چرخه‌ی واقعی مسابقه. حاشیه‌ی 22 را بکن 5 و ببین چقدر خطرناک می‌شود!',
+        en: { title: 'Lesson 3 — The budget rule',
+          body: 'When do we head home? The trip costs roughly <b>home / 25</b> percent of charge (home = the distance to the dock in cm). The champion adds a fat margin of 22: <b>needed = home / 25 + 22</b> — it covers the slow rug, detours and bumps. The moment battery dips below needed, leave.',
+          code: 'home = distto(dockx, docky)\nneeded = home / 25 + 22\n\nwheelleft = 25\nwheelright = 25\n\nif state == 1:           # on the way home\n    if atgoal == 1:\n        wheelleft = 0    # stay on the pad and fill up\n        wheelright = 0\n        if battery > 95:\n            state = 0    # full -> back to work\nelif battery < needed:   # time to go!\n    state = 1\n    goto(dockx, docky)\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\n',
+          expect: 'Let it run: every time battery dips below needed it heads home by itself, drinks to 95% and returns — the real match cycle. Change the 22 margin to 5 and see how dangerous life gets!' },
         setup(eng) { const r = eng.robots.red; r.x = 4.1; r.y = 6.9; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۴ — ماشین حالت',
-        body: 'برنامه‌ی قابل‌اعتماد یعنی ربات همیشه بداند «وسطِ چه کاری» است. این را با <b>state</b> می‌نویسیم: 0 تمیزکاری، 1 در راه خانه، 2 روی پد. هر حالت فقط کارِ خودش را می‌کند و فقط در شرایط مشخص به حالتِ بعد می‌رود — این استخوان‌بندیِ کد کامل قهرمان U19 است.<br><small>EN: a state machine — each state does one job and hands over explicitly.</small>',
+        body: 'برنامه‌ی قابل‌اعتماد یعنی ربات همیشه بداند «وسطِ چه کاری» است. این را با <b>state</b> می‌نویسیم: 0 تمیزکاری، 1 در راه خانه، 2 روی پد. هر حالت فقط کارِ خودش را می‌کند و فقط در شرایط مشخص به حالتِ بعد می‌رود — این استخوان‌بندیِ کد کامل قهرمان U19 است.',
         code: 'home = distto(dockx, docky)\n\nif state == 2:           # حالت ۲: نوشیدن\n    wheelleft = 0\n    wheelright = 0\n    if battery > 95:\n        state = 0\n\nelif state == 1:         # حالت ۱: در راه خانه\n    if bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dockx, docky)\n    elif home < 25:      # رسیدیم\n        stopgoto()\n        state = 2\n\nelse:                    # حالت ۰: تمیزکاری\n    wheelleft = 25\n    wheelright = 25\n    if battery < home / 25 + 22:\n        state = 1\n        goto(dockx, docky)\n    elif front < 55:\n        wheelleft = 18\n        wheelright = -18\n',
         expect: 'همان چرخه‌ی درس ۳، ولی این بار «هر حالت یک بلوک» — بخوانش: هر بلوک فقط یک کار می‌کند. حالا کد کامل «🏆 قهرمان U19» را از منوی ربات‌ها باز کن: همین ماشین است + مأموریت مخزن + فرارِ هوشمند.',
+        en: { title: 'Lesson 4 — The state machine',
+          body: 'A dependable program means the robot always knows what it is in the MIDDLE of. We write that with <b>state</b>: 0 cleaning, 1 heading home, 2 on the pad. Each state does only its own job and hands over only on explicit conditions — this is the skeleton of the full U19 champion.',
+          code: 'home = distto(dockx, docky)\n\nif state == 2:           # state 2: drinking\n    wheelleft = 0\n    wheelright = 0\n    if battery > 95:\n        state = 0\n\nelif state == 1:         # state 1: heading home\n    if bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dockx, docky)\n    elif home < 25:      # arrived\n        stopgoto()\n        state = 2\n\nelse:                    # state 0: cleaning\n    wheelleft = 25\n    wheelright = 25\n    if battery < home / 25 + 22:\n        state = 1\n        goto(dockx, docky)\n    elif front < 55:\n        wheelleft = 18\n        wheelright = -18\n',
+          expect: 'The same cycle as lesson 3, but now "one state, one block" — read it: each block does exactly one job. Now open the full U19 champion from the robots menu: the same machine, plus the bin mission and a smarter escape.' },
         setup(eng) { const r = eng.robots.red; r.x = 4.1; r.y = 6.9; r.heading = 0; }
       },
       {
         fa: true, solo: true,
         title: 'درس ۵ — مخزن خاک (تک‌نفره)',
-        body: 'در مسابقه‌ی تک‌نفره‌ی U19 مخزن هر <b>۳۰ کاشی</b> پر می‌شود — رباتِ پُر هیچ‌چیز تمیز نمی‌کند تا به <b>ایستگاه تخلیه</b> برسد (<b>dumpx</b> و <b>dumpy</b> — دستگاهی جدا از پد شارژ!). <b>dust</b> تعداد فعلی و <b>dustfull</b> پر بودن را می‌گوید. دو مأموریت، دو سفر: قانونِ باتری سرجایش می‌ماند.<br><small>EN: solo only — a 30-tile bin; full means nothing counts until you empty it at the dump station.</small>',
+        body: 'در مسابقه‌ی تک‌نفره‌ی U19 مخزن هر <b>۳۰ کاشی</b> پر می‌شود — رباتِ پُر هیچ‌چیز تمیز نمی‌کند تا به <b>ایستگاه تخلیه</b> برسد (<b>dumpx</b> و <b>dumpy</b> — دستگاهی جدا از پد شارژ!). <b>dust</b> تعداد فعلی و <b>dustfull</b> پر بودن را می‌گوید. دو مأموریت، دو سفر: قانونِ باتری سرجایش می‌ماند.',
         code: 'wheelleft = 25\nwheelright = 25\n\nif state == 5:           # در راه تخلیه\n    if dust == 0:        # خالی شد!\n        stopgoto()\n        state = 0\n    elif bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dumpx, dumpy)\n\nelif dustfull == 1 and dumpx > 0:\n    state = 5            # مخزن پر -> برو تخلیه\n    goto(dumpx, dumpy)\n\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
         expect: 'بگذار حسابی تمیز کند؛ نوارِ BIN بالای صفحه پر می‌شود و در ۳۰، ربات خودش راهی گوشه‌ی ایستگاه تخلیه می‌شود، خالی می‌کند و برمی‌گردد. در کد کامل قهرمان، وسطِ همین سفر باتری هم چک می‌شود — مخزن صبر می‌کند، باتری نه!',
+        en: { title: 'Lesson 5 — The dust bin (solo)',
+          body: 'In the solo U19 game the bin fills every <b>30 tiles</b> — a full robot cleans NOTHING until it reaches the emptying station (<b>dumpx</b>, <b>dumpy</b> — a separate machine from the charging pad!). <b>dust</b> is the current count and <b>dustfull</b> says it is full. Two missions, two trips — and the battery rule still applies.',
+          code: 'wheelleft = 25\nwheelright = 25\n\nif state == 5:           # on the way to empty\n    if dust == 0:        # emptied!\n        stopgoto()\n        state = 0\n    elif bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dumpx, dumpy)\n\nelif dustfull == 1 and dumpx > 0:\n    state = 5            # bin full -> go empty it\n    goto(dumpx, dumpy)\n\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
+          expect: 'Let it clean properly; the BIN bar fills and at 30 the robot heads for the emptying corner, empties, and returns. In the full champion, the battery is checked mid-trip too — the bin can wait, the battery cannot!' },
         setup(eng) { const r = eng.robots.red; r.x = 5.4; r.y = 8.2; r.heading = Math.PI; }
       },
     ];
@@ -5974,14 +6042,17 @@ else:                            # 7) nothing in the way -> full speed ahead
     function loadLesson(i) {
       tutIdx = i;
       const set = curLessons();
-      const L = set[i];
+      const L0 = set[i];
+      // the lesson follows the app language: `en:` carries the full English
+      // variant; without one, the lesson shows as written
+      const L = (LANG === 'en' && L0.en) ? Object.assign({}, L0, L0.en, { fa: false }) : L0;
       $('tutStep').textContent = (i + 1) + ' / ' + set.length;
       $('tutTitle').textContent = L.title;
       $('tutBody').innerHTML = L.body;
       $('tutCode').value = L.code;
       $('tutExpect').innerHTML = L.expect;
       $('tutErr').textContent = '';
-      // Persian lessons read right-to-left; the classic set stays LTR
+      // Persian lessons read right-to-left; English reads LTR
       $('tutTitle').classList.toggle('fa-rtl', !!L.fa);
       $('tutBody').classList.toggle('fa-rtl', !!L.fa);
       $('tutExpect').classList.toggle('fa-rtl', !!L.fa);

@@ -22,7 +22,7 @@
   // the game's language choice rides along: English by default,
   // Persian (Vazirmatn) when the player switched in the burger menu
   let LANG = 'en';
-  try { LANG = localStorage.getItem('shl_lang') || 'en'; } catch (e) { /* private mode */ }
+  try { LANG = localStorage.getItem('shl_lang') || 'fa'; } catch (e) { /* private mode */ }
   if (LANG !== 'fa') LANG = 'en';
   const T = (fa, en) => (LANG === 'fa' ? fa : en);
   document.documentElement.lang = LANG;

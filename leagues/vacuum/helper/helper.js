@@ -45,7 +45,7 @@
   const U14 = /(^|-)u14$/.test(LEAGUE);
   // ONE language at a time — the page follows the game's shl_lang
   let PAGE_LANG = 'en';
-  try { PAGE_LANG = localStorage.getItem('shl_lang') || 'en'; } catch (e) { /* private mode */ }
+  try { PAGE_LANG = localStorage.getItem('shl_lang') || 'fa'; } catch (e) { /* private mode */ }
   document.body.classList.add(PAGE_LANG === 'fa' ? 'lang-fa' : 'lang-en');
   document.documentElement.lang = PAGE_LANG === 'fa' ? 'fa' : 'en';
   document.documentElement.dir = PAGE_LANG === 'fa' ? 'rtl' : 'ltr';
