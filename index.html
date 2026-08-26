@@ -4399,12 +4399,17 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (counting) return;
       let redFn, blueFn = null;
       const dLg = leagueDef();
-      const solo1 = !!(dLg && !dLg.arena && $('playersSel').value === '1');
-      try { redFn = makeController($('codeRed').value, 'red'); } catch (e) { $('err').textContent = 'Red code error — ' + e.message; return; }
+      // ⏻ a switched-OFF team leaves the floor COMPLETELY: the match runs
+      // solo. RED off -> the lone robot runs BLUE's code under BLUE's name.
+      const offRed = !dLg.arena && !teamOn.red, offBlue = !dLg.arena && !teamOn.blue;
+      if (offRed && offBlue) { $('err').textContent = T('هر دو ربات خاموش‌اند — یکی را روشن کن', 'Both robots are OFF — switch one on'); return; }
+      const solo1 = !!(dLg && !dLg.arena && ($('playersSel').value === '1' || offRed || offBlue));
+      const soloSrc = offRed ? $('codeBlue').value : $('codeRed').value;
+      try { redFn = makeController(soloSrc, 'red'); } catch (e) { $('err').textContent = (offRed ? 'Blue' : 'Red') + ' code error — ' + e.message; return; }
       if (!solo1) { try { blueFn = makeController($('codeBlue').value, 'blue'); } catch (e) { $('err').textContent = 'Blue code error — ' + e.message; return; } }
-      // an OFF team stands dead where it spawns
-      if (!teamOn.red) redFn = () => ({ left: 0, right: 0 });
-      if (!solo1 && !teamOn.blue) blueFn = () => ({ left: 0, right: 0 });
+      // sumo has no empty ring: there an OFF robot just stands still
+      if (dLg.arena && !teamOn.red) redFn = () => ({ left: 0, right: 0 });
+      if (dLg.arena && !teamOn.blue && blueFn) blueFn = () => ({ left: 0, right: 0 });
       const secs = Math.max(5, Math.min(1800, parseInt($('inTime').value, 10) || 180));
       redErr = ''; blueErr = '';
       const dS = { fc: 2, fl: 2, fr: 2, l: 2, r: 2, bl: 2, br: 2 }, dI = { x: 1, y: 1, heading: 0, tilesMine: 0, tilesRival: 0, timeLeft: secs, color: 0, bumper: 0 };
@@ -4420,7 +4425,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         window._runHash = { red: await sha12($('codeRed').value), blue: blueFn ? await sha12($('codeBlue').value) : null };
       })();
 
-      const redName = ($('inRed').value || 'Team 1').trim();
+      const redName = (offRed ? ($('inBlue').value || 'Team 2') : ($('inRed').value || 'Team 1')).trim();
       const blueName = ($('inBlue').value || 'Team 2').trim();
       // the match seed: referee-set, or freshly rolled — either way the seed
       // that actually drove the match lands in the league book
@@ -4428,7 +4433,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       const usedSeed = Number.isFinite(seedIn) ? (seedIn >>> 0) : Math.floor(Math.random() * 1e9);
       // the DEMO always drives the league's full suggested kit — a half-built
       // (or empty) team robot would just stand there, which teaches nothing
-      engine = new Engine({ matchSeconds: secs, seed: usedSeed, mustWin: !!startMatch._mustWin, redName, blueName, finalMode: $('finalMode').checked, dockBox: !!($('dockBoxChk') && $('dockBoxChk').checked), startPose: (leagueDef() && leagueDef().group === 'sumo') ? poseCopy() : null, map: selectedMap(), league: leagueId, kits: demoOn ? null : kits, pets: !!($('petsChk') && $('petsChk').checked), players: +(($('playersSel') && $('playersSel').value) || 2) });
+      engine = new Engine({ matchSeconds: secs, seed: usedSeed, mustWin: !!startMatch._mustWin, redName, blueName, finalMode: $('finalMode').checked, dockBox: !!($('dockBoxChk') && $('dockBoxChk').checked), startPose: (leagueDef() && leagueDef().group === 'sumo') ? poseCopy() : null, map: selectedMap(), league: leagueId, kits: demoOn ? null : kits, pets: !!($('petsChk') && $('petsChk').checked), players: solo1 ? 1 : +(($('playersSel') && $('playersSel').value) || 2) });
       engine.redController = redFn; engine.blueController = blueFn;
       window._engine = engine;      // debug/testing handle — the UI never reads it
       window._stageCanvas = renderer.renderer.domElement;   // for ⏺ match recording
