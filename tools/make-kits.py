@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP_TOP = {'TeamKit', 'AdminKit', '__pycache__', '.claude', '.git', '.gitignore', 'CLAUDE.md', 'local-notes'}
 
 RUN_FILES = [
-    'index.html', 'rulebook.html', 'rulebook-en.html', 'serve.bat', 'serve.ps1', 'favicon.png',
+    'index.html', 'rulebook.html', 'rulebook-en.html', 'serve.bat', 'serve.ps1', 'Smart Home League (Mac).command', 'favicon.png',
     'engine.js', 'render.js', 'physics.js', 'homeobjects.js', 'sensors.js',
     'robot-parts.js', 'robot-battery.js', 'pyreader.js', 'leagues.js',
     'builder.js', 'robotController.py',
