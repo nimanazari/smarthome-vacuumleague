@@ -5956,18 +5956,6 @@ else:                            # 7) nothing in the way -> full speed ahead
           expect: 'The same cycle as lesson 3, but now "one state, one block" — read it: each block does exactly one job. Now open the full U19 champion from the robots menu: the same machine, plus the bin mission and a smarter escape.' },
         setup(eng) { const r = eng.robots.red; r.x = 4.1; r.y = 6.9; r.heading = 0; }
       },
-      {
-        fa: true, solo: true,
-        title: 'درس ۵ — مخزن خاک (تک‌نفره)',
-        body: 'در مسابقه‌ی تک‌نفره‌ی U19 مخزن هر <b>۳۰ کاشی</b> پر می‌شود — رباتِ پُر هیچ‌چیز تمیز نمی‌کند تا به <b>ایستگاه تخلیه</b> برسد (<b>dumpx</b> و <b>dumpy</b> — دستگاهی جدا از پد شارژ!). <b>dust</b> تعداد فعلی و <b>dustfull</b> پر بودن را می‌گوید. دو مأموریت، دو سفر: قانونِ باتری سرجایش می‌ماند.',
-        code: 'wheelleft = 25\nwheelright = 25\n\nif state == 5:           # در راه تخلیه\n    if dust == 0:        # خالی شد!\n        stopgoto()\n        state = 0\n    elif bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dumpx, dumpy)\n\nelif dustfull == 1 and dumpx > 0:\n    state = 5            # مخزن پر -> برو تخلیه\n    goto(dumpx, dumpy)\n\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
-        expect: 'بگذار حسابی تمیز کند؛ نوارِ BIN بالای صفحه پر می‌شود و در ۳۰، ربات خودش راهی گوشه‌ی ایستگاه تخلیه می‌شود، خالی می‌کند و برمی‌گردد. در کد کامل قهرمان، وسطِ همین سفر باتری هم چک می‌شود — مخزن صبر می‌کند، باتری نه!',
-        en: { title: 'Lesson 5 — The dust bin (solo)',
-          body: 'In the solo U19 game the bin fills every <b>30 tiles</b> — a full robot cleans NOTHING until it reaches the emptying station (<b>dumpx</b>, <b>dumpy</b> — a separate machine from the charging pad!). <b>dust</b> is the current count and <b>dustfull</b> says it is full. Two missions, two trips — and the battery rule still applies.',
-          code: 'wheelleft = 25\nwheelright = 25\n\nif state == 5:           # on the way to empty\n    if dust == 0:        # emptied!\n        stopgoto()\n        state = 0\n    elif bumper == 1:\n        stopgoto()\n        backward(1)\n        goto(dumpx, dumpy)\n\nelif dustfull == 1 and dumpx > 0:\n    state = 5            # bin full -> go empty it\n    goto(dumpx, dumpy)\n\nelif front < 55:\n    wheelleft = 18\n    wheelright = -18\nelif frontleft < 45:\n    wheelleft = 25\n    wheelright = 8\nelif frontright < 45:\n    wheelleft = 8\n    wheelright = 25\n',
-          expect: 'Let it clean properly; the BIN bar fills and at 30 the robot heads for the emptying corner, empties, and returns. In the full champion, the battery is checked mid-trip too — the bin can wait, the battery cannot!' },
-        setup(eng) { const r = eng.robots.red; r.x = 5.4; r.y = 8.2; r.heading = Math.PI; }
-      },
     ];
     const LESSONS = [
       {

@@ -58,26 +58,30 @@ li { margin:3px 0; }
 </div>
 
 <h2>Abstract</h2>
-<p>The Smart Home League is a prestigious robotics competition that focuses on developing
-programming, problem-solving, and critical thinking skills in participants. Held within the
-<b>Webots</b> simulation environment, the competition challenges participants to create efficient
-algorithms for autonomous robots capable of performing specific tasks in a virtual smart home.</p>
-<p>The competition fosters innovation by encouraging participants to solve real-world challenges
-in a simulated environment. Robots are programmed to navigate multiple rooms, avoid obstacles,
-manage resources such as battery life (in U19), and optimise cleaning tasks. In addition,
-participants take part in technical challenges and interviews to demonstrate their understanding
-of robotics and algorithms.</p>
+<p>The <b>Smart Home League</b> is an educational robotics competition that introduces students to
+the world of <b>smart homes and the Internet of Things (IoT)</b>: participants program autonomous
+robots inside a virtual smart home and learn what it takes to make a home "smart". Its goal is to
+develop <b>algorithmic thinking, programming, problem-solving and teamwork</b>.</p>
+<p>The league has several sub-leagues, and the <b>Smart Vacuum</b> is one of them — the sub-league
+whose rules this book describes. The Smart Home League runs at <b>FIRA</b> competitions and has so
+far been held at FIRA <b>Iran</b> and FIRA <b>Canada</b>.</p>
+<p>Everything runs <b>entirely virtually</b>, inside the league's own official simulator — the
+application delivered in your competition folder. The robot, the house, the sensors, the automatic
+refereeing and the match report all live in that single program. The robot must navigate several
+rooms on its own, avoid obstacles, manage its battery in U19, and clean as much of the house as it
+can. Alongside the matches, participants also take part in a <b>technical challenge</b> and a
+<b>technical interview</b>.</p>
 <h3>Key features</h3>
 <ul>
-  <li><b>Educational objectives:</b> enhancing algorithmic thinking and programming proficiency;
-  hands-on experience with automation and smart technologies; teamwork and collaboration in a
+  <li><b>Educational objectives:</b> algorithmic thinking and programming proficiency; hands-on
+  experience with smart-home automation and IoT concepts; teamwork and collaboration in a
   competitive yet supportive setting.</li>
-  <li><b>Competition scope:</b> developing autonomous cleaning robots that efficiently navigate
-  and clean home environments — identifying rooms accurately, tracking cleaning progress, and
-  avoiding obstacles while optimising performance.</li>
-  <li><b>Age categories:</b> First Step (Elementary School) · U14 (Primary) · U19 (Secondary).</li>
-  <li><b>Programming environment:</b> the competition exclusively uses the <b>Webots</b> simulation
-  platform; all programs are written in <b>Python</b>.</li>
+  <li><b>Competition scope:</b> autonomous cleaning robots that navigate a home efficiently —
+  identifying rooms accurately, tracking cleaning progress, and avoiding obstacles.</li>
+  <li><b>Divisions:</b> First Step (newcomers) · U14 (Primary) · U19 (Secondary).</li>
+  <li><b>Programming language:</b> <b>Python</b>.</li>
+  <li><b>Environment:</b> the league's official simulator — on Windows and macOS, with nothing
+  else to install.</li>
 </ul>
 
 <h2>1 · Robots and Sensors</h2>
@@ -101,13 +105,15 @@ of robotics and algorithms.</p>
 <div class="cap">Figure 2 — The competition robot on the official field</div>
 <h3>1.2 Sensors overview</h3>
 <img class="shot" id="shotSensors" alt="Figure 3 — sensor placement">
-<div class="cap">Figure 3 — Sensor placement: distance sensors D1–D4, the front bumper, and the drive wheels</div>
+<div class="cap">Figure 3 — Sensor placement: the three ultrasonic distance sensors (<code>front</code>, <code>frontleft</code>, <code>frontright</code>), the front bumper and the drive wheels</div>
 <table>
 <tr><th>Sensor</th><th>Function · variable names</th><th>Application</th><th>Leagues</th></tr>
-<tr><td><b>1.2.1 Distance sensors</b></td>
-<td>Emit signals and measure the reflection time, providing distance data. Placement: D1 front-left,
-D2 front-right, D3 right, D4 left. Simulator names: <code>front, frontleft, frontright, left, right</code> (cm).</td>
-<td>Collision prevention; path planning and safe navigation.</td><td>All</td></tr>
+<tr><td><b>1.2.1 Distance sensors (Ultrasonic Sensor — US)</b></td>
+<td>Emit an ultrasonic pulse and measure its return time to compute distance. The robot carries
+<b>three</b> of them, acting as its eyes: <code>front</code> looks straight ahead,
+<code>frontleft</code> to the front-<b>left</b> and <code>frontright</code> to the
+front-<b>right</b> — all in centimetres (a smaller number means closer).</td>
+<td>Collision prevention; choosing a safe path.</td><td>All</td></tr>
 <tr><td><b>1.2.2 Bumper sensor</b></td>
 <td>Detects physical contact or immediate proximity to obstacles and reports it to the control
 program. Names: <code>bumper, bumperfront, bumperback</code> (0/1).</td>
@@ -142,23 +148,21 @@ make full use of the sensors and motors provided. Creativity in combining sensor
 example the compass together with the distance sensors — results in more efficient navigation
 and a higher score.</div>
 
-<h2>2 · Competition Platform</h2>
+<h2>2 · Competition Environment</h2>
 <ul>
-  <li><b>2.1 About Webots.</b> The official competition operates within the Webots simulation
-  environment: a high-precision physics engine, integrated sensor and actuator support, and
-  straightforward integration with Python.</li>
-  <li><b>2.2 Required versions.</b> Participants must use <b>Webots 2025a</b> and
-  <b>Python 3.8 or higher</b>.</li>
-  <li><b>2.3 Competition files.</b> The competition files are downloaded from the official
-  Smart Home League repository; the world files are located under
-  <code>Smart Home\game\worlds</code>. Load the appropriate world in Webots and verify your robot
-  with the provided base code.</li>
-  <li><b>2.4 Additional resources.</b> Installation guides and tutorials are available on the
-  official Smart Home League website.</li>
+  <li><b>2.1 The league's official simulator.</b> Matches run entirely virtually inside the
+  league's own simulator: the physics engine, every sensor, the automatic refereeing
+  (relocations, penalties, overtime) and the end-of-match report all live in that one
+  application.</li>
+  <li><b>2.2 Running it.</b> The folder you received contains two sub-folders, <b>Windows</b> and
+  <b>Mac</b>. Double-click <code>Smart Home League.exe</code> on Windows, or
+  <code>Smart Home League (Mac).command</code> on macOS. Nothing else needs to be installed.</li>
+  <li><b>2.3 Programming language.</b> <b>Python</b>. The base code, the sample robots and the
+  code-building helpers are inside the application itself (Base code and Helper on each
+  division's front page).</li>
+  <li><b>2.4 Learning material.</b> The in-app Tutorial is step-by-step and runnable; each
+  division also receives its own printed lesson booklet.</li>
 </ul>
-<div class="note"><b>Browser training simulator.</b> The league additionally provides a
-zero-installation browser simulator implementing the same sensors, the same variable names, and
-the same rules. It is intended for teaching and practice; official matches are conducted in Webots.</div>
 
 <h2>3 · Game Structure</h2>
 <p>Teams must design algorithms that enable their robots to move safely and efficiently while
@@ -266,7 +270,7 @@ standard robot behaviour. Examples include:</p>
   Committee; failure to do so subjects all team members to a rigorous technical interview or
   disqualification.</li>
   <li>The Technical Committee is not responsible for software issues within the teams; it only
-  ensures that at least one laptop per team can run Webots and the latest version of the Smart
+  ensures that at least one laptop per team can run the latest version of the Smart
   Home software in the U14 and First Step sub-leagues.</li>
   <li>The use of external helping software is not restricted; any such tool is subject to
   section 3.4.3.</li>
@@ -465,10 +469,10 @@ in the event of any discrepancy, the official PDF document prevails.</div>
       // the robot, up close
       const rb = eng.robots.red, ox = -W / 2, oz = -H / 2;
       const rx = ox + rb.x, rz = oz + rb.y;
-      r3.camera.fov = 42; r3.camera.aspect = 1200 / 640; r3.camera.updateProjectionMatrix();
-      r3.camera.position.set(rx + 1.5, 1.0, rz + 1.5);
-      r3.camera.lookAt(rx, 0.1, rz);
-      r3.renderer.setSize(1200, 640);
+      r3.camera.fov = 34; r3.camera.aspect = 1200 / 620; r3.camera.updateProjectionMatrix();
+      r3.camera.position.set(rx + 0.62, 0.50, rz + 0.62);
+      r3.camera.lookAt(rx, 0.11, rz);
+      r3.renderer.setSize(1200, 620);
       r3.renderer.render(r3.scene, r3.camera);
       put('shotRobot', r3.renderer.domElement.toDataURL('image/png'));
       r3.renderer.dispose();
@@ -490,10 +494,9 @@ in the event of any discrepancy, the official PDF document prevails.</div>
         g.closePath();
         g.fillStyle = color; g.fill();
       };
-      beam(115, 190, 'rgba(46,111,224,.18)');   // D1 front-left
-      beam(65, 190, 'rgba(46,111,224,.18)');    // D2 front-right
-      beam(0, 150, 'rgba(34,197,94,.18)');      // D3 right
-      beam(180, 150, 'rgba(34,197,94,.18)');    // D4 left
+      beam(90, 210, 'rgba(46,111,224,.20)');    // front
+      beam(128, 175, 'rgba(46,111,224,.16)');   // frontleft
+      beam(52, 175, 'rgba(46,111,224,.16)');    // frontright
       // shell
       g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
       g.fillStyle = '#dfe7f4'; g.fill(); g.lineWidth = 5; g.strokeStyle = '#8fa3c4'; g.stroke();
@@ -509,15 +512,15 @@ in the event of any discrepancy, the official PDF document prevails.</div>
         const x = cx + Math.cos(a) * R, y = cy - Math.sin(a) * R;
         label(g, x, y, name, color);
       };
-      dot(115, 'D1', '#2e6fe0'); dot(65, 'D2', '#2e6fe0'); dot(0, 'D3', '#16a34a'); dot(180, 'D4', '#16a34a');
+      dot(90, 'F', '#2e6fe0'); dot(128, 'FL', '#2e6fe0'); dot(52, 'FR', '#2e6fe0');
       // caption texts
       g.fillStyle = '#20437e'; g.font = '700 24px "Segoe UI", sans-serif'; g.textAlign = 'center';
       g.fillText(RB_EN ? 'front' : 'جلو', cx, 68);
       g.fillStyle = '#b45309';
       g.fillText(RB_EN ? 'bumper' : 'بامپر (سپر)', cx, 130);
       g.fillStyle = '#374a68'; g.font = '600 20px "Segoe UI", sans-serif';
-      g.fillText(RB_EN ? 'D1 front-left · D2 front-right · D3 right · D4 left · colour sensor underneath'
-                       : 'D1 جلو-چپ · D2 جلو-راست · D3 راست · D4 چپ · سنسور رنگ زیر بدنه', cx, 585);
+      g.fillText(RB_EN ? 'F = front · FL = frontleft (front-left) · FR = frontright (front-right) · colour sensor underneath'
+                       : 'F = front (جلو) · FL = frontleft (جلو-چپ) · FR = frontright (جلو-راست) · سنسور رنگ زیر بدنه', cx, 585);
       put('shotSensors', c.toDataURL('image/png'));
     })();
 

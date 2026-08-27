@@ -133,7 +133,13 @@ const FORMAL = [
   ['با سه چشمِ جلو', 'با سه سنسور جلو'],
   ['درس ۱ — سه چشم، بدون توقف', 'درس ۱ — سه سنسور فاصله، بدون توقف'],
   ['وقتی هر سه چشم عدد کوچک می‌گویند', 'وقتی هر سه سنسورِ فاصله عدد کوچک می‌گویند'],
-  ['چشم‌ها', 'سنسورها'],
+  ['چشم‌ها', 'سنسورهای فاصله'],
+  ['هر سه چشم', 'هر سه سنسور فاصله'],
+  ['سه چشمِ جلو', 'سه سنسور فاصله‌ی جلو'],
+  ['چشمِ وسط', 'سنسور فاصله‌ی وسط'],
+  ['سه چشم', 'سه سنسور فاصله'],
+  ['چشمِ', 'سنسورِ فاصله‌ی'],
+  ['چشم', 'سنسور فاصله'],
   // possessives that address one child
   ['کدت', 'کدِ شما'],
   ['شارژت', 'شارژ شما'],
@@ -150,7 +156,11 @@ const FORMAL_EN = [
   ['Three eyes, no stopping', 'Three distance sensors, no stopping'],
   ['with the three front eyes', 'with the three front sensors'],
   ['ALL THREE eyes read small numbers', 'ALL THREE distance sensors read small numbers'],
-  ['the eyes get more warning', 'the sensors get more warning'],
+  ['the eyes get more warning', 'the distance sensors get more warning'],
+  ['three forward eyes', 'three forward distance sensors'],
+  ['the three eyes', 'the three distance sensors'],
+  ['forward eyes', 'forward distance sensors'],
+  ['eyes', 'distance sensors'],
 ];
 function formalize(text, lang) {
   let t = String(text);
@@ -256,6 +266,56 @@ const HELPERS = {
   },
 };
 
+/* what each division's robot actually carries */
+const SENSOR_LIST = {
+  fs: {
+    fa: `<ul>
+<li><b>سه سنسور فاصله‌ی آلتراسونیک (US)</b> — <code>front</code> رو‌به‌جلو، <code>frontleft</code> جلو سمتِ چپ، <code>frontright</code> جلو سمتِ راست؛ بر حسب سانتی‌متر، عدد کوچک‌تر یعنی نزدیک‌تر.</li>
+<li><b>بامپر (سپر لمسی)</b> — <code>bumperfront</code> برخورد با جلو و <code>bumperback</code> برخورد از پشت (۰ یا ۱).</li>
+<li><b>سنسور رنگ</b> — <code>color</code>: رنگِ کفِ درست جلوی ربات (<code>white</code>، <code>green</code>، <code>purple</code>، …).</li>
+</ul>`,
+    en: `<ul>
+<li><b>Three ultrasonic distance sensors (US)</b> — <code>front</code> straight ahead, <code>frontleft</code> to the front-left, <code>frontright</code> to the front-right; in centimetres, smaller means closer.</li>
+<li><b>The bumper</b> — <code>bumperfront</code> for a front hit and <code>bumperback</code> for a hit from behind (0 or 1).</li>
+<li><b>The colour sensor</b> — <code>color</code>: the floor colour just ahead (<code>white</code>, <code>green</code>, <code>purple</code>, …).</li>
+</ul>`,
+  },
+  u14: {
+    fa: `<ul>
+<li><b>سه سنسور فاصله‌ی آلتراسونیک (US)</b> — <code>front</code> رو‌به‌جلو، <code>frontleft</code> جلو سمتِ چپ، <code>frontright</code> جلو سمتِ راست (سانتی‌متر).</li>
+<li><b>بامپر</b> — <code>bumperfront</code> و <code>bumperback</code> (۰ یا ۱).</li>
+<li><b>سنسور رنگ</b> — <code>color</code>.</li>
+<li><b>قطب‌نما</b> — <code>heading</code> از ۰ تا ۳۵۹ درجه.</li>
+<li><b>شماره‌ی اتاق و درصد تمیزی</b> — <code>room</code> و <code>clean1..clean5</code>.</li>
+</ul>`,
+    en: `<ul>
+<li><b>Three ultrasonic distance sensors (US)</b> — <code>front</code>, <code>frontleft</code> (front-left), <code>frontright</code> (front-right), in centimetres.</li>
+<li><b>The bumper</b> — <code>bumperfront</code> and <code>bumperback</code> (0 or 1).</li>
+<li><b>The colour sensor</b> — <code>color</code>.</li>
+<li><b>The compass</b> — <code>heading</code>, 0 to 359 degrees.</li>
+<li><b>Room number and clean-%</b> — <code>room</code> and <code>clean1..clean5</code>.</li>
+</ul>`,
+  },
+  u19: {
+    fa: `<ul>
+<li><b>سه سنسور فاصله‌ی آلتراسونیک (US)</b> — <code>front</code>، <code>frontleft</code> (جلو-چپ)، <code>frontright</code> (جلو-راست)، بر حسب سانتی‌متر.</li>
+<li><b>بامپر</b> — <code>bumperfront</code> و <code>bumperback</code> (۰ یا ۱).</li>
+<li><b>سنسور رنگ</b> — <code>color</code>.</li>
+<li><b>قطب‌نما</b> — <code>heading</code>.</li>
+<li><b>GPS</b> — <code>x</code> و <code>y</code> (سانتی‌متر) به‌همراه <code>goto(x, y)</code>، <code>distto</code> و <code>angleto</code>.</li>
+<li><b>باتری و ایستگاه شارژ</b> — <code>battery</code> (٪) و مختصات پد: <code>dockx</code>، <code>docky</code>.</li>
+</ul>`,
+    en: `<ul>
+<li><b>Three ultrasonic distance sensors (US)</b> — <code>front</code>, <code>frontleft</code> (front-left), <code>frontright</code> (front-right), in centimetres.</li>
+<li><b>The bumper</b> — <code>bumperfront</code> and <code>bumperback</code> (0 or 1).</li>
+<li><b>The colour sensor</b> — <code>color</code>.</li>
+<li><b>The compass</b> — <code>heading</code>.</li>
+<li><b>GPS</b> — <code>x</code> and <code>y</code> (cm) with <code>goto(x, y)</code>, <code>distto</code> and <code>angleto</code>.</li>
+<li><b>Battery and charging station</b> — <code>battery</code> (%) and the pad coordinates <code>dockx</code>, <code>docky</code>.</li>
+</ul>`,
+  },
+};
+
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function page(lang, leagueId) {
@@ -306,9 +366,10 @@ ol,ul { padding-inline-start:22px; }
 ${INSTALL[lang]}
 ${HELPERS[leagueId][lang]}
 <h2>${t('سنسورهای ربات در یک نگاه', 'The robot\'s sensors at a glance')}</h2>
+${SENSOR_LIST[leagueId][lang]}
 <canvas id="sensCv" width="980" height="560" style="width:100%;border:1px solid #ccd4e2;border-radius:12px"></canvas>
 <div style="text-align:center;color:#5b6880;font-size:11px;margin:4px 0 10px">${t(
-  'سنسورهای فاصله‌ی آلتراسونیک (US): front جلوی ربات، frontleft جلو-چپ، frontright جلو-راست — و حلقه‌ی نارنجی، بامپر (سپر لمسی) است',
+  'سه سنسور فاصله‌ی آلتراسونیک (US): front جلوی ربات، frontleft جلو-چپ، frontright جلو-راست — و حلقه‌ی نارنجی، بامپر (سپر لمسی) است',
   'The ultrasonic distance sensors (US): front looks straight ahead, frontleft front-left, frontright front-right — the orange arc is the touch bumper')}</div>
 <script>
 (function () {
