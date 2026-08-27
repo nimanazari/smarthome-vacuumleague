@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>SHL — figure renderer</title>
+<!-- tools/shots.html — renders ONE figure full-bleed so headless Edge can
+     screenshot it into a real PNG for the website.
+     Usage: shots.html?fig=hero|robot|sensors|fs|u14|u19  -->
+<style>
+  html,body{margin:0;padding:0;background:#0b0f16;overflow:hidden}
+  canvas,img{display:block;width:100vw;height:100vh;object-fit:contain}
+</style></head>
+<body>
+<div id="host"></div>
+<script src="leagues/vacuum/maps/rooms.js"></script>
+<script src="leagues/vacuum/maps/grown-rooms.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="homeobjects.js"></script>
+<script src="sensors.js"></script>
+<script src="robot-parts.js"></script>
+<script src="physics.js"></script>
+<script src="robot-battery.js"></script>
+<script src="leagues.js"></script>
+<script src="leagues/manifest.js"></script>
+<script>
+  (function () {
+    const tag = (src) => document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    for (const L of (self.LEAGUE_MANIFEST || [])) {
+      for (const x of (L.pre || [])) tag('leagues/' + L.id + '/' + x);
+      tag('leagues/' + L.id + '/robot.js');
+      tag('leagues/' + L.id + '/league.js');
+      for (const e of (L.extra || [])) tag('leagues/' + L.id + '/' + e);
+      for (const d of L.divisions) tag('leagues/' + L.id + '/' + d + '/rules.js');
+    }
+  })();
+</script>
+<script src="engine.js"></script>
+<script src="render.js"></script>
+<script>
+(function () {
+  const fig = new URLSearchParams(location.search).get('fig') || 'hero';
+  const host = document.getElementById('host');
+  const hider = document.createElement('div');
+  hider.style.cssText = 'position:fixed;left:-5000px;top:0;width:1600px;height:1000px';
+  document.body.appendChild(hider);
+
+  const mapOf = (id) => (Leagues.get(id) && Leagues.get(id).map) || self.VacuumMaps.GROWN_ROOMS;
+  const show = (url) => { const im = new Image(); im.src = url; host.appendChild(im); };
+
+  function scene(mapId) {
+    const map = mapOf(mapId);
+    const eng = new Engine({ map, matchSeconds: 60, players: 2, seed: 1 });
+    const r3 = new Renderer3D(hider);
+    r3.buildScene(eng); r3.sync(eng);
+    return { map, eng, r3, W: map.cols * map.tileSize, H: map.rows * map.tileSize };
+  }
+
+  function topShot(mapId, annotate, size) {
+    const s = scene(mapId);
+    const S = size || 1400;
+    const camO = new THREE.OrthographicCamera(-s.W / 2 - 0.4, s.W / 2 + 0.4, s.H / 2 + 0.4, -s.H / 2 - 0.4, 0.1, 90);
+    camO.position.set(0, 45, 0); camO.up.set(0, 0, 1); camO.lookAt(0, 0, 0);
+    s.r3.scene.fog = null;
+    s.r3.renderer.setSize(S, S);
+    s.r3.renderer.render(s.r3.scene, camO);
+    const c = document.createElement('canvas'); c.width = S; c.height = S;
+    const g = c.getContext('2d');
+    g.drawImage(s.r3.renderer.domElement, 0, 0);
+    const PX = (x) => (x + 0.4) / (s.W + 0.8) * S;
+    const PY = (y) => (s.H + 0.4 - y) / (s.H + 0.8) * S;
+    if (annotate) annotate(g, PX, PY, s.map);
+    s.r3.renderer.dispose();
+    return c.toDataURL('image/png');
+  }
+
+  const badge = (g, x, y, text, color) => {
+    g.beginPath(); g.arc(x, y, 26, 0, Math.PI * 2);
+    g.fillStyle = color; g.fill();
+    g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+    g.fillStyle = '#fff'; g.font = '800 26px "Segoe UI",sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, x, y + 1);
+  };
+
+  if (fig === 'hero') {
+    const s = scene('u14');
+    s.r3.renderer.setSize(1600, 900);
+    s.r3.render();
+    show(s.r3.renderer.domElement.toDataURL('image/png'));
+  } else if (fig === 'robot') {
+    const s = scene('u14');
+    const rb = s.eng.robots.red, ox = -s.W / 2, oz = -s.H / 2;
+    const rx = ox + rb.x, rz = oz + rb.y;
+    s.r3.camera.fov = 34; s.r3.camera.aspect = 1400 / 900; s.r3.camera.updateProjectionMatrix();
+    s.r3.camera.position.set(rx + 0.62, 0.50, rz + 0.62);
+    s.r3.camera.lookAt(rx, 0.11, rz);
+    s.r3.renderer.setSize(1400, 900);
+    s.r3.renderer.render(s.r3.scene, s.r3.camera);
+    show(s.r3.renderer.domElement.toDataURL('image/png'));
+  } else if (fig === 'sensors') {
+    const c = document.createElement('canvas'); c.width = 1400; c.height = 900;
+    const g = c.getContext('2d');
+    g.fillStyle = '#f7f9fd'; g.fillRect(0, 0, 1400, 900);
+    const cx = 700, cy = 470, R = 190;
+    const beam = (ang, len, a) => {
+      const t = ang * Math.PI / 180;
+      g.beginPath();
+      g.moveTo(cx + Math.cos(t - 0.15) * R, cy - Math.sin(t - 0.15) * R);
+      g.lineTo(cx + Math.cos(t) * (R + len), cy - Math.sin(t) * (R + len));
+      g.lineTo(cx + Math.cos(t + 0.15) * R, cy - Math.sin(t + 0.15) * R);
+      g.closePath(); g.fillStyle = 'rgba(46,111,224,' + a + ')'; g.fill();
+    };
+    beam(90, 280, 0.20); beam(128, 230, 0.16); beam(52, 230, 0.16);
+    g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
+    g.fillStyle = '#dfe7f4'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#8fa3c4'; g.stroke();
+    g.beginPath(); g.arc(cx, cy, R + 12, -Math.PI * 0.80, -Math.PI * 0.20);
+    g.lineWidth = 14; g.strokeStyle = '#f59e0b'; g.stroke();
+    g.fillStyle = '#5b6880';
+    g.fillRect(cx - R - 6, cy - 52, 20, 104); g.fillRect(cx + R - 14, cy - 52, 20, 104);
+    const dot = (ang, name) => {
+      const t = ang * Math.PI / 180;
+      const x = cx + Math.cos(t) * R, y = cy - Math.sin(t) * R;
+      g.beginPath(); g.arc(x, y, 16, 0, Math.PI * 2);
+      g.fillStyle = '#2e6fe0'; g.fill(); g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+      g.fillStyle = '#20437e'; g.font = '700 26px Consolas, monospace'; g.textAlign = 'center';
+      g.fillText(name, cx + Math.cos(t) * (R + 250), cy - Math.sin(t) * (R + 250));
+    };
+    dot(90, 'front'); dot(128, 'frontleft'); dot(52, 'frontright');
+    g.fillStyle = '#b45309'; g.font = '700 24px Consolas, monospace'; g.textAlign = 'center';
+    g.fillText('bumper', cx, cy - R - 46);
+    g.fillStyle = '#374a68'; g.font = '600 24px "Segoe UI",sans-serif';
+    g.fillText('3 ultrasonic distance sensors (US)  ·  bumper  ·  colour sensor underneath', cx, 850);
+    show(c.toDataURL('image/png'));
+  } else if (fig === 'fs') {
+    show(topShot('fs'));
+  } else if (fig === 'u14') {
+    show(topShot('u14', (g, PX, PY, map) => {
+      for (const rm of (map.rooms || [])) badge(g, PX((rm.x1 + rm.x2) / 2), PY((rm.y1 + rm.y2) / 2), String(rm.id), '#16a34a');
+      badge(g, PX(map.cols * map.tileSize * 0.5), PY(map.rows * map.tileSize * 0.44), '0', '#16a34a');
+    }));
+  } else if (fig === 'u19') {
+    show(topShot('u19', (g, PX, PY, map) => {
+      const d = (map.objects || []).filter((o) => o.t === 'dock')[0];
+      if (d) {
+        const x = PX(d.x), y = PY(d.y);
+        g.beginPath(); g.arc(x, y, 44, 0, Math.PI * 2);
+        g.lineWidth = 7; g.strokeStyle = '#f59e0b'; g.stroke();
+        g.fillStyle = '#b45309'; g.font = '800 26px "Segoe UI",sans-serif'; g.textAlign = 'center';
+        g.fillText('charging station', x, y - 60);
+      }
+    }));
+  }
+})();
+</script>
+</body></html>

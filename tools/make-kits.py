@@ -26,7 +26,7 @@ RUN_FILES = [
     'builder.js', 'robotController.py',
     'RULES.md', 'CODING.md', 'TEACHING.md',
 ]
-RUN_DIRS = ['fonts', 'vendor', 'fsapp', 'leagues']
+RUN_DIRS = ['fonts', 'vendor', 'fsapp', 'leagues', 'assets']
 
 TEAM_README = """# 🤖 Smart Home League — Team Kit · بسته‌ی تیم
 

@@ -15,10 +15,14 @@
    at the corner (0,0), heading in radians, counter-clockwise.
    ============================================================ */
 
+// The engine writes a few labels straight onto the scoreboard, so it needs
+// the app language too. index.html publishes it; read it at call time.
+const TR_ENGINE = (fa, en) => ((typeof window !== 'undefined' && window.LANG === 'fa') ? fa : en);
+
 const MATCH_DEFAULTS = {
   matchSeconds: 180,   // match length (seconds) — set by the referee
-  redName: 'Team 1',
-  blueName: 'Team 2',
+  get redName() { return TR_ENGINE('تیم ۱', 'Team 1'); },
+  get blueName() { return TR_ENGINE('تیم ۲', 'Team 2'); },
   // FINAL mode: the CAT becomes a hazard — every painted tile it walks over
   // turns WHITE again and the team that had painted it loses that point.
   finalMode: false,
@@ -153,7 +157,7 @@ class Engine {
   // that implements no hud() of its own still gets a working scoreboard.
   hud() {
     const base = {
-      scoreLabel: 'points',
+      scoreLabel: TR_ENGINE('امتیاز', 'points'),
       // per team: { num, label, pct, alert, good } — the second line under the score
       metric: { red: { num: '', label: '', pct: 0 }, blue: { num: '', label: '', pct: 0 } },
       center: null,      // one line under the clock

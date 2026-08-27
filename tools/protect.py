@@ -55,9 +55,26 @@ def protect_html(text):
     out.append(text[pos:])
     return ''.join(out)
 
+# TeamKit is what make-kits.py builds out of the live repo. TeamPack is the
+# same thing without the .md files — the exact set the teams are allowed to
+# see. Rebuilding it here means the .exe, the Mac file and the website can
+# never again be minified from a stale hand-made copy.
+TEAMKIT = os.path.join(TOOLS, '..', 'TeamKit')
+
+def refresh_teampack():
+    kit = os.path.abspath(TEAMKIT)
+    if not os.path.isdir(kit):
+        print('  (no TeamKit — run tools/make-kits.py first; using SmartHome-TeamPack as it stands)')
+        return
+    if os.path.isdir(SRC):
+        shutil.rmtree(SRC)
+    shutil.copytree(kit, SRC, ignore=shutil.ignore_patterns('*.md'))
+    print('  TeamPack refreshed from TeamKit')
+
 def main():
     if not TERSER:
         sys.exit('terser not found — npm install -g terser')
+    refresh_teampack()
     if os.path.isdir(DST):
         shutil.rmtree(DST)
     shutil.copytree(SRC, DST)

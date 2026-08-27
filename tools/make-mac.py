@@ -100,7 +100,7 @@ mkdir -p "$D"
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$D"' EXIT
 N=$(awk '/^__PAYLOAD__$/{print NR+1; exit}' "$0")
 tail -n +"$N" "$0" | "$PY" -c 'import sys,base64;sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$D/pack.zip"
-"$PY" -c "import zipfile;zipfile.ZipFile('$D/pack.zip').extract('__serve.py','$D')"
+"$PY" -c 'import sys,zipfile;zipfile.ZipFile(sys.argv[1]).extract("__serve.py",sys.argv[2])' "$D/pack.zip" "$D"
 "$PY" "$D/__serve.py" "$D/pack.zip"
 exit 0
 __PAYLOAD__
@@ -123,6 +123,42 @@ def main():
         for i in range(0, len(payload), 120):
             f.write(payload[i:i + 120] + '\n')
     print('wrote', OUT, '(%.1f MB)' % (os.path.getsize(OUT) / 1e6))
+
+    # ---- and the ZIP that KEEPS the +x bit -------------------------------
+    # A .command copied from Windows loses its execute permission, and macOS
+    # then refuses to open it on a double-click. Shipping it inside a zip
+    # whose entry carries mode 0755 makes Archive Utility restore the bit.
+    zip_out = os.path.join(os.path.dirname(OUT), 'Smart Home League (Mac).zip')
+    readme = chr(10).join([
+        "HOW TO OPEN - Smart Home League on macOS",
+        "========================================",
+        "",
+        "1) Double-click this ZIP to unpack it (it makes the .command file).",
+        "2) RIGHT-CLICK 'Smart Home League (Mac).command' -> Open -> Open.",
+        "   (Only the first time. A plain double-click works afterwards.)",
+        "",
+        "If nothing happens, or you see 'permission denied':",
+        "   - Open the Terminal app",
+        "   - Type:  bash    (then one space)",
+        "   - Drag the .command file into the Terminal window",
+        "   - Press Enter",
+        "",
+        "If macOS offers to install its command line tools (python3),",
+        "accept it once and then open the file again.",
+        "",
+        "The game opens in its own window. Closing that window stops it.",
+        "",
+    ])
+    with zipfile.ZipFile(zip_out, 'w', zipfile.ZIP_DEFLATED) as z:
+        info = zipfile.ZipInfo('Smart Home League (Mac).command')
+        info.external_attr = (0o100755 << 16)          # -rwxr-xr-x
+        info.compress_type = zipfile.ZIP_DEFLATED
+        z.writestr(info, open(OUT, 'rb').read())
+        ri = zipfile.ZipInfo('HOW TO OPEN (read me).txt')
+        ri.external_attr = (0o100644 << 16)
+        ri.compress_type = zipfile.ZIP_DEFLATED
+        z.writestr(ri, readme)
+    print('wrote', zip_out, '(%.1f MB)' % (os.path.getsize(zip_out) / 1e6))
 
 if __name__ == '__main__':
     main()

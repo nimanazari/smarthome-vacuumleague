@@ -5,3 +5,6 @@ kits/
 *.webm
 CLAUDE.md
 local-notes/
+build/
+dist/
+tools/__pycache__/

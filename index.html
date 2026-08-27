@@ -2813,12 +2813,12 @@ else:                            # 7) nothing in the way -> full speed ahead
       let landed = false;
       if (pendingRed != null) {
         $('codeRed').value = pendingRed;
-        $('statusRed').textContent = 'built in the helper';
+        $('statusRed').textContent = T('ساخته‌شده در هلپر', 'built in the helper');
         pendingRed = null; landed = true;
       }
       if (pendingBlue != null) {
         $('codeBlue').value = pendingBlue;
-        $('statusBlue').textContent = 'built in the helper';
+        $('statusBlue').textContent = T('ساخته‌شده در هلپر', 'built in the helper');
         pendingBlue = null;
       }
       // the child pressed PLAY in the helper - they came here to WATCH it
@@ -2835,7 +2835,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       const srcB = await grabCode(programBlueOf(d)) || src;
       $('codeRed').value = src || DEF_RED;
       $('codeBlue').value = srcB || DEF_BLUE;
-      $('statusRed').textContent = 'sample code'; $('statusBlue').textContent = 'sample code';
+      $('statusRed').textContent = $('statusBlue').textContent = T('کد نمونه', 'sample code');
       codeLeague = file || 'embedded';
       applyPendingCode();
     }
@@ -3100,8 +3100,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       r.onload = () => {
         const text = r.result;
         $(areaId).value = text;
-        $(statusId).textContent = 'loaded: ' + f.name;
-        sha12(text).then((h) => { if (h) $(statusId).textContent = 'loaded: ' + f.name + ' · #' + h; });
+        $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name;
+        sha12(text).then((h) => { if (h) $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name + ' · #' + h; });
         cheer(statusId === 'statusRed' ? 'red' : 'blue');   // robot hops when its code arrives
         const code = text.split('\n').filter(l => !l.trim().startsWith('#')).join('\n');
         const old = RETIRED.filter(n => new RegExp('\\b' + n + '\\b').test(code));
@@ -3411,8 +3411,37 @@ else:                            # 7) nothing in the way -> full speed ahead
     try { LANG = localStorage.getItem('shl_lang') || 'fa'; } catch (e) { /* private mode */ }
     if (LANG !== 'fa') LANG = 'en';
     const T = (fa, en) => (LANG === 'fa' ? fa : en);
+    // the league files are separate scripts — they need the language too
+    window.LANG = LANG;
+    window.T = T;
     document.documentElement.lang = LANG;
     if (LANG === 'en') document.body.classList.add('lang-en');
+    // the scoreboard carries English defaults in the markup; the match loop
+    // rewrites them every frame, but before a match starts these are what
+    // the lobby shows — so translate them once, at boot.
+    document.addEventListener('DOMContentLoaded', () => {
+      const put = (id, fa, en) => { const el = document.getElementById(id); if (el) el.textContent = T(fa, en); };
+      put('redSub', 'کاشی تمیزشده', 'tiles cleaned');
+      put('blueSub', 'کاشی تمیزشده', 'tiles cleaned');
+      put('redPctLbl', 'از کل خانه', 'of the house');
+      put('bluePctLbl', 'از کل خانه', 'of the house');
+      put('timeLbl', 'زمان باقی‌مانده', 'TIME LEFT');
+      put('speedLbl', 'سرعت: 1x', 'Speed: 1x');
+      put('sensLbl', 'سنسورها: خاموش', 'Sensors: off');
+      put('viewLabel', 'نمای ۲.۵ بعدی', '2.5D view');
+      put('lockLbl', 'حالت رسمی: خاموش', 'Official mode: off');
+      put('exLinks', 'ربات‌های نمونه: ', 'Example robots: ');
+      // the two team-name boxes start with a default name and a placeholder
+      for (const [id, fa, en] of [['inRed', 'تیم ۱', 'Team 1'], ['inBlue', 'تیم ۲', 'Team 2']]) {
+        const box = document.getElementById(id);
+        if (!box) continue;
+        const wasDefault = box.value === en;      // untouched by the user
+        box.placeholder = T(fa + ' — نام تیم', en + ' name');
+        if (wasDefault) box.value = T(fa, en);
+      }
+      const hc = document.getElementById('houseClean');
+      if (hc) hc.innerHTML = T('<b>0.0%</b> خانه تمیز شده', 'HOUSE <b>0.0%</b> CLEAN');
+    });
 
     // ---- per-division DEFAULT-MAP overrides (set in the Map Maker) ----
     // A map stamped with ★ in the Map Maker replaces the division's official
@@ -3657,7 +3686,7 @@ else:                            # 7) nothing in the way -> full speed ahead
           ov.querySelector('.vs-body').appendChild(dockRow);
           const note = document.createElement('div');
           note.className = 'coinNote'; note.id = 'coinNote';
-          note.textContent = 'Flip! The colour that lands face-up takes the LEFT corner.';
+          note.textContent = T('شیر یا خط! رنگی که رو بیاید گوشه‌ی چپ را می‌گیرد.', 'Flip! The colour that lands face-up takes the LEFT corner.');
           coin.insertBefore(note, coin.querySelector('.coin-corners'));
           // ---- the map's OWN row: save it, load one, reset it ----
           const dmRow = document.createElement('div');
@@ -3671,7 +3700,7 @@ else:                            # 7) nothing in the way -> full speed ahead
             return b;
           };
           mkBtn('&#128190; <span class="fa">سیو مپ</span>', 'the CURRENT floor becomes this division\'s default map',
-            () => { showToast(saveMapAsDefault(currentMapObj()) ? '💾 saved as this division\'s map' : 'could not save'); });
+            () => { showToast(saveMapAsDefault(currentMapObj()) ? T('💾 به‌عنوان نقشه‌ی این رده ذخیره شد', '💾 saved as this division\'s map') : T('ذخیره نشد', 'could not save')); });
           mkBtn('&#128194; <span class="fa">لود فایل مپ</span>', 'open a map .json — ONE CLICK and it IS this division\'s map',
             () => $('mapFileIn').click());
           mkBtn('&#128465; <span class="fa">برگشت به مپ اصلی</span>', 'forget the saved map — the shipped floor returns',
@@ -3701,8 +3730,8 @@ else:                            # 7) nothing in the way -> full speed ahead
               try {
                 const j = JSON.parse(rd.result);
                 if (!j || !j.cols) throw 0;
-                showToast(saveMapAsDefault(j) ? '📂 loaded — this IS the map now' : 'could not save');
-              } catch (e) { showToast('that file is not a map'); }
+                showToast(saveMapAsDefault(j) ? T('📂 بارگذاری شد — از این پس نقشه همین است', '📂 loaded — this IS the map now') : T('ذخیره نشد', 'could not save'));
+              } catch (e) { showToast(T('این فایل نقشه نیست', 'that file is not a map')); }
             };
             rd.readAsText(f);
             fin.value = '';
@@ -3895,8 +3924,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       populateBots(d);
       $('inTime').value = (d.defaults && d.defaults.matchSeconds) || 180;
       // the hero line says what THIS league is about
-      $('heroSub').innerHTML = 'Name the teams, load each robot\'s <b>Python</b> code, press Start — ' +
-        (grp.tagline ? grp.tagline.en.toLowerCase() : 'most tiles wins') + '.';
+      const tag = grp.tagline
+        ? T(grp.tagline.fa, grp.tagline.en.toLowerCase())
+        : T('هر که بیشتر تمیز کند برنده است', 'most tiles wins');
+      $('heroSub').innerHTML = T('نام تیم‌ها را بنویسید، کد <b>پایتون</b> هر ربات را بارگذاری کنید و شروع را بزنید — ',
+        'Name the teams, load each robot\'s <b>Python</b> code, press Start — ') + tag + '.';
       // sumo has FIXED sides, like the real dohyo: red is EAST, blue is WEST —
       // they never swap, never wander
       const corners = d.group === 'sumo'
@@ -3961,7 +3993,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     function exampleLinks(d) {
       const box = $('exLinks');
       if (!box) return;
-      box.innerHTML = 'Example robots: ';
+      box.innerHTML = T('ربات‌های نمونه: ', 'Example robots: ');
       const grp = Leagues.getGroup(d.group) || {};
       const seen = {};
       const add = (file, label) => {
@@ -4079,7 +4111,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         const f = (team === 'blue' && programBlueOf(d)) || programOf(d);
         const src = f ? await fetchBot(f) : null;
         $(area).value = src || (team === 'red' ? DEF_RED : DEF_BLUE);
-        $(status).textContent = 'sample code';
+        $(status).textContent = T('کد نمونه', 'sample code');
         return;
       }
       let file = val, label = null;
@@ -4181,8 +4213,17 @@ else:                            # 7) nothing in the way -> full speed ahead
 
     /* ---------- the league DEMO: it plays itself and narrates ---------- */
     const DEMO_STEPS = {
-      vacuum: ['Every tile the robot crosses turns its colour', 'Rug slows it, wet floor costs tiles',
-        'U19: the battery drains \u2014 the fixed dock refills it', 'Most tiles when the clock ends wins'],
+      // only the vacuum league ships in this app, so it is the one that
+      // gets narrated in both languages
+      get vacuum() {
+        return T(
+          ['هر کاشی‌ای که ربات از رویش رد شود رنگ او را می‌گیرد',
+            'فرش کندش می‌کند و کف خیس کاشی از او کم می‌کند',
+            'U19: باتری خالی می‌شود \u2014 ایستگاه شارژ ثابت پرش می‌کند',
+            'هر که در پایان زمان کاشی بیشتری داشته باشد برنده است'],
+          ['Every tile the robot crosses turns its colour', 'Rug slows it, wet floor costs tiles',
+            'U19: the battery drains \u2014 the fixed dock refills it', 'Most tiles when the clock ends wins']);
+      },
       assistive: ['The person walks BEHIND, holding the handle', 'Tour: sofa \u2192 kitchen \u2192 BED, then chores alone',
         'Drift 1.6 m away and they FALL: \u2212100, autopilot + 3-2-1', 'Slow and smooth beats fast'],
       sumo: ['No walls: shove the rival off the platform', 'Edge sensors are life \u2014 the drop is everywhere',
@@ -4230,11 +4271,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       await setBot('red', '::sample');
       if (d.arena) { const src = await fetchBot(programBlueOf(d) || programOf(d)); if (src) $('codeBlue').value = src; }
       demoOn = true;
-      $('dcTitle').textContent = 'DEMO \u00b7 ' + (grp.name ? grp.name.en : d.code);
+      $('dcTitle').textContent = T('نمایش \u00b7 ', 'DEMO \u00b7 ') + (grp.name ? T(grp.name.fa, grp.name.en) : d.code);
       $('dcSteps').innerHTML = (DEMO_STEPS[d.group] || []).map((t) => '<li>' + t + '</li>').join('');
       $('dcLog').innerHTML = '';
       $('demoCard').style.display = 'flex';
-      sensOn = true; $('sensLbl').textContent = 'Sensors: on';
+      sensOn = true; $('sensLbl').textContent = T('سنسورها: روشن', 'Sensors: on');
       $('startBtn').click();
       setTimeout(() => { hookDemo(); applySens(); demoLog('demo started \u2014 the sample robot is driving'); }, 350);
     }
@@ -4254,7 +4295,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         catalogue: (leagueDef() || {}).blocks,     // this league's own blocks
         onDone(py) {
           $('codeRed').value = py;
-          $('statusRed').textContent = 'built from blocks';
+          $('statusRed').textContent = T('ساخته‌شده با بلوک‌ها', 'built from blocks');
           $('startBtn').click();
         },
       });
@@ -4360,39 +4401,47 @@ else:                            # 7) nothing in the way -> full speed ahead
           t.reloc++; t.relocLost += lost || 0;
           logEvent('reloc', color, reason + (lost ? ' −' + lost : ''), t.lx, t.ly);
         }
-        showToast(who + (reason === 'stuck' ? ' was stuck 10s → relocated' : reason === 'free' ? ' moved by referee (no penalty)' : ' relocated by referee') + (lost ? '  ·  -' + lost + ' tiles' : ''));
+        const why = reason === 'stuck' ? T(' ۱۰ ثانیه گیر کرده بود ← جابه‌جا شد', ' was stuck 10s → relocated')
+          : reason === 'free' ? T(' توسط داور جابه‌جا شد (بدون جریمه)', ' moved by referee (no penalty)')
+            : T(' توسط داور جابه‌جا شد', ' relocated by referee');
+        showToast(who + why + (lost ? '  ·  -' + lost + T(' کاشی', ' tiles') : ''));
       };
       engine.onDump = (color, emptied) => {
         const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
         showToast(emptied
-          ? '🗑 ' + who + ' emptied the bin · ' + emptied + ' tiles — cleaning again'
-          : '🗑 ' + who + ' emptied the bin · +5');
+          ? '🗑 ' + who + T(' مخزن را خالی کرد · ' + emptied + ' کاشی — دوباره تمیز می‌کند',
+            ' emptied the bin · ' + emptied + ' tiles — cleaning again')
+          : '🗑 ' + who + T(' مخزن را خالی کرد · +۵', ' emptied the bin · +5'));
       };
       // solo U19: the bin filled up. Nothing counts until it is emptied.
       engine.onDumpFull = (color) => {
         const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
-        showToast('🗑 ' + who + '’s bin is FULL — drive to the emptying station, nothing counts until you do');
+        showToast('🗑 ' + who + T(' مخزنش پر است — به ایستگاه تخلیه بروید، تا آن موقع هیچ امتیازی ثبت نمی‌شود',
+          '’s bin is FULL — drive to the emptying station, nothing counts until you do'));
       };
       engine.onDiscover = (color, key, n) => {
         const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
-        showToast('💡 ' + who + ' found ' + key + ' · +5  (' + n + ' so far)');
+        showToast('💡 ' + who + T(' ' + key + ' را پیدا کرد · +۵  (تا حالا ' + n + ')',
+          ' found ' + key + ' · +5  (' + n + ' so far)'));
       };
       // sumo: every round gets the gyoji's call, every reshuffle a toast
       if (leagueDef() && leagueDef().group === 'sumo' && engine.mode) {
         const prevRound = engine.mode.onRound;
         engine.mode.onRound = (w, r, why) => { if (prevRound) prevRound(w, r, why); sumoRound(w, r, why); };
-        engine.mode.onRearm = () => showToast('🔄 the referee reset the bout — random headings');
+        engine.mode.onRearm = () => showToast(T('🔄 داور دور را از نو شروع کرد — جهت‌ها تصادفی است',
+          '🔄 the referee reset the bout — random headings'));
       }
       engine.onWet = (color, lost) => {
         const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
         if (lost > 0 && matchLog && matchLog[color]) { matchLog[color].wet++; matchLog[color].wetLost += lost; logEvent('wet', color, '−' + lost); }
-        if (lost > 0) showToast(who + ' drove into the wet floor  ·  -' + lost + ' tiles');
+        if (lost > 0) showToast(who + T(' روی کف خیس رفت  ·  -' + lost + ' کاشی',
+          ' drove into the wet floor  ·  -' + lost + ' tiles'));
       };
       engine.onOvertime = (add, round) => {
         logEvent('overtime', null, '+' + add + ' s (round ' + round + ')');
         lastEndSec = null;
-        $('otTitle').textContent = round === 1 ? 'DRAW' : 'STILL A DRAW';
-        $('otAdd').textContent = '+' + add + ' SECONDS';
+        $('otTitle').textContent = round === 1 ? T('مساوی', 'DRAW') : T('باز هم مساوی', 'STILL A DRAW');
+        $('otAdd').textContent = '+' + add + T(' ثانیه', ' SECONDS');
         const el = $('overtime'); el.style.display = 'flex';
         el.classList.remove('otin'); void el.offsetWidth; el.classList.add('otin');
         setTimeout(() => { el.style.display = 'none'; }, 2200);
@@ -4409,8 +4458,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (offRed && offBlue) { $('err').textContent = T('هر دو ربات خاموش‌اند — یکی را روشن کن', 'Both robots are OFF — switch one on'); return; }
       const solo1 = !!(dLg && !dLg.arena && ($('playersSel').value === '1' || offRed || offBlue));
       const soloSrc = offRed ? $('codeBlue').value : $('codeRed').value;
-      try { redFn = makeController(soloSrc, 'red'); } catch (e) { $('err').textContent = (offRed ? 'Blue' : 'Red') + ' code error — ' + e.message; return; }
-      if (!solo1) { try { blueFn = makeController($('codeBlue').value, 'blue'); } catch (e) { $('err').textContent = 'Blue code error — ' + e.message; return; } }
+      try { redFn = makeController(soloSrc, 'red'); } catch (e) { $('err').textContent = T((offRed ? 'آبی' : 'قرمز') + ' — خطای کد: ', (offRed ? 'Blue' : 'Red') + ' code error — ') + e.message; return; }
+      if (!solo1) { try { blueFn = makeController($('codeBlue').value, 'blue'); } catch (e) { $('err').textContent = T('آبی — خطای کد: ', 'Blue code error — ') + e.message; return; } }
       // sumo has no empty ring: there an OFF robot just stands still
       if (dLg.arena && !teamOn.red) redFn = () => ({ left: 0, right: 0 });
       if (dLg.arena && !teamOn.blue && blueFn) blueFn = () => ({ left: 0, right: 0 });
@@ -4419,8 +4468,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       const dS = { fc: 2, fl: 2, fr: 2, l: 2, r: 2, bl: 2, br: 2 }, dI = { x: 1, y: 1, heading: 0, tilesMine: 0, tilesRival: 0, timeLeft: secs, color: 0, bumper: 0 };
       redFn(dS, dI); if (blueFn) blueFn(dS, dI);
       const HINT = '\n(if this is an older downloaded file, press Reset to get the current sample code)';
-      if (redErr) { $('err').textContent = 'Red code error — ' + redErr + HINT; return; }
-      if (blueErr) { $('err').textContent = 'Blue code error — ' + blueErr + HINT; return; }
+      if (redErr) { $('err').textContent = T('قرمز — خطای کد: ', 'Red code error — ') + redErr + HINT; return; }
+      if (blueErr) { $('err').textContent = T('آبی — خطای کد: ', 'Blue code error — ') + blueErr + HINT; return; }
       $('err').textContent = ''; redErr = ''; blueErr = ''; lastEndSec = null;
       // fingerprint the code that ACTUALLY runs (async — done in ms, the
       // record is written minutes later at the whistle)
@@ -4452,7 +4501,7 @@ else:                            # 7) nothing in the way -> full speed ahead
 
       wireRelocate();
       resetMatchLog();
-      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       fitText($('redName'), redName); fitText($('blueName'), blueName);
       $('panel').style.display = 'none'; $('results').style.display = 'none';
       $('scoreboard').style.display = 'flex';
@@ -4515,7 +4564,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (this.on) { this.stop(); return; }
         const cvs = window._stageCanvas || document.querySelector('canvas');
         if (!cvs || !cvs.captureStream || typeof MediaRecorder === 'undefined') {
-          showToast('recording is not supported in this browser');
+          showToast(T('ضبط فیلم در این مرورگر پشتیبانی نمی‌شود', 'recording is not supported in this browser'));
           return;
         }
         const stream = cvs.captureStream(30);
@@ -4533,14 +4582,14 @@ else:                            # 7) nothing in the way -> full speed ahead
           a.download = 'match-' + stamp + '.webm';
           document.body.appendChild(a); a.click(); a.remove();
           setTimeout(() => URL.revokeObjectURL(a.href), 8000);
-          showToast('🎞 the match video is saved — upload it and end every argument');
+          showToast(T('🎞 فیلم مسابقه ذخیره شد — آپلودش کنید تا هر بحثی تمام شود', '🎞 the match video is saved — upload it and end every argument'));
         };
         this.rec.start(1000);
         this.on = true;
         // the official film is ONE FIXED view: lock the camera on TOP so a
         // protest can be judged from the same evidence every time
         renderer.viewMode = 'top'; renderer.setView('top'); renderer._vi = 0;
-        $('viewLabel').textContent = 'Top view';
+        $('viewLabel').textContent = T('نمای بالا', 'Top view');
         showToast(T('⏺ ضبط رسمی — دوربین روی نمای بالا قفل شد؛ فایل در پایان مسابقه ذخیره می‌شود',
           '⏺ OFFICIAL RECORDING — camera locked to Top view; the file saves itself at the whistle'));
       },
@@ -4564,7 +4613,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (pass) techMark(curGroup, mission.id, secs);
         $('results').classList.remove('sumo');
         $('rTrophy').innerHTML = '<div style="font-size:58px">' + (pass ? '&#127942;' : '&#128679;') + '</div>';
-        $('rLabel').textContent = 'Technical Challenge';
+        $('rLabel').textContent = T('چالش فنی', 'Technical Challenge');
         fitText($('rName'), mission.title.fa, true);
         $('rName').style.color = pass ? '#7ee7b4' : '#ff8a8a';
         $('rName').classList.add('fa');
@@ -4612,9 +4661,11 @@ else:                            # 7) nothing in the way -> full speed ahead
           'radial-gradient(720px 560px at 20% 45%, ' + rc + '44, transparent 60%), ' +
           'radial-gradient(720px 560px at 80% 45%, ' + bc + '44, transparent 60%), rgba(7,9,13,.78)';
         $('rTrophy').innerHTML = ICON.scale; $('rTrophy').style.color = '#cfd6df';
-        $('rLabel').textContent = 'Result'; fitText($('rName'), 'Draw', true); $('rName').style.color = '#e8eaed';
-        $('rSub').textContent = sumoG ? 'The basho ends level — no yūshō today.'
-          : 'Both robots cleaned the same number of tiles.';
+        $('rLabel').textContent = T('نتیجه', 'Result');
+        fitText($('rName'), T('مساوی', 'Draw'), true); $('rName').style.color = '#e8eaed';
+        $('rSub').textContent = sumoG
+          ? T('باشو مساوی تمام شد — امروز یوشویی در کار نیست.', 'The basho ends level — no yūshō today.')
+          : T('هر دو ربات به یک اندازه تمیز کردند.', 'Both robots cleaned the same number of tiles.');
         confetti([TEAM_COLORS[selCol.red].css, TEAM_COLORS[selCol.blue].css, '#ffffff']);
       } else {
         const name = w === 'red' ? engine.cfg.redName : engine.cfg.blueName;
@@ -4624,10 +4675,12 @@ else:                            # 7) nothing in the way -> full speed ahead
         const wc = TEAM_COLORS[selCol[w]].css;
         $('rTrophy').innerHTML = sumoG ? '<div class="yushoDisc">&#21213;</div>' : ICON.star;
         $('rTrophy').style.color = sumoG ? '#ff5a4e' : wc;
-        $('rLabel').textContent = sumoG ? 'YŪSHŌ · champion of the ring' : 'Winner';
+        $('rLabel').textContent = sumoG
+          ? T('یوشو · قهرمان رینگ', 'YŪSHŌ · champion of the ring')
+          : T('برنده', 'Winner');
         fitText($('rName'), name, true); $('rName').style.color = w === 'red' ? 'var(--red)' : 'var(--blue)';
         $('rSub').textContent = sumoG
-          ? 'took the basho ' + engine.scores.red + ' – ' + engine.scores.blue
+          ? T('باشو را برد ', 'took the basho ') + engine.scores.red + ' – ' + engine.scores.blue
           : '';
         $('results').style.background =
           'radial-gradient(900px 640px at 50% 38%, ' + wc + '55, transparent 62%), rgba(7,9,13,.78)';
@@ -5050,7 +5103,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         const n = $('bkTeamName').value.trim();
         if (!n) return;
         const all = teamsAll();
-        if (all.some((t) => t.name === n)) { showToast('این تیم قبلاً ثبت شده'); return; }
+        if (all.some((t) => t.name === n)) { showToast(T('این تیم قبلاً ثبت شده', 'that team is already entered')); return; }
         all.push({ name: n, added: Date.now() });
         teamsSave(all); refreshTeamList(); renderTeams(); renderCup();
       };
@@ -5075,12 +5128,12 @@ else:                            # 7) nothing in the way -> full speed ahead
         const picked = () => Array.prototype.filter.call(el.querySelectorAll('#bkPick input'), (i) => i.checked).map((i) => i.getAttribute('data-n'));
         $('bkMakeRR').onclick = () => {
           const p = picked();
-          if (p.length < 2) { showToast('دست‌کم ۲ تیم انتخاب کن'); return; }
+          if (p.length < 2) { showToast(T('دست‌کم ۲ تیم انتخاب کنید', 'pick at least 2 teams')); return; }
           cupCreate('rr', p); renderCup();
         };
         $('bkMakeCup').onclick = () => {
           const p = picked();
-          if (p.length !== 6) { showToast('جام کلاسیک دقیقاً ۶ تیم می‌خواهد (' + p.length + ' انتخاب شده)'); return; }
+          if (p.length !== 6) { showToast(T('جام کلاسیک دقیقاً ۶ تیم می‌خواهد (' + p.length + ' انتخاب شده)', 'the classic cup needs exactly 6 teams (' + p.length + ' picked)')); return; }
           cupCreate('cup', p); renderCup();
         };
         return;
@@ -5173,7 +5226,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('houseBtn').style.display = 'none';
       wireRelocate();
       resetMatchLog();
-      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       fitText($('redName'), engine.cfg.redName); fitText($('blueName'), '—');
       $('panel').style.display = 'none'; $('results').style.display = 'none';
       $('scoreboard').style.display = 'flex';
@@ -5315,7 +5368,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       endMission();
       if (tutorialActive) { tutorialActive = false; $('tutorial').style.display = 'none'; }
       engine = new Engine({ map: selectedMap(), league: leagueId, kits: kits, pets: !!($('petsChk') && $('petsChk').checked), players: +(($('playersSel') && $('playersSel').value) || 2) }); renderer.buildScene(engine);
-      paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop';
+      paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       redErr = ''; blueErr = '';
       $('scoreboard').style.display = 'none'; $('results').style.display = 'none';
       $('runtimeErr').style.display = 'none'; $('confetti').innerHTML = ''; $('toast').style.display = 'none';
@@ -5332,9 +5385,9 @@ else:                            # 7) nothing in the way -> full speed ahead
     const SPEEDS = [1, 2, 4, 8];
     let simSpeed = 1;
     $('speedBtn').onclick = () => {
-      if (window.SHL_LOCK && engine.running) { showToast('🔒 حالت مسابقه‌ی رسمی: تغییر سرعت وسط بازی قفل است'); return; }
+      if (window.SHL_LOCK && engine.running) { showToast(T('🔒 حالت مسابقه‌ی رسمی: تغییر سرعت وسط بازی قفل است', '🔒 Official mode: the speed is locked once the match is running')); return; }
       simSpeed = SPEEDS[(SPEEDS.indexOf(simSpeed) + 1) % SPEEDS.length];
-      $('speedLbl').textContent = 'Speed: ' + simSpeed + 'x';
+      $('speedLbl').textContent = T('سرعت: ', 'Speed: ') + simSpeed + 'x';
       if (engine.running) logEvent('speed', null, simSpeed + 'x');
     };
 
@@ -5450,7 +5503,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('sensorPanel').style.display = (on && tutorialActive) ? 'flex' : 'none';
       $('scopes').style.display = (on && !tutorialActive) ? 'flex' : 'none';
     }
-    $('sensBtn').onclick = () => { sensOn = !sensOn; $('sensLbl').textContent = 'Sensors: ' + (sensOn ? 'on' : 'off'); applySens(); };
+    $('sensBtn').onclick = () => { sensOn = !sensOn; $('sensLbl').textContent = T(sensOn ? 'سنسورها: روشن' : 'سنسورها: خاموش', 'Sensors: ' + (sensOn ? 'on' : 'off')); applySens(); };
 
     /* ---------- the referee's relocate menu ----------
        One misclick used to cost 5 irreversible tiles. Now the button opens a
@@ -5495,7 +5548,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     window.SHL_LOCK = false;
     function applyLock() {
       const on = window.SHL_LOCK;
-      $('lockLbl').textContent = 'Official mode: ' + (on ? 'ON' : 'off');
+      $('lockLbl').textContent = T(on ? 'حالت رسمی: روشن' : 'حالت رسمی: خاموش', 'Official mode: ' + (on ? 'ON' : 'off'));
       document.body.classList.toggle('shl-locked', on);
       for (const id of ['loadRed', 'loadBlue', 'selRed', 'selBlue', 'fsBlockBtn', 'fsBlocks2Btn', 'mapEdit']) {
         const e = $(id); if (e) e.disabled = on;
@@ -5508,13 +5561,13 @@ else:                            # 7) nothing in the way -> full speed ahead
         try { sessionStorage.setItem('shl_lock_pin', pin); } catch (e) { /* private mode */ }
         window.SHL_LOCK = true;
         logEvent('lock', null, 'on');
-        showToast('🔒 حالت مسابقه‌ی رسمی فعال شد — کد، خانه و سرعت قفل‌اند');
+        showToast(T('🔒 حالت مسابقه‌ی رسمی فعال شد — کد، خانه و سرعت قفل‌اند', '🔒 Official mode is ON — code, house and speed are locked'));
       } else {
         const pin = prompt('PIN داور:');
-        if (pin !== sessionStorage.getItem('shl_lock_pin')) { showToast('PIN اشتباه است'); return; }
+        if (pin !== sessionStorage.getItem('shl_lock_pin')) { showToast(T('PIN اشتباه است', 'wrong PIN')); return; }
         window.SHL_LOCK = false;
         logEvent('unlock', null, 'off');
-        showToast('🔓 حالت مسابقه‌ی رسمی خاموش شد');
+        showToast(T('🔓 حالت مسابقه‌ی رسمی خاموش شد', '🔓 Official mode is off'));
       }
       applyLock();
     };
@@ -5547,7 +5600,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       return true;
     }
     function houseReject() {
-      showToast('جا نمی‌شود — روی وسایل یا دیوار نمی‌افتد ✕');
+      showToast(T('جا نمی‌شود — روی وسایل یا دیوار نمی‌افتد ✕', 'it does not fit — furniture or a wall is in the way ✕'));
       renderer.buildScene(engine);            // snap the dragged model back
     }
     let houseEdit = false, housePrevPaused = false, houseSel = null, houseArm = null;
@@ -5558,7 +5611,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         houseArm = (houseArm && houseArm.t === t) ? null : { t, w: aw, d: ad };
         renderer.editArm = houseArm;
         for (const x of $('hbAdd').children) x.classList.toggle('on', !!houseArm && x === b);
-        $('hbHint').textContent = houseArm ? 'now click the floor to drop it' : 'drag furniture to move it';
+        $('hbHint').textContent = houseArm ? T('حالا روی کف کلیک کنید تا بگذاریدش', 'now click the floor to drop it') : T('وسیله‌ها را بکشید تا جابه‌جا شوند', 'drag furniture to move it');
       };
       $('hbAdd').appendChild(b);
     }
@@ -5571,10 +5624,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('hbLong').style.display = 'none'; $('hbShort').style.display = 'none';
       $('houseBtn').classList.toggle('on', on);
       $('housebar').style.display = on ? 'flex' : 'none';
-      $('hbHint').textContent = 'drag furniture to move it';
+      $('hbHint').textContent = T('وسیله‌ها را بکشید تا جابه‌جا شوند', 'drag furniture to move it');
       if (on) {
-        housePrevPaused = paused; paused = true; $('stopBtn').querySelector('.mi-t').textContent = 'Resume';
-        showToast('🛠 EDIT MODE — the clock waits while you redecorate');
+        housePrevPaused = paused; paused = true; $('stopBtn').querySelector('.mi-t').textContent = T('ادامه', 'Resume');
+        showToast(T('🛠 حالت ویرایش — تا وقتی چیدمان را عوض می‌کنید ساعت صبر می‌کند', '🛠 EDIT MODE — the clock waits while you redecorate'));
       } else {
         paused = housePrevPaused; $('stopBtn').querySelector('.mi-t').textContent = paused ? 'Resume' : 'Stop';
       }
@@ -5600,7 +5653,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     renderer.onEditAction = (a) => {
       if (a.kind === 'pick') {
-        if (a.target === 'rug') { $('hbHint').textContent = 'drag the rug — it moves like furniture'; return; }
+        if (a.target === 'rug') { $('hbHint').textContent = T('فرش را بکشید — مثل بقیه‌ی وسیله‌ها جابه‌جا می‌شود', 'drag the rug — it moves like furniture'); return; }
         houseSelect(a.target, a.idx); return;
       }
       if (a.kind === 'move') {
@@ -5637,7 +5690,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         // one chip click = one piece: disarm, so the next click selects/drags
         houseArm = null; renderer.editArm = null;
         for (const x of $('hbAdd').children) x.classList.remove('on');
-        $('hbHint').textContent = 'drag furniture to move it';
+        $('hbHint').textContent = T('وسیله‌ها را بکشید تا جابه‌جا شوند', 'drag furniture to move it');
         afterHouseEdit();
       }
     };
@@ -5681,7 +5734,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       });
       houseSel = null;
       $('hbLong').style.display = 'none'; $('hbShort').style.display = 'none';
-      $('hbHint').textContent = 'drag furniture to move it';
+      $('hbHint').textContent = T('وسیله‌ها را بکشید تا جابه‌جا شوند', 'drag furniture to move it');
       afterHouseEdit();
     };
     // the Delete key removes whatever is selected — same rule as the Map Maker
@@ -5694,11 +5747,11 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('hbDone').onclick = () => setHouseEdit(false);
     $('hbSave').onclick = () => {
       showToast(saveMapAsDefault(currentMapObj())
-        ? '💾 saved — this floor IS this division\'s map now'
-        : 'could not save the map');
+        ? T('💾 ذخیره شد — از این پس نقشه‌ی این رده همین کف است', '💾 saved — this floor IS this division\'s map now')
+        : T('نقشه ذخیره نشد', 'could not save the map'));
     };
     $('houseBtn').onclick = () => {
-      if (window.SHL_LOCK) { showToast('🔒 حالت مسابقه‌ی رسمی: ویرایش خانه قفل است'); return; }
+      if (window.SHL_LOCK) { showToast(T('🔒 حالت مسابقه‌ی رسمی: ویرایش خانه قفل است', '🔒 Official mode: editing the house is locked')); return; }
       if (engine.running || paused) logEvent('houseedit', null, houseEdit ? 'closed' : 'opened');
       setHouseEdit(!houseEdit);
     };
@@ -5752,7 +5805,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('stopBtn').querySelector('.mi-t').textContent = paused ? 'Resume' : 'Stop';
       if (engine.running) logEvent(paused ? 'pause' : 'resume', null, null);
     };
-    $('endBtn').onclick = () => { if (engine.running) { logEvent('end', null, 'referee'); paused = false; $('stopBtn').querySelector('.mi-t').textContent = 'Stop'; engine.endNow(); } };
+    $('endBtn').onclick = () => { if (engine.running) { logEvent('end', null, 'referee'); paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop'); engine.endNow(); } };
 
     // ---------- interactive tutorial ----------
     // Per-DIVISION lesson sets: each division teaches its own senses on its
@@ -6126,7 +6179,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       }
       const left = Math.max(0, engine.cfg.matchSeconds - engine.elapsed);
       $('clock').textContent = mmss(left);
-      $('timeLbl').textContent = engine.overtimeCount > 0 ? 'OVERTIME' : 'TIME LEFT';
+      $('timeLbl').textContent = engine.overtimeCount > 0 ? T('وقت اضافه', 'OVERTIME') : T('زمان باقی‌مانده', 'TIME LEFT');
       endDrama(left);
       // scores and clock stay OFF the floor while the match runs; the last
       // 10 seconds are the reveal — countdown + the backdrop leaning toward

@@ -14,10 +14,13 @@ const COL = {
 // how high the uphill end of a sloped ramp stands (the energy maze wedges)
 const RAMP_H = 0.30;
 
+// the view name is shown in the HUD, so it follows the app language
+const TR_VIEW = (fa, en) => ((typeof window !== 'undefined' && window.LANG === 'fa') ? fa : en);
+
 const VIEWS = {
-  top:    { az: Math.PI * 0.70, pol: 0.34, rad: 20, fov: 44, label: 'Top view' },
-  '3d':   { az: Math.PI * 0.72, pol: 0.92, rad: 16, fov: 48, label: '3D view' },
-  '2.5d': { az: Math.PI * 0.75, pol: 0.60, rad: 32, fov: 22, label: '2.5D view' },
+  top:    { az: Math.PI * 0.70, pol: 0.34, rad: 20, fov: 44, get label() { return TR_VIEW('نمای بالا', 'Top view'); } },
+  '3d':   { az: Math.PI * 0.72, pol: 0.92, rad: 16, fov: 48, get label() { return TR_VIEW('نمای سه‌بعدی', '3D view'); } },
+  '2.5d': { az: Math.PI * 0.75, pol: 0.60, rad: 32, fov: 22, get label() { return TR_VIEW('نمای ۲.۵ بعدی', '2.5D view'); } },
 };
 
 class Renderer3D {
@@ -79,9 +82,9 @@ class Renderer3D {
     this._vi = ((this._vi || 0) + 1) % keys.length;
     const k = keys[this._vi];
     this.viewMode = k;
-    if (k === 'spin') { this.setView('2.5d'); return '360° orbit'; }
-    if (k === 'pov') return 'Robot POV';
-    if (k === 'cine') { this._cine = null; return '🎬 Cinematic'; }
+    if (k === 'spin') { this.setView('2.5d'); return TR_VIEW('چرخش ۳۶۰ درجه', '360° orbit'); }
+    if (k === 'pov') return TR_VIEW('از نگاه ربات', 'Robot POV');
+    if (k === 'cine') { this._cine = null; return TR_VIEW('🎬 سینماتیک', '🎬 Cinematic'); }
     this.setView(k);
     return VIEWS[k].label;
   }

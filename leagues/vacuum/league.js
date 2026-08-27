@@ -29,6 +29,11 @@
 (function (root) {
   'use strict';
 
+  // Scoreboard text follows the app language. index.html publishes the
+  // chosen language; read it at call time, never at load time, because
+  // this file is loaded before the language is decided.
+  const TR = (fa, en) => (root.LANG === 'fa' ? fa : en);
+
   const PENALTY_TILES = 5;    // tiles lost on a relocate (manual or automatic)
   const WET_PENALTY = 2;      // tiles lost each time a robot drives onto a wet tile
   // On a draw the match keeps going: +10s first, then +5s each time
@@ -328,12 +333,12 @@
     // the pill under the clock: the pad, plus the solo bin gauge
     _chip() {
       const bits = [];
-      if (this.dock) bits.push('&#9889; PAD ' + Math.round(this.dock.x * 100) + ' , ' + Math.round(this.dock.y * 100));
+      if (this.dock) bits.push('&#9889; ' + TR('ایستگاه شارژ ', 'PAD ') + Math.round(this.dock.x * 100) + ' , ' + Math.round(this.dock.y * 100));
       if (this.dumpEvery) {
         const n = this.dust.red;
         bits.push(n >= this.dumpEvery
-          ? '<b style="color:#ff8a8a">&#128465; BIN FULL &mdash; GO EMPTY</b>'
-          : '&#128465; BIN ' + n + '/' + this.dumpEvery);
+          ? '<b style="color:#ff8a8a">&#128465; ' + TR('مخزن پر است &mdash; خالی کنید', 'BIN FULL &mdash; GO EMPTY') + '</b>'
+          : '&#128465; ' + TR('مخزن ', 'BIN ') + n + '/' + this.dumpEvery);
       }
       return bits.length ? bits.join(' &nbsp;&middot;&nbsp; ') : null;
     }
@@ -344,12 +349,13 @@
       const pct = (n) => (w.totalTiles ? (n / w.totalTiles) * 100 : 0);
       const cell = (k) => ({
         num: pct(this.scores[k]).toFixed(1) + '<small>%</small>',
-        label: 'of the house', pct: Math.min(100, pct(this.scores[k])),
+        label: TR('از کل خانه', 'of the house'), pct: Math.min(100, pct(this.scores[k])),
       });
       return {
-        scoreLabel: 'tiles cleaned',
+        scoreLabel: TR('کاشی تمیزشده', 'tiles cleaned'),
         metric: { red: cell('red'), blue: cell('blue') },
-        center: 'HOUSE <b>' + pct(this.scores.red + this.scores.blue).toFixed(1) + '%</b> CLEAN',
+        center: TR('<b>' + pct(this.scores.red + this.scores.blue).toFixed(1) + '%</b> خانه تمیز شده',
+          'HOUSE <b>' + pct(this.scores.red + this.scores.blue).toFixed(1) + '%</b> CLEAN'),
         // the pad's coordinates, and — solo — how full the bin is. A full bin
         // shouts, because from that moment nothing the robot does counts.
         chip: this._chip(),
@@ -384,12 +390,12 @@
       { file: 'leagues/vacuum/bots/champ_fs.py', label: '🏆 قهرمان FS — کد کامل' },
       { file: 'leagues/vacuum/bots/champ_u14.py', label: '🏆 قهرمان U14 — کد کامل' },
       { file: 'leagues/vacuum/bots/champ_u19.py', label: '🏆 قهرمان U19 — کد کامل' },
-      { file: 'leagues/vacuum/bots/wallfollow.py', label: 'Wall-follow' },
-      { file: 'leagues/vacuum/bots/easymoves.py', label: 'Easy moves' },
-      { file: 'leagues/vacuum/bots/hunter.py', label: 'Hunter' },
-      { file: 'leagues/vacuum/bots/colorsensor.py', label: 'Colour sensor' },
-      { file: 'leagues/vacuum/bots/goto.py', label: 'Goto patrol' },
-      { file: 'leagues/vacuum/bots/battery.py', label: 'Battery runner' }
+      { file: 'leagues/vacuum/bots/wallfollow.py', get label() { return TR('دیوارگرد', 'Wall-follow'); } },
+      { file: 'leagues/vacuum/bots/easymoves.py', get label() { return TR('حرکت‌های ساده', 'Easy moves'); } },
+      { file: 'leagues/vacuum/bots/hunter.py', get label() { return TR('شکارچی', 'Hunter'); } },
+      { file: 'leagues/vacuum/bots/colorsensor.py', get label() { return TR('سنسور رنگ', 'Colour sensor'); } },
+      { file: 'leagues/vacuum/bots/goto.py', get label() { return TR('گشت با goto', 'Goto patrol'); } },
+      { file: 'leagues/vacuum/bots/battery.py', get label() { return TR('مدیریت باتری', 'Battery runner'); } }
     ],
     icon: '🧹',
     accent: '#4d8bff',
