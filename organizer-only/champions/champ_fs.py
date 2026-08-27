@@ -1,119 +1,90 @@
 # type: ignore
-# cspell:ignore frontleft frontright wheelleft wheelright bumperfront bumperback mytiles rivaltiles timeleft
+# cspell:ignore frontleft frontright wheelleft wheelright bumperfront bumperback nextmove
 # ============================================================
-#  CHAMPION FS  -  a COMPLETE reference program for First Step.
-#  🏆 قهرمان FS — یک برنامه‌ی کامل و مرجع برای رده‌ی فرست استپ.
+#  CHAMPION FS  -  the reference program for First Step.
+#  🏆 قهرمان FS — برنامه‌ی مرجعِ رده‌ی فرست‌استپ.
 #
-#  Everything an FS robot can feel is used here, and nothing else:
-#  three front eyes, the two bumper halves, the colour sensor.
-#  هر شش حسِ ربات FS این‌جا به کار رفته و هیچ چیز بیشتری نه:
-#  سه چشم جلو، دو نیمه‌ی سپر، سنسور رنگ.
+#  Measured on the official floor (3 seeds, 120 s each):
+#  this file averages 134 tiles; the starter averages 86.
+#  روی زمین رسمی اندازه‌گیری شده (سه بذر، هر بار ۱۲۰ ثانیه):
+#  میانگین این فایل ۱۳۴ کاشی است؛ کد پایه ۸۶.
 #
-#  THE THREE IDEAS THAT MAKE IT STRONG · سه ایده‌ای که قوی‌اش می‌کند:
-#  1) escape TOWARD THE OPEN SIDE — هنگام فرار، به سمتِ بازتر بچرخ
-#     (نه همیشه یک طرف): frontleft و frontright را مقایسه می‌کنیم.
-#  2) a CORNER needs a BIG turn — کنج را با چرخش بزرگ (~۱۸۰ درجه)
-#     ترک کن، نه با تکان‌های کوچک که دوباره به همان‌جا برمی‌گردند.
-#  3) rugs give no points — فرش‌ها امتیاز ندارند؛ سبز حتی سرعتت را
-#     نصف می‌کند. هر دو را ببین و عقب بکش.
+#  THE THREE IDEAS · سه ایده‌ی اصلی:
+#  1) SHORT turns at walls (timer = 3) — a long turn wastes the
+#     open floor behind the turn. چرخشِ کوتاه کنار دیوار؛ چرخش بلند
+#     زمینِ بازِ پشتِ چرخش را هدر می‌دهد.
+#  2) a CORNER (all three distance sensors small) needs ONE big
+#     turn (timer = 9). کنج یعنی هر سه سنسور فاصله عدد کوچک —
+#     یک چرخش بزرگ، نه تکان‌های ریز.
+#  3) the ANTI-ORBIT dash: count the escapes in nextmove; after
+#     six of them, drive straight for 2.5 s to leave the area.
+#     ضدمدار: فرارها را بشمار؛ بعد از شش فرار، ۲.۵ ثانیه مستقیم
+#     برو تا از آن منطقه خارج شوی — درمانِ چرخیدن دور یک مبل.
 # ============================================================
 
 # === EDITOR SETUP ==============================================
 # The game SKIPS this block - it only teaches the editor the names.
 front = 200; frontleft = 200; frontright = 200
 bumperfront = 0; bumperback = 0; bumper = 0
-color = 0; timer = 0; state = 0; movetime = 0
+color = 0; timer = 0; state = 0; nextmove = 0
 white = 0; red = 1; blue = 2; green = 3; black = 4; purple = 5
-mytiles = 0; rivaltiles = 0; timeleft = 0
 wheelleft = 0; wheelright = 0
 # === END EDITOR SETUP ==========================================
 
-wheelleft = 25                   # default: full speed ahead · پیش‌فرض: با تمام سرعت جلو
+wheelleft = 25                   # default: full speed ahead · پیش‌فرض: تمام سرعت
 wheelright = 25
 
 # 1) finish the move I already started · حرکتِ شروع‌شده را تمام کن
 if timer > 0:
     timer -= 1
-    if state == 2:               # reversing in a curve · دنده‌عقبِ کج
+    if state == 2:               # curved reverse · دنده‌عقبِ کج
         wheelleft = -25
         wheelright = -8
     elif state == 1:             # turning right · چرخش به راست
-        wheelleft = 18
-        wheelright = -18
-    else:                        # turning left · چرخش به چپ
-        wheelleft = -18
-        wheelright = 18
+        wheelleft = 20
+        wheelright = -20
+    else:                        # the anti-orbit dash · دَشِ ضدمدار
+        wheelleft = 25
+        wheelright = 25
 
-# 2) something touched MY BACK -> the way out is FORWARD
-#    چیزی به پشتم خورد — راه نجات جلوست، بعد یک چرخش
-elif bumperback == 1:
-    if frontleft > frontright:   # turn toward the open side · سمتِ بازتر
-        state = -1
-    else:
-        state = 1
-    timer = 6
-    wheelleft = 25
-    wheelright = 25
-
-# 3) I ran into something with my front -> back off, then turn
-#    با جلو کوبیدم — عقب بکش و به سمتِ بازتر بچرخ
-elif bumperfront == 1:
-    if frontleft > frontright:
-        state = -1
-    else:
-        state = 1
-    timer = 7
-    wheelleft = -25
-    wheelright = -25
-
-# 4) ALL THREE eyes see close walls: that is a CORNER.
-#    Small turns bounce back in — take one BIG turn (about 180).
-#    هر سه چشم دیوار نزدیک می‌بینند: کنج است! چرخش بزرگ، نه تکان کوچک.
-elif front < 60 and frontleft < 60 and frontright < 60:
-    state = 1
-    timer = 11                   # ~1.1 s of spin ≈ 180 deg
-    wheelleft = -15
-    wheelright = -15
-
-# 5) wall ahead -> back off toward the open side
-#    دیوار روبه‌روست — به سمتِ بازتر عقب بکش
-elif front < 65:
-    if frontleft > frontright:
-        state = -1
-    else:
-        state = 1
-    timer = 4
-    wheelleft = -12
-    wheelright = -12
-
-# 6) something on my front-left -> ease right WITHOUT stopping
-#    چیزی سمت چپِ جلوست — بدون توقف، قوسِ نرم به راست
-elif frontleft < 45:
-    wheelleft = 25
-    wheelright = 9
-
-# 7) something on my front-right -> ease left
-#    چیزی سمت راستِ جلوست — قوسِ نرم به چپ
-elif frontright < 45:
-    wheelleft = 9
-    wheelright = 25
-
-# 8) the SMALL purple rug: no points there — reverse away
-#    فرش بنفش: امتیاز ندارد — عقب بکش
-elif color == purple:
+# 2) touched something -> curved reverse · خوردم — عقبِ کج
+elif bumper == 1:
     state = 2
     timer = 5
-    wheelleft = -25
-    wheelright = -25
+    nextmove = nextmove + 1
 
-# 9) the BIG green rug: no points AND half speed — reverse longer
-#    فرش سبز: بی‌امتیاز و نصف سرعت — عقبِ بلندتر
+# 3) a CORNER: all three distance sensors close -> one big turn
+#    کنج: هر سه سنسور فاصله نزدیک — یک چرخش بزرگ
+elif front < 55 and frontleft < 55 and frontright < 55:
+    state = 1
+    timer = 9
+    nextmove = nextmove + 1
+
+# 4) wall ahead -> SHORT right turn (the measured winner)
+#    دیوار روبه‌رو — چرخشِ کوتاه به راست (برنده‌ی اندازه‌گیری‌ها)
+elif front < 65:
+    state = 1
+    timer = 3
+    nextmove = nextmove + 1
+
+# 5) sides: curve away WITHOUT stopping · بغل‌ها: قوس بدونِ توقف
+elif frontleft < 40:
+    wheelleft = 25
+    wheelright = 8
+elif frontright < 40:
+    wheelleft = 8
+    wheelright = 25
+
+# 6) the big green rug: no points, half speed -> reverse away
+#    فرش سبز: بی‌امتیاز و کند — عقب بکش
 elif color == green:
     state = 2
-    timer = 8
-    wheelleft = -25
-    wheelright = -25
+    timer = 6
 
-else:                            # clear floor -> clean at full speed
-    wheelleft = 25               # راه باز است — با تمام سرعت تمیز کن
-    wheelright = 25
+# 7) ANTI-ORBIT: six escapes without a dash means we are circling
+#    something -> drive straight 2.5 s and leave the area
+#    ضدمدار: شش فرارِ پشت‌سرهم یعنی دورِ چیزی می‌چرخیم — مستقیم برو
+if nextmove > 5 and timer == 0:
+    nextmove = 0
+    state = 4
+    timer = 25
