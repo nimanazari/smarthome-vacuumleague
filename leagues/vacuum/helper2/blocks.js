@@ -83,6 +83,19 @@
   function saveFile() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(FILE)); } catch (e) { /* private mode */ }
   }
+  /* ---- HELPER-STATE: the road back from Python ----
+     The model is written into the .py as ONE comment line, so the file
+     itself carries everything needed to reopen it here and keep building. */
+  function stateEncode(app, model) {
+    const json = JSON.stringify({ app: app, league: LEAGUE, v: 1, model: model });
+    return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function stateDecode(text) {
+    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+  }
+
   const newRule = () => ({
     members: [], cm: 60, colorPick: 'purple', act: 'backright', secs: 0.5, speed: 25,
     on: true, act2: null, secs2: 0.5, speed2: 18,
@@ -148,7 +161,11 @@
       P(cmt('wheelleft = ' + FILE.drive, 'straight ahead - and every tile'));
       P(cmt('wheelright = ' + FILE.drive, 'I drive over turns my colour'));
       P('');
-      return L.join('\n');
+      P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncode('blocks', FILE));
+    P('');
+    return L.join('\n');
     }
     P('# ---------- MY BLOCK RULES, IN MY ORDER ----------');
     let kw = 'if ';
@@ -170,6 +187,10 @@
     P(cmt('else:', 'no rule fired'));
     P(cmt('    wheelleft = ' + FILE.drive, 'straight ahead - and every tile'));
     P(cmt('    wheelright = ' + FILE.drive, 'I drive over turns my colour'));
+    P('');
+    P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncode('blocks', FILE));
     P('');
     return L.join('\n');
   }
@@ -482,6 +503,26 @@
 
   $('addRule').onclick = () => { addRule(); refresh(); };
   $('resetBtn').onclick = () => { FILE = { drive: 25, rules: [] }; sel = 0; refresh(); toast(T('همه‌ی بلاک‌ها پاک شد', 'All blocks cleared')); };
+
+  // ---- Python -> blocks: open a .py this page (or the AI helper) wrote ----
+  if ($('openPyBtn')) $('openPyBtn').onclick = () => $('openPyFile').click();
+  if ($('openPyFile')) $('openPyFile').onchange = () => {
+    const f = $('openPyFile').files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      const j = stateDecode(rd.result);
+      $('openPyFile').value = '';
+      if (!j || (j.app !== 'helper' && j.app !== 'blocks') || !j.model || !Array.isArray(j.model.rules)) {
+        toast(T('این فایل با هلپر ساخته نشده — یا خط HELPER-STATE آن پاک شده', 'That file was not written by the helper (or its HELPER-STATE line was deleted)'));
+        return;
+      }
+      FILE = j.model; if (!FILE.drive) FILE.drive = 25;
+      sel = 0; saveFile(); refresh();
+      toast(T('همان‌طور که ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)',
+        'Open again, as it was built — keep going (hand edits to the Python are not included)'));
+    };
+    rd.readAsText(f);
+  };
   $('copyBtn').onclick = () => {
     if (navigator.clipboard) navigator.clipboard.writeText(toPython()).then(() => toast(T('کپی شد', 'Copied')), () => toast(T('کپی نشد', 'Could not copy')));
   };

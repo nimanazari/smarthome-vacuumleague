@@ -55,6 +55,35 @@
   } catch (e) { /* private mode */ }
   const save = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(ROUTE)); } catch (e) { /* private mode */ } };
 
+  // a .py the GAME just loaded parked its route here
+  let importedFile = false;
+  try {
+    const IK = 'shl_helper_import_' + LEAGUE;
+    const imp = localStorage.getItem(IK);
+    if (imp) {
+      localStorage.removeItem(IK);
+      const j = JSON.parse(imp);
+      if (j && j.app === 'route' && j.model && Array.isArray(j.model.wps)) {
+        ROUTE = Object.assign(ROUTE, j.model);
+        importedFile = true;
+        save();
+      }
+    }
+  } catch (e) { /* private mode */ }
+  /* ---- HELPER-STATE: the road back from Python ----
+     The model is written into the .py as ONE comment line, so the file
+     itself carries everything needed to reopen it here and keep building. */
+  function stateEncode(app, model) {
+    const json = JSON.stringify({ app: app, league: LEAGUE, v: 1, model: model });
+    return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function stateDecode(text) {
+    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+  }
+
+
   /* ================================================================
      THE PLANNER — goto() drives a straight line and does NOT dodge
      walls, so this page routes each leg itself: A* over the house
@@ -250,7 +279,11 @@
       P('wheelleft = 25');
       P('wheelright = 25');
       P('');
-      return L.join('\n');
+      P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncode('route', ROUTE));
+    P('');
+    return L.join('\n');
     }
     const pts = expandRoute();
     const CP = chargePlans(pts);
@@ -348,6 +381,10 @@
     P('    go_charge()');
     P('else:');
     P('    follow_route()');
+    P('');
+    P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncode('route', ROUTE));
     P('');
     return L.join('\n');
   }
@@ -771,6 +808,26 @@
   $('lowIn').onchange = () => { const v = parseInt($('lowIn').value, 10); if (isFinite(v)) ROUTE.low = clamp(v, 5, 80); $('lowIn').value = ROUTE.low; refresh(); };
   $('fullIn').onchange = () => { const v = parseInt($('fullIn').value, 10); if (isFinite(v)) ROUTE.full = clamp(v, ROUTE.low + 10, 100); $('fullIn').value = ROUTE.full; refresh(); };
   $('resetBtn').onclick = () => { ROUTE.wps = []; refresh(); toast('مسیر پاک شد'); };
+  if (importedFile) setTimeout(() => toast('مسیری که بارگذاری کردید همین‌جا باز است — ادامه بدهید'), 400);
+
+  // ---- Python -> route: open a .py this page wrote and keep planning ----
+  if ($('openPyBtn')) $('openPyBtn').onclick = () => $('openPyFile').click();
+  if ($('openPyFile')) $('openPyFile').onchange = () => {
+    const f = $('openPyFile').files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      const j = stateDecode(rd.result);
+      $('openPyFile').value = '';
+      if (!j || j.app !== 'route' || !j.model || !Array.isArray(j.model.wps)) {
+        toast('این فایل با هلپر مسیر ساخته نشده — یا خط HELPER-STATE آن پاک شده');
+        return;
+      }
+      ROUTE = Object.assign({ wps: [], loop: true, low: 35, full: 90, batt: true, stay: 'pct', staySecs: 5, team: 'red' }, j.model);
+      save(); refresh();
+      toast('مسیر همان‌طور که ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)');
+    };
+    rd.readAsText(f);
+  };
   $('copyBtn').onclick = () => {
     if (navigator.clipboard) navigator.clipboard.writeText(toPython()).then(() => toast('کپی شد'), () => toast('کپی نشد'));
   };

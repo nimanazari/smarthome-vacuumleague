@@ -315,17 +315,30 @@
 
   const usedAnywhere = (sensorId) => RULES.some((r) => r.members.indexOf(sensorId) >= 0);
 
-  function save() {
-    const out = {
+  function modelObj() {
+    return {
       drive: DRIVE.speed,
       rules: RULES.map((r) => ({ members: r.members, cm: r.cm, colorPick: r.colorPick, act: r.act, secs: r.secs, speed: r.speed, on: r.on, act2: r.act2, secs2: r.secs2, speed2: r.speed2, act3: r.act3, secs3: r.secs3, speed3: r.speed3, dir: r.dir, roomPick: r.roomPick, cleanRoom: r.cleanRoom, cleanPct: r.cleanPct, deg: r.deg, deg2: r.deg2, deg3: r.deg3 })),
     };
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify(out)); } catch (e) { /* private mode */ }
   }
-  function restore() {
-    let j = null;
-    try { j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { /* private mode */ }
-    if (!j || !Array.isArray(j.rules)) return;
+  function save() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(modelObj())); } catch (e) { /* private mode */ }
+  }
+  /* ---- HELPER-STATE: the road back from Python ----
+     The model is written into the .py as ONE comment line, so the file
+     itself carries everything needed to reopen it here and keep building. */
+  function stateEncode(app, model) {
+    const json = JSON.stringify({ app: app, league: LEAGUE, v: 1, model: model });
+    return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function stateDecode(text) {
+    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+  }
+
+  function applyModel(j) {
+    if (!j || !Array.isArray(j.rules)) return false;
     if (j.drive) DRIVE.speed = clamp(Math.round(j.drive), 1, 25);
     j.rules.forEach((s) => {
       if (!s || !Array.isArray(s.members)) return;
@@ -346,8 +359,48 @@
       ['deg', 'deg2', 'deg3'].forEach((k) => { if (isFinite(s[k])) r[k] = ((Math.round(s[k]) % 360) + 360) % 360; });
       RULES.push(r);
     });
+    return true;
+  }
+  function restore() {
+    let j = null;
+    try { j = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { /* private mode */ }
+    applyModel(j);
   }
   restore();
+  // A .py the GAME just loaded parked its model here. Take it, but keep one
+  // level of undo: the child may have had rules of their own in this helper.
+  const IMPORT_KEY = 'shl_helper_import_' + LEAGUE;
+  const BACKUP_KEY = SAVE_KEY + '_prev';
+  let importedFile = false;
+  try {
+    const imp = localStorage.getItem(IMPORT_KEY);
+    if (imp) {
+      localStorage.removeItem(IMPORT_KEY);
+      const j = JSON.parse(imp);
+      if (j && (j.app === 'helper' || j.app === 'blocks') && j.model && Array.isArray(j.model.rules)) {
+        const had = RULES.length;
+        const before = localStorage.getItem(SAVE_KEY);
+        RULES = []; sel = null;
+        if (applyModel(j.model)) {
+          if (had && before) { try { localStorage.setItem(BACKUP_KEY, before); } catch (e2) { /* full */ } }
+          importedFile = had > 0 ? 'replaced' : true;
+          save();
+        }
+      }
+    }
+  } catch (e) { /* private mode */ }
+
+  function undoImport() {
+    let prev = null;
+    try { prev = localStorage.getItem(BACKUP_KEY); } catch (e) { /* private mode */ }
+    if (!prev) return false;
+    try { localStorage.removeItem(BACKUP_KEY); } catch (e) { /* private mode */ }
+    RULES = []; sel = null;
+    let j = null;
+    try { j = JSON.parse(prev); } catch (e) { return false; }
+    applyModel(j); save();
+    return true;
+  }
 
   /* ================================================================
      4. THE PICTURE  —  the robot from above: the six pieces a rule
@@ -1700,6 +1753,10 @@
       P('# rule in the helper and its question appears here.');
       P(elseLines(true));
       P('');
+      P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+      P(stateEncode('helper', modelObj()));
+      P('');
       return L.join('\n');
     }
 
@@ -1715,6 +1772,10 @@
     });
     cls.forEach((c) => { P(isPlan(c.rule) ? planFireLines(c.rule, KW()) : clauseLines(c, KW())); P(''); });
     P(elseLines());
+    P('');
+    P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncode('helper', modelObj()));
     P('');
     return L.join('\n');
   }
@@ -1872,14 +1933,56 @@
 
   $('backLink').href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE);
 
+  // the file the game handed over is already open — say so, and offer the way back
+  if (importedFile) {
+    setTimeout(() => {
+      if (importedFile === 'replaced') {
+        toast(L('Your loaded file is open here. Press Start over to go back to what you had.',
+          'فایلی که بارگذاری کردید همین‌جا باز است. برای برگشتن به کار قبلی، «از نو» را بزنید.'));
+      } else {
+        toast(L('Your loaded file is open here — keep building',
+          'فایلی که بارگذاری کردید همین‌جا باز است — ادامه بدهید'));
+      }
+    }, 400);
+  }
+
   $('addRule').onclick = () => { createRuleWith(null); };
 
   $('resetBtn').onclick = () => {
+    // if a loaded file displaced the child's own rules, the first press of
+    // Start over gives them back rather than throwing everything away
+    if (undoImport()) {
+      resetSim(); refresh();
+      toast(L('Your own rules are back', 'قانون‌های خودتان برگشت'));
+      return;
+    }
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* private mode */ }
     RULES = []; DRIVE.speed = 25;
     sel = null;
     resetSim(); refresh();
-    toast('Every rule thrown away — build your own');
+    toast(L('Every rule thrown away — build your own', 'همه‌ی قانون‌ها پاک شد — خودتان بسازید'));
+  };
+
+  // ---- Python -> helper: open a .py this helper (or the blocks page) wrote ----
+  if ($('openPyBtn')) $('openPyBtn').onclick = () => $('openPyFile').click();
+  if ($('openPyFile')) $('openPyFile').onchange = () => {
+    const f = $('openPyFile').files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      const j = stateDecode(rd.result);
+      $('openPyFile').value = '';
+      if (!j || (j.app !== 'helper' && j.app !== 'blocks')) {
+        toast(L('That file was not written by this helper (or its HELPER-STATE line was deleted)',
+          'این فایل با این هلپر ساخته نشده — یا خط HELPER-STATE آن پاک شده است'));
+        return;
+      }
+      RULES = []; sel = null;
+      if (!applyModel(j.model)) { toast(L('Could not read the file', 'فایل خوانده نشد')); return; }
+      resetSim(); refresh();
+      toast(L('Open again, as the helper built it — keep going (hand edits to the Python are not included)',
+        'همان‌طور که در هلپر ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)'));
+    };
+    rd.readAsText(f);
   };
 
   $('copyBtn').onclick = () => {

@@ -8,3 +8,4 @@ local-notes/
 build/
 dist/
 tools/__pycache__/
+shots.html

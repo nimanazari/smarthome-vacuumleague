@@ -3103,6 +3103,34 @@ else:                            # 7) nothing in the way -> full speed ahead
         $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name;
         sha12(text).then((h) => { if (h) $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name + ' · #' + h; });
         cheer(statusId === 'statusRed' ? 'red' : 'blue');   // robot hops when its code arrives
+        // A file written by a helper carries its model as one comment line.
+        // The game NEVER writes the helper's own save slot — a passive file
+        // load must not be able to destroy work sitting in the helper. It
+        // parks a validated copy in a PENDING slot; the helper picks it up,
+        // backs up what was there, and offers Undo.
+        try {
+          const hm = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text);
+          if (hm) {
+            const hj = JSON.parse(decodeURIComponent(escape(atob(hm[1]))));
+            const here = (leagueDef() || {}).id || '';
+            const m = hj && hj.model;
+            const shapeOk = !m ? false
+              : (hj.app === 'helper' || hj.app === 'blocks') ? Array.isArray(m.rules)
+                : hj.app === 'route' ? Array.isArray(m.wps) : false;
+            const sameDivision = !hj.league || !here || hj.league === here;
+            if (shapeOk && sameDivision) {
+              localStorage.setItem('shl_helper_import_' + here, JSON.stringify(hj));
+              showToast(hj.app === 'route'
+                ? T('این فایل با هلپر مسیر ساخته شده — دکمه‌ی Route از همین‌جا ادامه می‌دهد',
+                  'Built in the Route helper — the Route button continues from here')
+                : T('این فایل با هلپر ساخته شده — دکمه‌ی هلپر از همین‌جا ادامه می‌دهد',
+                  'Built in the helper — the helper button continues from here'));
+            } else if (shapeOk) {
+              showToast(T('این فایل برای رده‌ی دیگری ساخته شده — کد اجرا می‌شود، ولی هلپر ادامه‌اش نمی‌دهد',
+                'That file was built for another division — it still runs, but the helper cannot continue it'));
+            }
+          }
+        } catch (e) { /* an edited or foreign file — never block the load */ }
         const code = text.split('\n').filter(l => !l.trim().startsWith('#')).join('\n');
         const old = RETIRED.filter(n => new RegExp('\\b' + n + '\\b').test(code));
         $('err').textContent = (old.length
@@ -4293,6 +4321,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (!window.FSApp) return;
       FSApp.open({
         catalogue: (leagueDef() || {}).blocks,     // this league's own blocks
+        code: $('codeRed').value,                  // reopen a file the panel itself wrote
         onDone(py) {
           $('codeRed').value = py;
           $('statusRed').textContent = T('ساخته‌شده با بلوک‌ها', 'built from blocks');

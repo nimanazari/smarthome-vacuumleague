@@ -237,8 +237,23 @@
         P('    wheelright = 0');
       }
     }
+    P('# --- Keep the next line. It lets the helper reopen this file so you\n#     can carry on building. It stores what the HELPER built, so if\n#     you edit the Python below by hand, those edits are yours alone\n#     and will not come back with it. ---');
+    P('# --- خط بعدی را پاک نکنید. با آن، هلپر همین فایل را دوباره باز می\u200cکند\n#     تا ادامه بدهید. آنچه ذخیره می\u200cشود ساخته\u200cی هلپر است؛ پس اگر\n#     پایتونِ پایین را با دست تغییر بدهید، آن تغییرها با فایل\n#     برنمی\u200cگردند. ---');
+    P(stateEncodeFS({ blocks: B, loop: !!loop }));
     P('');
     return L.join('\n');
+  }
+
+  // the model rides inside the file as one comment line, so the panel can
+  // reopen any file it wrote and keep building
+  function stateEncodeFS(model) {
+    const json = JSON.stringify({ app: 'fsapp', v: 1, model: model });
+    return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function stateDecodeFS(text) {
+    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
   }
 
   /* ================================================================
@@ -817,6 +832,14 @@
     S.onDone = opts.onDone || null;
     S.cat = opts.catalogue || null;
     if (opts.blocks) S.blocks = opts.blocks.slice();
+    // reopening a .py this panel once wrote? pick its blocks straight back up
+    if (opts.code && !opts.blocks) {
+      const j = stateDecodeFS(opts.code);
+      if (j && j.app === 'fsapp' && j.model && Array.isArray(j.model.blocks)) {
+        S.blocks = j.model.blocks.slice();
+        if (typeof j.model.loop === 'boolean') S.loop = j.model.loop;
+      }
+    }
     // the league's own headline, so the child knows what THIS game is about
     const sub = $('fsSub');
     if (sub && S.cat && S.cat.intro) sub.textContent = S.cat.intro;
