@@ -5678,15 +5678,25 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (el && el.classList.contains('mitem')) el.style.display = live ? '' : 'none';
       }
       if (live) {
-        $('speedLbl').textContent = T('سرعت بازی', 'Speed') + ': ' + simSpeed + 'x';
-        $('sensLbl').textContent = T('سنسورها', 'Sensors') + ': ' + (sensOn ? T('روشن', 'on') : T('خاموش', 'off'));
-        $('relocRed').querySelector('.mi-t').textContent = T('جابه‌جایی تیم ۱', 'Relocate Team 1');
-        $('relocBlue').querySelector('.mi-t').textContent = T('جابه‌جایی تیم ۲', 'Relocate Team 2');
-        $('endBtn').querySelector('.mi-t').textContent = T('پایان بازی', 'End Game');
-        $('restartBtn').querySelector('.mi-t').textContent = T('شروع دوباره', 'Restart match');
-        $('helpBtn').lastChild.textContent = T('راهنما', 'Guide');
-        $('dlBaseBtn').lastChild.textContent = T('کد پایه .py', 'Base code .py');
-        $('lockLbl').textContent = T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off'));
+        // Labels only. A build that ships without one of these buttons — the
+        // teams' copy has no Official mode — must still open its menu, so a
+        // missing item means 'nothing to label', never a thrown handler.
+        const label = (id, text, how) => {
+          const el = $(id);
+          if (!el) return;
+          const target = how === 'inner' ? el.querySelector('.mi-t')
+            : how === 'last' ? el.lastChild : el;
+          if (target) target.textContent = text;
+        };
+        label('speedLbl', T('سرعت بازی', 'Speed') + ': ' + simSpeed + 'x');
+        label('sensLbl', T('سنسورها', 'Sensors') + ': ' + (sensOn ? T('روشن', 'on') : T('خاموش', 'off')));
+        label('relocRed', T('جابه‌جایی تیم ۱', 'Relocate Team 1'), 'inner');
+        label('relocBlue', T('جابه‌جایی تیم ۲', 'Relocate Team 2'), 'inner');
+        label('endBtn', T('پایان بازی', 'End Game'), 'inner');
+        label('restartBtn', T('شروع دوباره', 'Restart match'), 'inner');
+        label('helpBtn', T('راهنما', 'Guide'), 'last');
+        label('dlBaseBtn', T('کد پایه .py', 'Base code .py'), 'last');
+        label('lockLbl', T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off')));
       }
       m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
     };
