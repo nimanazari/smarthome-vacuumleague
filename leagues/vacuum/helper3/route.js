@@ -55,21 +55,35 @@
   } catch (e) { /* private mode */ }
   const save = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(ROUTE)); } catch (e) { /* private mode */ } };
 
-  // a .py the GAME just loaded parked its route here
+  // a .py the GAME just loaded parked its route here. Keep one level of undo
+  // for THIS visit — the child may have had a route of their own.
   let importedFile = false;
+  let undoSnapshot = null;
   try {
     const IK = 'shl_helper_import_' + LEAGUE;
     const imp = localStorage.getItem(IK);
     if (imp) {
       localStorage.removeItem(IK);
       const j = JSON.parse(imp);
-      if (j && j.app === 'route' && j.model && Array.isArray(j.model.wps)) {
+      const sameDivision = !j.league || j.league === LEAGUE;
+      if (j && j.app === 'route' && sameDivision && j.model && Array.isArray(j.model.wps)) {
+        if (ROUTE.wps.length) undoSnapshot = JSON.stringify(ROUTE);
         ROUTE = Object.assign(ROUTE, j.model);
-        importedFile = true;
+        importedFile = undoSnapshot ? 'replaced' : true;
         save();
       }
     }
   } catch (e) { /* private mode */ }
+
+  function undoImport() {
+    if (!undoSnapshot) return false;
+    let j = null;
+    try { j = JSON.parse(undoSnapshot); } catch (e) { undoSnapshot = null; return false; }
+    undoSnapshot = null;
+    if (!j) return false;
+    ROUTE = j; save();
+    return true;
+  }
   /* ---- HELPER-STATE: the road back from Python ----
      The model is written into the .py as ONE comment line, so the file
      itself carries everything needed to reopen it here and keep building. */
@@ -810,8 +824,14 @@
   $('fullIn').value = ROUTE.full;
   $('lowIn').onchange = () => { const v = parseInt($('lowIn').value, 10); if (isFinite(v)) ROUTE.low = clamp(v, 5, 80); $('lowIn').value = ROUTE.low; refresh(); };
   $('fullIn').onchange = () => { const v = parseInt($('fullIn').value, 10); if (isFinite(v)) ROUTE.full = clamp(v, ROUTE.low + 10, 100); $('fullIn').value = ROUTE.full; refresh(); };
-  $('resetBtn').onclick = () => { ROUTE.wps = []; refresh(); toast('مسیر پاک شد'); };
-  if (importedFile) setTimeout(() => toast('مسیری که بارگذاری کردید همین‌جا باز است — ادامه بدهید'), 400);
+  $('resetBtn').onclick = () => {
+    // if a loaded file displaced the child's own route, give it back first
+    if (undoImport()) { refresh(); toast('مسیر خودتان برگشت — برای پاک‌کردن دوباره بزنید'); return; }
+    ROUTE.wps = []; refresh(); toast('مسیر پاک شد');
+  };
+  if (importedFile) setTimeout(() => toast(importedFile === 'replaced'
+    ? 'مسیرِ فایلی که بارگذاری کردید باز است. برای برگشتن به مسیر قبلی، «از نو» را بزنید.'
+    : 'مسیری که بارگذاری کردید همین‌جا باز است — ادامه بدهید'), 400);
 
   // ---- Python -> route: open a .py this page wrote and keep planning ----
   if ($('openPyBtn')) $('openPyBtn').onclick = () => $('openPyFile').click();
@@ -829,6 +849,7 @@
         toast('این فایل برای رده‌ی ' + j.league.toUpperCase() + ' ساخته شده — در هلپر همان رده بازش کنید');
         return;
       }
+      if (ROUTE.wps.length) undoSnapshot = JSON.stringify(ROUTE);
       ROUTE = Object.assign({ wps: [], loop: true, low: 35, full: 90, batt: true, stay: 'pct', staySecs: 5, team: 'red' }, j.model);
       save(); refresh();
       toast('مسیر همان‌طور که ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)');
