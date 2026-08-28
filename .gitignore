@@ -10,3 +10,6 @@ dist/
 tools/__pycache__/
 shots.html
 shots.html
+
+# npm working files — never part of the game
+node_modules/

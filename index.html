@@ -396,6 +396,15 @@
     #finishPanel { position: static; transform: none; width: auto; max-height: none;
       margin: 16px auto 0; max-width: 92vw; animation: none; opacity: 1; }
   }
+  /* the held floor: the house keeps the screen, with only a word over it */
+  #floorHold { position: fixed; inset: 0; z-index: 24; display: flex;
+    align-items: flex-start; justify-content: center; cursor: pointer;
+    background: none; }
+  #floorHold .fh-line { margin-top: 12vh; padding: 11px 30px; border-radius: 16px;
+    font-size: 23px; font-weight: 800; letter-spacing: 1px;
+    background: rgba(10,13,19,.72); border: 1px solid rgba(255,255,255,.16);
+    backdrop-filter: blur(6px); animation: fhIn .8s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes fhIn { 0% { opacity: 0; transform: translateY(-14px); } 100% { opacity: 1; transform: none; } }
   .rcard { position: relative; text-align: center; padding: 20px 40px; animation: rise .6s cubic-bezier(.2,.8,.2,1); }
   /* the score arrives BIG and centred, holds a beat so the number lands, and
      only then glides over to make room for how it was won */
@@ -1112,6 +1121,35 @@
   /* ---------------- SCREEN 1 · the character select ---------------- */
   .dv-stage { position: relative; z-index: 1; width: 100%; min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 18px 14px; }
   .dv-brand { text-align: center; margin-bottom: 10px; }
+  /* the one question a first-time visitor actually has, answered where they
+     are standing -- beside the name, not buried in a menu they have not
+     opened yet */
+  .dv-how { margin-top: 7px; width: 30px; height: 30px; border-radius: 50%;
+    font: 800 15px inherit; cursor: pointer; color: var(--muted);
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.18); }
+  .dv-how:hover { color: #0d1117; background: #4d8bff; border-color: #4d8bff; }
+  #howTo { position: fixed; inset: 0; z-index: 40; display: flex;
+    align-items: center; justify-content: center; padding: 18px;
+    background: rgba(7,9,13,.72); backdrop-filter: blur(6px); }
+  #howTo .ht-card { position: relative; width: min(520px, 94vw); max-height: 88vh;
+    overflow: auto; padding: 26px 28px 22px; border-radius: 22px; text-align: start;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219;
+    border: 1px solid rgba(255,255,255,.13); box-shadow: 0 30px 70px rgba(0,0,0,.6);
+    animation: rise .5s cubic-bezier(.2,.8,.2,1); }
+  #howTo h2 { font-size: 19px; font-weight: 900; margin: 0 0 4px; }
+  #howTo .ht-sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+  #howTo ol { margin: 0; padding-inline-start: 0; list-style: none; counter-reset: ht; }
+  #howTo li { counter-increment: ht; position: relative; padding-inline-start: 42px;
+    margin-bottom: 15px; font-size: 13.5px; line-height: 1.95; }
+  #howTo li::before { content: counter(ht); position: absolute; inset-inline-start: 0; top: 1px;
+    width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; font-size: 12.5px; color: #0d1117; background: #4d8bff; }
+  #howTo li b { color: var(--text); }
+  #howTo .ht-x { position: absolute; inset-inline-end: 14px; top: 11px; width: 30px; height: 30px;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.16); cursor: pointer;
+    background: transparent; color: var(--muted); font-size: 17px; line-height: 1; }
+  #howTo .ht-go { margin-top: 6px; width: 100%; padding: 12px; border-radius: 13px;
+    font: 800 14px inherit; cursor: pointer; border: none; background: #4d8bff; color: #08101f; }
   .dv-mark { position: relative; display: inline-block; }
   .dv-mark .dv-bot { width: 62px; height: 62px; filter: drop-shadow(0 14px 30px rgba(77,139,255,.45)); animation: dvbob 3s ease-in-out infinite; }
   @keyframes dvbob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-7px) rotate(3deg); } }
@@ -2243,7 +2281,8 @@ else:                          # turn AND drive toward them
           </svg>
           <span class="dv-spark s1"></span><span class="dv-spark s2"></span><span class="dv-spark s3"></span>
         </div>
-        <h1 class="fa" id="lTitle">Simulation League</h1>
+        <h1 class="fa" id="lTitle">Smart Home Simulation League</h1>
+        <button type="button" class="dv-how" id="howBtn">?</button>
         <div class="dv-sub fa" id="lSub" style="display:none"></div>
       </div>
       <div class="lsteps" id="lSteps" style="display:none"></div>
@@ -3771,14 +3810,12 @@ else:                            # 7) nothing in the way -> full speed ahead
         const pick = (o) => (o ? T(o.fa || o.en, o.en || o.fa) : '');
         b.innerHTML =
           '<span class="dv-code">' + d.code + '</span>' +
-          '<button type="button" class="dv-q" title="' + T('این رده چیست؟', 'What is this division?') + '">?</button>' +
           (d.id === lastPlayed ? '<span class="dv-seen' + (LANG === 'fa' ? ' fa' : '') + '">' + T('بار قبل همین بود', 'LAST PLAYED') + '</span>' : '') +
           '<span class="dv-porthole">' + emblem + '</span>' +
           '<span class="dv-name' + (LANG === 'fa' ? ' fa' : '') + '">' + pick(d.name) + '</span>' +
           '<span class="dv-age' + (LANG === 'fa' ? ' fa' : '') + '">' + pick(d.age) + '</span>' +
           '<span class="dv-go' + (LANG === 'fa' ? ' fa' : '') + '">' + T('بزن بریم <b>&larr;</b>', 'Let\'s go <b>&rarr;</b>') + '</span>';
         b.onclick = () => chooseLeague(d.id);
-        b.querySelector('.dv-q').onclick = (ev) => { ev.stopPropagation(); showDivInfo(d); };
         g.appendChild(b);
       }
     }
@@ -4242,7 +4279,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       setStep(2);
       // ONE line on the front page: the league's name. Nothing else —
       // every explanation lives behind the doors' own «?» buttons.
-      $('lTitle').textContent = T('لیگ شبیه‌سازی', 'Simulation League');
+      $('lTitle').textContent = T('لیگ شبیه‌سازی خانه هوشمند', 'Smart Home Simulation League');
       $('lSub').style.display = 'none';
       $('lSteps').style.display = 'none';      // no breadcrumb on the front page
       $('lBack').style.display = ONE_LEAGUE ? 'none' : 'block';
@@ -4250,6 +4287,40 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('leaguePanel').style.display = 'flex';
     }
     $('lBack').onclick = showLeaguePicker;
+
+    /* HOW TO START — the four steps, and nothing more. Whoever opens this has
+       not chosen a division yet, so it must make sense before any choice. */
+    $('howBtn').onclick = () => {
+      const old = $('howTo'); if (old) old.remove();
+      const ov = document.createElement('div');
+      ov.id = 'howTo';
+      const step = (b, t) => '<li><b>' + b + '</b><br>' + t + '</li>';
+      ov.innerHTML = '<div class="ht-card' + (LANG === 'fa' ? ' fa' : '') + '">'
+        + '<button type="button" class="ht-x">&times;</button>'
+        + '<h2>' + T('از کجا شروع کنم؟', 'How do I start?') + '</h2>'
+        + '<div class="ht-sub">' + T('چهار قدم، همین.', 'Four steps, that is all.') + '</div>'
+        + '<ol>'
+        + step(T('رده‌ات را انتخاب کن', 'Pick your division'),
+               T('سه در می‌بینی — فرست‌استپ (۸ تا ۱۱ سال)، U14 (۱۱ تا ۱۴) و U19 (۱۴ تا ۱۹). سنِ خودت را بردار؛ هر سه در همان خانه بازی می‌کنند و فرقشان در حس‌های ربات است.',
+                 'Three doors — First Step (8–11), U14 (11–14) and U19 (14–19). Take the one for your age; all three play the same house, and what differs is the robot\'s senses.'))
+        + step(T('کد ربات را بنویس', 'Write the robot\'s code'),
+               T('یا در ادیتور پایتون بنویس، یا از هلپر استفاده کن: چند شرط ساده انتخاب می‌کنی و خودش برنامه را می‌نویسد. ربات آماده است — تو فقط مغزش را می‌نویسی.',
+                 'Either write Python in the editor, or use a helper: pick a few simple conditions and it writes the program for you. The robot is ready-made — you only write its brain.'))
+        + step(T('مسابقه را شروع کن', 'Start the match'),
+               T('دکمه‌ی سبزِ «شروع مسابقه» را بزن. ربات خودش راه می‌افتد؛ هر کاشی که تمیز کند یک امتیاز است.',
+                 'Press the green “Start match”. The robot drives itself; every tile it cleans is a point.'))
+        + step(T('گزارش را بخوان', 'Read the report'),
+               T('آخر بازی نمودار امتیاز و نقشه‌ی حرارتی را می‌بینی — کجا وقت تلف شده و کجا خوب کار کرده. از روی همان، کد را بهتر کن.',
+                 'At the whistle you get the score chart and the heat map — where time was wasted and where it worked. Improve the code from that.'))
+        + '</ol>'
+        + '<button type="button" class="ht-go">' + T('فهمیدم، شروع کنیم', 'Got it — let\'s start') + '</button>'
+        + '</div>';
+      const close = () => ov.remove();
+      ov.onclick = (e) => { if (e.target === ov) close(); };
+      ov.querySelector('.ht-x').onclick = close;
+      ov.querySelector('.ht-go').onclick = close;
+      document.body.appendChild(ov);
+    };
     // step 3 — the robot builder. Kits are remembered per league, so a team's
     // build is still there next time they open that division.
     const kitKey = () => 'shl_kit_' + leagueId;
@@ -4730,9 +4801,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       wireRelocate();
       resetMatchLog();
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
-      // Official mode means this match counts, and a match that counts is
-      // filmed. The referee should never have to remember to press record.
-      if (window.SHL_LOCK && !matchRec.on) {
+      // EVERY match is filmed, not only the official ones -- a referee should
+      // never have to remember, and neither should a child who has just done
+      // something worth keeping. If this browser cannot record, it simply
+      // does not, and the match runs exactly as before.
+      if (!matchRec.on) {
         try { matchRec.toggle(); } catch (e) { /* no recorder in this browser */ }
       }
       fitText($('redName'), redName); fitText($('blueName'), blueName);
@@ -4833,6 +4906,26 @@ else:                            # 7) nothing in the way -> full speed ahead
       },
     };
 
+    /* At the whistle the floor gets the screen to itself for a moment: the
+       finished house, both robots, everything they painted. Only then does
+       the score arrive. Anyone who wants to skip it can click. */
+    let floorHold = null;
+    function holdTheFloor(then) {
+      if (floorHold) { clearTimeout(floorHold.t); floorHold.el.remove(); floorHold = null; }
+      const el = document.createElement('div');
+      el.id = 'floorHold';
+      el.innerHTML = '<div class="fh-line">' + T('پایان مسابقه', 'Full time') + '</div>';
+      const done = () => {
+        if (!floorHold) return;
+        clearTimeout(floorHold.t);
+        floorHold.el.remove(); floorHold = null;
+        then();
+      };
+      el.onclick = done;
+      document.body.appendChild(el);
+      floorHold = { el: el, t: setTimeout(done, 3500) };
+    }
+
     function showResults() {
       matchRec.stop();               // the whistle finishes the film too
       $('vignette').style.boxShadow = 'inset 0 0 26vh 8vh rgba(255,40,40,0)';
@@ -4931,8 +5024,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('debriefCard').style.display = 'none';
       $('debriefBtn').style.display = matchLog ? '' : 'none';
         $('reelBtn').style.display = (matchLog && matchLog.frames && matchLog.frames.length > 20) ? '' : 'none';
-      $('results').style.display = 'flex'; document.body.classList.add('resultopen');
-      openFinish();
+      holdTheFloor(() => {
+        $('results').style.display = 'flex'; document.body.classList.add('resultopen');
+        openFinish();
+      });
     }
 
     /* ---------- the debrief itself ---------- */

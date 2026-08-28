@@ -58,6 +58,9 @@ class Renderer3D {
     sun.shadow.camera.left = -14; sun.shadow.camera.right = 14; sun.shadow.camera.top = 14; sun.shadow.camera.bottom = -14;
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
     this.scene.add(sun);
+    this._sun = sun;                 // the endgame tints this, and the shadows with it
+    this._sunBase = sun.color.clone();
+    this._tint = 0;                  // 0 = neutral room, 1 = fully the leader's
 
     // camera (2.5D view by default — the whole board in one glance) + smooth view transitions
     const v = VIEWS['2.5d']; this._vi = 2;
@@ -83,23 +86,70 @@ class Renderer3D {
   }
 
   cycleView() {
-    // the top view is home, and the reel built around it comes next
-    const keys = ['top', 'cine', '3d', '2.5d', 'spider', 'spin', 'pov'];
+    // 2.5D reads best, so it leads; the reel built around it comes next,
+    // then third person -- the shot that shows both robots at once
+    const keys = ['2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
     this._vi = ((this._vi || 0) + 1) % keys.length;
     const k = keys[this._vi];
     this.viewMode = k;
     if (k === 'spider') { this._spider = null; return TR_VIEW('اسپایدرکم', 'Spider cam'); }
+    if (k === 'chase') return TR_VIEW('سوم‌شخص — هر دو ربات', 'Third person — both robots');
     if (k === 'spin') { this.setView('2.5d'); return TR_VIEW('چرخش ۳۶۰ درجه', '360° orbit'); }
-    if (k === 'pov') return TR_VIEW('از نگاه ربات', 'Robot POV');
+    if (k === 'pov') return TR_VIEW('از نگاه ربات‌ها', 'Robot POV — both');
     if (k === 'cine') { this._cine = null; return TR_VIEW('🎬 سینماتیک', '🎬 Cinematic'); }
     this.setView(k);
     return VIEWS[k].label;
   }
 
-  _gradientBg() {
+  /* THE CLOSING STRETCH takes the leader's colour -- the sky behind the house
+     and the sun that casts every shadow. `k` is how far into the last ten
+     seconds we are, so it arrives gradually and never snaps; when the lead
+     changes hands in those seconds, the room changes with it. */
+  _endgameTint() {
+    const LAST = 10;
+    const live = this._cineRunning && this._cineLeft != null;
+    const k = live ? Math.max(0, Math.min(1, (LAST - this._cineLeft) / LAST)) : 0;
+    const S = this._cineScores || { red: 0, blue: 0 };
+    const lead = (S.red || 0) === (S.blue || 0) ? null : ((S.red || 0) > (S.blue || 0) ? 'red' : 'blue');
+    const want = lead ? k : 0;
+    this._tint += (want - this._tint) * 0.05;          // ease, never snap
+    if (this._tint < 0.004 && want === 0) {
+      if (this._tinted) {
+        this.scene.background = this._gradientBg();
+        if (this._sun) this._sun.color.copy(this._sunBase);
+        this._tinted = false;
+      }
+      return;
+    }
+    const t = this._tint;
+    const C = lead === 'blue' ? [0x4d, 0x8b, 0xff] : [0xff, 0x5a, 0x4e];
+    if (this._tintKey !== lead + '|' + Math.round(t * 24)) {
+      this._tintKey = lead + '|' + Math.round(t * 24);
+      this.scene.background = this._gradientBg(C, t);
+      this._tinted = true;
+    }
+    if (this._sun) {
+      // the sun carries the colour, so every shadow on the floor carries it too
+      const b = this._sunBase;
+      this._sun.color.setRGB(
+        b.r + ((C[0] / 255) - b.r) * t * 0.75,
+        b.g + ((C[1] / 255) - b.g) * t * 0.75,
+        b.b + ((C[2] / 255) - b.b) * t * 0.75);
+    }
+  }
+
+  _gradientBg(tint, amount) {
     const cvs = document.createElement('canvas'); cvs.width = 2; cvs.height = 256;
     const ctx = cvs.getContext('2d'); const g = ctx.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0, '#1b2333'); g.addColorStop(0.55, '#12161e'); g.addColorStop(1, '#0a0c11');
+    // the neutral room, and the same room washed towards a team's colour
+    const base = [[0x1b, 0x23, 0x33], [0x12, 0x16, 0x1e], [0x0a, 0x0c, 0x11]];
+    const a = tint ? Math.max(0, Math.min(1, amount || 0)) : 0;
+    const stop = (i, w) => {
+      const b = base[i];
+      const mix = (j) => Math.round(b[j] + ((tint ? tint[j] : b[j]) - b[j]) * a * w);
+      return 'rgb(' + mix(0) + ',' + mix(1) + ',' + mix(2) + ')';
+    };
+    g.addColorStop(0, stop(0, 0.42)); g.addColorStop(0.55, stop(1, 0.24)); g.addColorStop(1, stop(2, 0.12));
     ctx.fillStyle = g; ctx.fillRect(0, 0, 2, 256);
     const tex = new THREE.CanvasTexture(cvs); tex.encoding = THREE.sRGBEncoding; return tex;
   }
@@ -1459,7 +1509,7 @@ class Renderer3D {
          That cut is the whole point: the camera moves because the MATCH
          moved, not because a timer went off. */
     if (!this._cineOrder) {
-      const specials = ['spider', 'orbit', '2.5d', '3d'];
+      const specials = ['spider', 'orbit', 'top', '3d'];
       for (let i = specials.length - 1; i > 0; i--) {   // a fresh order per match
         const j = Math.floor(Math.random() * (i + 1));
         const t = specials[i]; specials[i] = specials[j]; specials[j] = t;
@@ -1476,7 +1526,7 @@ class Renderer3D {
 
     const c0 = this._cine;
     const drama = this._cineDrama(now);
-    if (drama && (!c0 || c0.shot === 'top')) {
+    if (drama && (!c0 || c0.shot === '2.5d')) {
       // Something happened. Get close to it -- but only ever from HOME, so a
       // visit already running is never cut in half.
       this._cineWatch.cool = now + 15000;
@@ -1490,10 +1540,10 @@ class Renderer3D {
         why: drama,
       };
     } else if (!c0 || now > c0.until) {
-      if (!c0 || c0.shot !== 'top') {
-        // home, and stay there: this is the shot the match is watched on
+      if (!c0 || c0.shot !== '2.5d') {
+        // home, and stay there: 2.5D is the shot the match is watched on
         this._cine = {
-          shot: 'top', until: now + 26000 + Math.random() * 9000,
+          shot: '2.5d', until: now + 24000 + Math.random() * 8000,
           az: Math.random() * Math.PI * 2,
           dir: Math.random() < 0.5 ? -1 : 1,
         };
@@ -1553,20 +1603,30 @@ class Renderer3D {
   }
 
   render() {
+    this._endgameTint();          // the room answers the scoreboard
     // ---- 🎬 CINEMATIC: the auto-director takes the wheel ----
     if (this.viewMode === 'cine') { this._renderCine(); return; }
     // ---- SPIDER CAM: the wire rig, following the action from above ----
     if (this.viewMode === 'spider') { this._renderSpider(); return; }
-    // ---- ROBOT POV: ride team 1's shell, look where it looks ----
-    if (this.viewMode === 'pov' && this._povPose) {
-      const p = this._povPose;
-      const cx = Math.cos(p.h), sz = Math.sin(p.h);
-      this.camera.fov += (74 - this.camera.fov) * 0.15;
-      this.camera.updateProjectionMatrix();
-      this.camera.position.set(p.x - cx * 0.10, 0.34, p.z - sz * 0.10);
-      this.camera.lookAt(p.x + cx * 3, 0.22, p.z + sz * 3);
-      this.renderer.render(this.scene, this.camera);
-      return;
+    /* ---- THIRD PERSON and ROBOT POV: BOTH robots, side by side ----
+       A match has two robots in it. Watching it over one robot's shoulder,
+       or down one robot's nose, is watching half a match -- so both of these
+       split the frame and give each side its own half. With only one robot
+       on the floor there is no second half to fill, and they go full frame. */
+    if (this.viewMode === 'chase' || this.viewMode === 'pov') {
+      const poses = this._cinePoses || {};
+      const mode = this.viewMode === 'pov' ? 'pov' : 'chase';
+      if (poses.red && poses.blue) { this._renderPair(poses, mode); return; }
+      const only = poses.red || poses.blue || this._povPose;
+      if (only) {
+        const el = this.renderer.domElement, R = this.renderer.getPixelRatio();
+        this.renderer.setScissorTest(false);
+        this.renderer.setViewport(0, 0, el.width / R, el.height / R);
+        this.camera.aspect = (el.width / R) / ((el.height / R) || 1);
+        this.camera.updateProjectionMatrix();
+        if (mode === 'pov') this._renderPovOf(only); else this._renderChaseOf(only);
+        return;
+      }
     }
     // ---- 360°: the 2.5D framing, slowly circling the house ----
     if (this.viewMode === 'spin') { this.tAz += 0.0013; this.az = this.tAz; }

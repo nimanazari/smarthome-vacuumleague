@@ -876,7 +876,7 @@
     };
     rd.readAsText(f);
   };
-  $('copyBtn').onclick = () => {
+  if ($('copyBtn')) $('copyBtn').onclick = () => {
     if (navigator.clipboard) navigator.clipboard.writeText(toPython()).then(() => toast('کپی شد'), () => toast('کپی نشد'));
   };
   $('dlPyBtn').onclick = () => {
@@ -891,7 +891,7 @@
     catch (e) { toast('مرورگر اجازه‌ی ذخیره نداد'); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
   };
-  $('playBtn2').onclick = () => {
+  if ($('playBtn2')) $('playBtn2').onclick = () => {
     try { localStorage.setItem(HANDOFF_KEY + '_blue', toPython()); }
     catch (e) { toast('مرورگر اجازه‌ی ذخیره نداد'); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';

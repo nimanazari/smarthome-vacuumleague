@@ -2031,7 +2031,7 @@
     rd.readAsText(f);
   };
 
-  $('copyBtn').onclick = () => {
+  if ($('copyBtn')) $('copyBtn').onclick = () => {
     const py = toPython();
     if (navigator.clipboard) navigator.clipboard.writeText(py).then(() => toast('Copied'), () => toast('Could not copy'));
     else toast('Could not copy');
@@ -2054,7 +2054,7 @@
     catch (e) { toast('This browser will not let me save the file'); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
   };
-  if ($('playBtn2')) $('playBtn2').onclick = () => {
+  if ($('playBtn2')) if ($('playBtn2')) $('playBtn2').onclick = () => {
     try { localStorage.setItem(HANDOFF_KEY + '_blue', toPython()); }
     catch (e) { toast('This browser will not let me save the file'); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';

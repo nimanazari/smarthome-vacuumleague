@@ -588,7 +588,7 @@
     };
     rd.readAsText(f);
   };
-  $('copyBtn').onclick = () => {
+  if ($('copyBtn')) $('copyBtn').onclick = () => {
     if (navigator.clipboard) navigator.clipboard.writeText(toPython()).then(() => toast(T('کپی شد', 'Copied')), () => toast(T('کپی نشد', 'Could not copy')));
   };
   const download = (text, name, type) => {
@@ -599,10 +599,10 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   };
   $('dlPyBtn').onclick = () => download(toPython(), 'my-robot.py', 'text/x-python');
-  $('dlJsonBtn').onclick = () => download(JSON.stringify(FILE, null, 2), 'my-robot.blocks.json', 'application/json');
-  $('loadJsonBtn').onclick = () => $('jsonFile').click();
+  if ($('dlJsonBtn')) $('dlJsonBtn').onclick = () => download(JSON.stringify(FILE, null, 2), 'my-robot.blocks.json', 'application/json');
+  if ($('loadJsonBtn')) $('loadJsonBtn').onclick = () => $('jsonFile').click();
   // PYTHON → BLOCKS: open a .py, or paste one into the little modal
-  $('loadPyBtn').onclick = () => {
+  if ($('loadPyBtn')) $('loadPyBtn').onclick = () => {
     const ov = document.createElement('div');
     ov.id = 'pyModal';
     ov.innerHTML = '<div class="pym-card"><b>' + T('پایتون را اینجا بچسبان — بلاک می‌شود', 'Paste Python here — it becomes blocks') + '</b>' +
@@ -643,7 +643,7 @@
     catch (e) { toast(T('مرورگر اجازه‌ی ذخیره نداد', 'The browser blocked saving')); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
   };
-  $('playBtn2').onclick = () => {
+  if ($('playBtn2')) $('playBtn2').onclick = () => {
     try { localStorage.setItem(HANDOFF_KEY + '_blue', toPython()); }
     catch (e) { toast(T('مرورگر اجازه‌ی ذخیره نداد', 'The browser blocked saving')); return; }
     location.href = GAME_URL + '?league=' + encodeURIComponent(LEAGUE) + '&helpercode=1';
@@ -671,10 +671,11 @@
 
   /* ---- static page copy, in the picked language ---- */
   const SET = (id, fa, en) => { const el = $(id); if (el) el.innerHTML = T(fa, en); };
+  const SET_GONE = () => {};   // the button was removed
   SET('uiTitle', 'Blocks — هلپر بلاکی', 'Blocks helper');
   SET('resetBtn', 'از نو', 'Start over');
   SET('backLink', '&#8594; برگرد به بازی', '&#8592; Back to the game');
-  SET('loadPyBtn', '&#128229; پایتون &#8594; بلاک', '&#128229; Python &#8594; blocks');
+  SET_GONE('loadPyBtn', '&#128229; پایتون &#8594; بلاک', '&#128229; Python &#8594; blocks');
   SET('h2Pal', '<span class="step">۱</span> بلاک‌ها', '<span class="step">1</span> Blocks');
   SET('palHint', 'روی بلاک بزن تا در قانونِ انتخاب‌شده بنشیند. شش‌ضلعی‌ها «شرط»اند، گردها «حرکت».',
       'Tap a block and it snaps into the selected rule. Hexagons are CONDITIONS, rounded ones are MOVES.');
@@ -685,11 +686,11 @@
   SET('addRule', '+ قانون جدید', '+ New rule');
   SET('h2Code', '<span class="step">۳</span> پایتونِ همین بلاک‌ها <span class="hint">— فایل واقعی‌ای که مسابقه اجرا می‌کند</span>',
       '<span class="step">3</span> The Python of these blocks <span class="hint">— the real file the match runs</span>');
-  SET('copyBtn', 'کپی پایتون', 'Copy Python');
-  SET('dlPyBtn', '&#11015; فایل پایتون', '&#11015; Python file');
-  SET('dlJsonBtn', '&#11015; فایل بلاکی', '&#11015; Blocks file');
-  SET('loadJsonBtn', '&#128229; بارگذاری فایل بلاکی', '&#128229; Load blocks file');
-  SET('playBtn2', '&#9654; تیم ۲', '&#9654; Team 2');
+  SET_GONE('copyBtn', 'کپی پایتون', 'Copy Python');
+  SET('dlPyBtn', '&#11015; دانلود کد پایتون', '&#11015; Download the Python');
+  SET_GONE('dlJsonBtn', '&#11015; فایل بلاکی', '&#11015; Blocks file');
+  SET_GONE('loadJsonBtn', '&#128229; بارگذاری فایل بلاکی', '&#128229; Load blocks file');
+  SET_GONE('playBtn2', '&#9654; تیم ۲', '&#9654; Team 2');
   SET('playBtn', '&#9654; بازی با این کد', '&#9654; Play with this code');
 
   /* ---- go ---- */
