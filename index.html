@@ -341,60 +341,48 @@
     font: 700 12.5px inherit; padding: 8px 14px; border-radius: 10px; cursor: pointer;
     border: 1px solid var(--line); background: rgba(10,13,19,.86); color: var(--text); }
   #reel .reel-skip:hover { border-color: var(--accent); }
+  /* The floor already had the screen to itself for three and a half seconds.
+     The result now takes the whole of it: score across the top, how it was
+     won underneath, buttons at the foot. */
   #results { position: fixed; inset: 0; z-index: 25; display: none;
-    align-items: center; justify-content: flex-start;
-    background: none; backdrop-filter: none; overflow: hidden;
-    pointer-events: none; }
+    align-items: flex-start; justify-content: center;
+    overflow: auto; padding: 3vh 0 4vh; }
   #results > * { pointer-events: auto; }
   #results .rcard {
-    margin-inline-start: 3.5vw;
-    max-width: min(560px, 46vw);
+    margin: auto;
+    width: min(1080px, 94vw); max-width: none;
     background: linear-gradient(180deg, rgba(10,13,19,.93), rgba(10,13,19,.87));
     border: 1px solid var(--line); border-radius: 22px;
     box-shadow: 0 30px 80px -30px rgba(0,0,0,.9);
     backdrop-filter: blur(10px);
   }
-  /* the floor slides over to make room, instead of vanishing behind a blur */
-  body.resultopen #scene { transform: translateX(14vw) scale(.86); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
   body.resultopen #scoreboard { opacity: .35; transition: opacity .5s; }
   @media (max-width: 900px) {
-    /* no room to sit beside it on a phone — fall back to over the top */
-    #results { justify-content: center; background: rgba(7,9,13,.72); backdrop-filter: blur(7px); }
-    #results .rcard { margin-inline-start: 0; max-width: 92vw; }
-    body.resultopen #scene { transform: none; }
+    #results .rcard { width: 94vw; padding: 20px 18px 18px; }
   }
   /* THE FINISH PANEL — how the score was won, on the floor's own side of the
      screen: the trend over time, the heat map of where each robot worked,
      and the buttons you reach for once you have read the score. */
-  #finishPanel { position: fixed; right: 2.6vw; top: 50%; transform: translateY(-50%);
-    width: min(430px, 33vw); max-height: 92vh; overflow: auto; display: none;
-    padding: 15px 16px 13px; border-radius: 20px; direction: ltr;
-    background: linear-gradient(180deg, rgba(15,19,27,.90), rgba(10,13,19,.85));
-    border: 1px solid rgba(255,255,255,.13);
-    box-shadow: 0 26px 64px rgba(0,0,0,.55); backdrop-filter: blur(8px);
-    opacity: 0; animation: fpIn .7s cubic-bezier(.2,.8,.2,1) 1.25s forwards; }
+  /* under the score: the two pictures that explain it, side by side while
+     there is room, stacked when there is not */
+  #finishPanel { display: none; direction: ltr; margin-top: 22px;
+    padding-top: 20px; border-top: 1px solid rgba(255,255,255,.10);
+    opacity: 0; animation: fpIn .7s cubic-bezier(.2,.8,.2,1) .9s forwards; }
   #finishPanel.on { display: block; }
-  @keyframes fpIn { 0% { opacity: 0; transform: translateY(-50%) translateX(26px); }
-                    100% { opacity: 1; transform: translateY(-50%) translateX(0); } }
-  #finishPanel .fp-sec { margin-bottom: 13px; }
+  @keyframes fpIn { 0% { opacity: 0; transform: translateY(16px); }
+                    100% { opacity: 1; transform: none; } }
+  #finishPanel .fp-grid { display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+  #finishPanel .fp-sec { margin-bottom: 0; text-align: start; }
   #finishPanel .fp-h { font-size: 12px; font-weight: 800; margin-bottom: 7px;
     letter-spacing: .3px; color: #dfe4ec; }
   #finishPanel canvas { display: block; width: 100%; height: auto; border-radius: 11px;
     border: 1px solid rgba(255,255,255,.10); background: #10141a; }
   #finishPanel .fp-cap { margin-top: 6px; font-size: 10.5px; color: var(--muted); }
-  #finishPanel .fp-btns { padding-top: 3px; border-top: 1px solid rgba(255,255,255,.09); }
-  #finishPanel .fp-btns .rbtnrow { margin-top: 11px; gap: 9px; }
-  /* On a phone nothing sits beside anything: the score, then how it was won,
-     then the buttons — straight down the page, all of it still there. */
+  #finishPanel .fp-btns .rbtnrow { margin-top: 22px; gap: 11px; }
   @media (max-width: 900px) {
-    /* showResults sets display:flex INLINE, which no stylesheet rule can
-       outrank -- so the column is made by turning the flex row on its side
-       rather than by trying to replace it. Score first, then how it was won. */
-    #results { flex-direction: column; align-items: center; justify-content: flex-start;
-      overflow: auto; padding: 16px 0 26px; }
-    #results .rcard { margin: 0 auto; }
-    #finishPanel { position: static; transform: none; width: auto; max-height: none;
-      margin: 16px auto 0; max-width: 92vw; animation: none; opacity: 1; }
+    #results .rcard { width: 94vw; padding: 20px 18px 18px; }
+    #finishPanel { animation: none; opacity: 1; }
   }
   /* the held floor: the house keeps the screen, with only a word over it */
   #floorHold { position: fixed; inset: 0; z-index: 24; display: flex;
@@ -1309,17 +1297,17 @@
      the score on the left. (It used to paint a 94%-opaque sheet right here,
      which covered the floor completely.) The heavy background comes back
      only on a phone, where the card really does cover the screen. */
-  body #results { background: none; backdrop-filter: none; }
-  @media (max-width: 900px) {
-    body #results {
-      background:
-        radial-gradient(1000px 620px at 12% -8%, rgba(77,139,255,.17), transparent 62%),
-        radial-gradient(900px 560px at 88% 108%, rgba(47,208,138,.13), transparent 62%),
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
-        rgba(10,13,19,.94);
-      background-size: auto, auto, 46px 46px, 46px 46px, auto;
-    }
+  /* The floor had its own three and a half seconds before this appeared, so
+     the result is free to take the whole screen and be properly readable. */
+  body #results {
+    background:
+      radial-gradient(1000px 620px at 12% -8%, rgba(77,139,255,.17), transparent 62%),
+      radial-gradient(900px 560px at 88% 108%, rgba(47,208,138,.13), transparent 62%),
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+      rgba(10,13,19,.94);
+    background-size: auto, auto, 46px 46px, 46px 46px, auto;
+    backdrop-filter: none;
   }
   body #results #rcardMain, body #results #debriefCard {
     padding: 24px 42px 22px; border-radius: 26px;
@@ -1774,6 +1762,22 @@
       </div>
       <div class="rsub" id="rSub"></div>
       <div class="rsaved fa" id="rSaved" style="display:none"></div>
+      <!-- how the score was won: where they worked, and how it pulled apart -->
+      <div id="finishPanel">
+        <div class="fp-grid">
+          <div class="fp-sec">
+            <div class="fp-h fa" id="fpHeatH"></div>
+            <canvas id="fpHeat" width="440" height="300"></canvas>
+            <div class="fp-cap fa" id="fpHeatC"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-h fa" id="fpTrendH"></div>
+            <canvas id="fpSeries" width="440" height="150"></canvas>
+            <div class="fp-cap fa" id="fpTrendC"></div>
+          </div>
+        </div>
+        <div class="fp-btns" id="fpBtns"></div>
+      </div>
       <div class="rbtnrow">
         <button class="rbtn ghosty" id="debriefBtn" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/></svg>
@@ -1808,20 +1812,7 @@
         <button class="btn" id="newMatch3">New Match</button>
       </div>
     </div>
-    <!-- how the score was won: the trend, the ground covered, the way on -->
-    <div id="finishPanel">
-      <div class="fp-sec">
-        <div class="fp-h fa" id="fpTrendH"></div>
-        <canvas id="fpSeries" width="440" height="150"></canvas>
-        <div class="fp-cap fa" id="fpTrendC"></div>
-      </div>
-      <div class="fp-sec">
-        <div class="fp-h fa" id="fpHeatH"></div>
-        <canvas id="fpHeat" width="440" height="300"></canvas>
-        <div class="fp-cap fa" id="fpHeatC"></div>
-      </div>
-      <div class="fp-btns" id="fpBtns"></div>
-    </div>
+
   </div>
 
 
