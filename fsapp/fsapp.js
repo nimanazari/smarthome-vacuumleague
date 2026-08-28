@@ -251,9 +251,10 @@
     return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
   }
   function stateDecodeFS(text) {
-    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+    const all = String(text || '').match(/#[ \t]*HELPER-STATE[ \t]+shl1:[A-Za-z0-9+/=]+/g);
+    if (!all || !all.length) return null;
+    const b64 = all[all.length - 1].split('shl1:')[1];
+    try { return JSON.parse(decodeURIComponent(escape(atob(b64)))); } catch (e) { return null; }
   }
 
   /* ================================================================

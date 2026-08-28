@@ -332,9 +332,12 @@
     return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
   }
   function stateDecode(text) {
-    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+    // every encoder writes the line LAST, so when a file carries more than one
+    // (code pasted together) the last is the one that describes it
+    const all = String(text || '').match(/#[ \t]*HELPER-STATE[ \t]+shl1:[A-Za-z0-9+/=]+/g);
+    if (!all || !all.length) return null;
+    const b64 = all[all.length - 1].split('shl1:')[1];
+    try { return JSON.parse(decodeURIComponent(escape(atob(b64)))); } catch (e) { return null; }
   }
 
   function applyModel(j) {
@@ -370,37 +373,44 @@
   // A .py the GAME just loaded parked its model here. Take it, but keep one
   // level of undo: the child may have had rules of their own in this helper.
   const IMPORT_KEY = 'shl_helper_import_' + LEAGUE;
-  const BACKUP_KEY = SAVE_KEY + '_prev';
   let importedFile = false;
+
+  // The undo lives for THIS visit only. A backup kept in storage would sit
+  // there for ever and turn a later "Start over" into a resurrection.
+  let undoSnapshot = null;
+  function rememberUndo(hadCount) {
+    undoSnapshot = hadCount ? JSON.stringify(modelObj.__before || null) : null;
+  }
+  function undoImport() {
+    if (!undoSnapshot) return false;
+    let j = null;
+    try { j = JSON.parse(undoSnapshot); } catch (e) { undoSnapshot = null; return false; }
+    undoSnapshot = null;
+    if (!j) return false;
+    RULES = []; sel = null;
+    applyModel(j); save();
+    return true;
+  }
+
   try {
     const imp = localStorage.getItem(IMPORT_KEY);
     if (imp) {
       localStorage.removeItem(IMPORT_KEY);
       const j = JSON.parse(imp);
-      if (j && (j.app === 'helper' || j.app === 'blocks') && j.model && Array.isArray(j.model.rules)) {
+      const sameDivision = !j.league || j.league === LEAGUE;
+      if (j && (j.app === 'helper' || j.app === 'blocks') && sameDivision
+          && j.model && Array.isArray(j.model.rules)) {
         const had = RULES.length;
-        const before = localStorage.getItem(SAVE_KEY);
+        modelObj.__before = had ? modelObj() : null;
         RULES = []; sel = null;
         if (applyModel(j.model)) {
-          if (had && before) { try { localStorage.setItem(BACKUP_KEY, before); } catch (e2) { /* full */ } }
+          rememberUndo(had);
           importedFile = had > 0 ? 'replaced' : true;
           save();
         }
       }
     }
   } catch (e) { /* private mode */ }
-
-  function undoImport() {
-    let prev = null;
-    try { prev = localStorage.getItem(BACKUP_KEY); } catch (e) { /* private mode */ }
-    if (!prev) return false;
-    try { localStorage.removeItem(BACKUP_KEY); } catch (e) { /* private mode */ }
-    RULES = []; sel = null;
-    let j = null;
-    try { j = JSON.parse(prev); } catch (e) { return false; }
-    applyModel(j); save();
-    return true;
-  }
 
   /* ================================================================
      4. THE PICTURE  —  the robot from above: the six pieces a rule
@@ -1953,7 +1963,8 @@
     // Start over gives them back rather than throwing everything away
     if (undoImport()) {
       resetSim(); refresh();
-      toast(L('Your own rules are back', 'قانون‌های خودتان برگشت'));
+      toast(L('Your own rules are back — press it again to clear everything',
+        'قانون‌های خودتان برگشت — برای پاک‌کردن همه‌چیز دوباره بزنید'));
       return;
     }
     try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* private mode */ }
@@ -1971,13 +1982,28 @@
     rd.onload = () => {
       const j = stateDecode(rd.result);
       $('openPyFile').value = '';
-      if (!j || (j.app !== 'helper' && j.app !== 'blocks')) {
+      if (!j || (j.app !== 'helper' && j.app !== 'blocks') || !j.model || !Array.isArray(j.model.rules)) {
         toast(L('That file was not written by this helper (or its HELPER-STATE line was deleted)',
           'این فایل با این هلپر ساخته نشده — یا خط HELPER-STATE آن پاک شده است'));
         return;
       }
+      // a file from ANOTHER division names sensors and moves this one does not
+      // have. Opening it would quietly drop half the program.
+      if (j.league && j.league !== LEAGUE) {
+        toast(L('That file was built for the ' + j.league.toUpperCase() + ' division — open it in that helper',
+          'این فایل برای رده‌ی ' + j.league.toUpperCase() + ' ساخته شده — در هلپر همان رده بازش کنید'));
+        return;
+      }
+      const keep = RULES;                       // only dropped once the model reads
+      modelObj.__before = keep.length ? modelObj() : null;
       RULES = []; sel = null;
-      if (!applyModel(j.model)) { toast(L('Could not read the file', 'فایل خوانده نشد')); return; }
+      if (!applyModel(j.model)) {
+        RULES = keep;
+        refresh();
+        toast(L('Could not read the file', 'فایل خوانده نشد'));
+        return;
+      }
+      rememberUndo(keep.length);
       resetSim(); refresh();
       toast(L('Open again, as the helper built it — keep going (hand edits to the Python are not included)',
         'همان‌طور که در هلپر ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)'));

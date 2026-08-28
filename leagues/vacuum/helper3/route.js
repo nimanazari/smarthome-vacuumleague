@@ -78,9 +78,12 @@
     return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
   }
   function stateDecode(text) {
-    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+    // every encoder writes the line LAST, so when a file carries more than one
+    // (code pasted together) the last is the one that describes it
+    const all = String(text || '').match(/#[ \t]*HELPER-STATE[ \t]+shl1:[A-Za-z0-9+/=]+/g);
+    if (!all || !all.length) return null;
+    const b64 = all[all.length - 1].split('shl1:')[1];
+    try { return JSON.parse(decodeURIComponent(escape(atob(b64)))); } catch (e) { return null; }
   }
 
 
@@ -820,6 +823,10 @@
       $('openPyFile').value = '';
       if (!j || j.app !== 'route' || !j.model || !Array.isArray(j.model.wps)) {
         toast('این فایل با هلپر مسیر ساخته نشده — یا خط HELPER-STATE آن پاک شده');
+        return;
+      }
+      if (j.league && j.league !== LEAGUE) {
+        toast('این فایل برای رده‌ی ' + j.league.toUpperCase() + ' ساخته شده — در هلپر همان رده بازش کنید');
         return;
       }
       ROUTE = Object.assign({ wps: [], loop: true, low: 35, full: 90, batt: true, stay: 'pct', staySecs: 5, team: 'red' }, j.model);

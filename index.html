@@ -3126,9 +3126,14 @@ else:                            # 7) nothing in the way -> full speed ahead
                 : T('این فایل با هلپر ساخته شده — دکمه‌ی هلپر از همین‌جا ادامه می‌دهد',
                   'Built in the helper — the helper button continues from here'));
             } else if (shapeOk) {
+              localStorage.removeItem('shl_helper_import_' + here);
               showToast(T('این فایل برای رده‌ی دیگری ساخته شده — کد اجرا می‌شود، ولی هلپر ادامه‌اش نمی‌دهد',
                 'That file was built for another division — it still runs, but the helper cannot continue it'));
             }
+          } else {
+            // a plain .py replaces whatever was loaded before, so a pending
+            // import from an earlier file must not outlive it
+            localStorage.removeItem('shl_helper_import_' + ((leagueDef() || {}).id || ''));
           }
         } catch (e) { /* an edited or foreign file — never block the load */ }
         const code = text.split('\n').filter(l => !l.trim().startsWith('#')).join('\n');

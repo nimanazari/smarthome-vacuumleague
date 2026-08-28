@@ -91,9 +91,28 @@
     return '# HELPER-STATE shl1:' + btoa(unescape(encodeURIComponent(json)));
   }
   function stateDecode(text) {
-    const m = /#\s*HELPER-STATE\s+shl1:([A-Za-z0-9+/=]+)/.exec(text || '');
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
+    // every encoder writes the line LAST, so when a file carries more than one
+    // (code pasted together) the last is the one that describes it
+    const all = String(text || '').match(/#[ \t]*HELPER-STATE[ \t]+shl1:[A-Za-z0-9+/=]+/g);
+    if (!all || !all.length) return null;
+    const b64 = all[all.length - 1].split('shl1:')[1];
+    try { return JSON.parse(decodeURIComponent(escape(atob(b64)))); } catch (e) { return null; }
+  }
+
+  // Only what THIS page can express survives: a rule whose sensors are all
+  // foreign would generate `if  and movetime == 0:` and brick the page.
+  function adoptModel(m) {
+    const out = { drive: (m && m.drive) || 25, rules: [] };
+    (m && m.rules ? m.rules : []).forEach((r) => {
+      if (!r || !Array.isArray(r.members)) return;
+      const members = r.members.filter((id) => SENSORS[id]);
+      if (!members.length) return;                 // nothing left to test on
+      const copy = Object.assign({}, r, { members: members });
+      if (!ACTS[copy.act]) copy.act = 'backright';
+      if (copy.act2 && !ACTS[copy.act2]) { copy.act2 = null; }
+      out.rules.push(copy);
+    });
+    return out;
   }
 
   const newRule = () => ({
@@ -101,6 +120,23 @@
     on: true, act2: null, secs2: 0.5, speed2: 18,
   });
   load();
+
+  // a .py the GAME just loaded parked its model here — take it, same rules
+  let importedFile = false;
+  try {
+    const IK = 'shl_helper_import_' + LEAGUE;
+    const imp = localStorage.getItem(IK);
+    if (imp) {
+      localStorage.removeItem(IK);
+      const j = JSON.parse(imp);
+      if (j && (j.app === 'helper' || j.app === 'blocks') && (!j.league || j.league === LEAGUE)
+          && j.model && Array.isArray(j.model.rules)) {
+        FILE = adoptModel(j.model);
+        importedFile = true;
+        saveFile();
+      }
+    }
+  } catch (e) { /* private mode */ }
 
   let sel = 0;                                   // index of the selected stack
   const R = () => FILE.rules;
@@ -503,6 +539,8 @@
 
   $('addRule').onclick = () => { addRule(); refresh(); };
   $('resetBtn').onclick = () => { FILE = { drive: 25, rules: [] }; sel = 0; refresh(); toast(T('همه‌ی بلاک‌ها پاک شد', 'All blocks cleared')); };
+  if (importedFile) setTimeout(() => toast(T('فایلی که بارگذاری کردید همین‌جا باز است — ادامه بدهید',
+    'Your loaded file is open here — keep building')), 400);
 
   // ---- Python -> blocks: open a .py this page (or the AI helper) wrote ----
   if ($('openPyBtn')) $('openPyBtn').onclick = () => $('openPyFile').click();
@@ -516,7 +554,14 @@
         toast(T('این فایل با هلپر ساخته نشده — یا خط HELPER-STATE آن پاک شده', 'That file was not written by the helper (or its HELPER-STATE line was deleted)'));
         return;
       }
-      FILE = j.model; if (!FILE.drive) FILE.drive = 25;
+      // a file from another division names sensors this page does not have:
+      // taking it would write a rule with an EMPTY condition — broken Python
+      if (j.league && j.league !== LEAGUE) {
+        toast(T('این فایل برای رده‌ی ' + j.league.toUpperCase() + ' ساخته شده — در هلپر همان رده بازش کنید',
+          'That file was built for the ' + j.league.toUpperCase() + ' division — open it in that helper'));
+        return;
+      }
+      FILE = adoptModel(j.model);
       sel = 0; saveFile(); refresh();
       toast(T('همان‌طور که ساخته بودید باز شد — ادامه بدهید (تغییرهای دستیِ پایتون همراهش نیست)',
         'Open again, as it was built — keep going (hand edits to the Python are not included)'));
