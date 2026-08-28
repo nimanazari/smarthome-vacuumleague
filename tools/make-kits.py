@@ -135,6 +135,21 @@ def build_team():
         p = os.path.join(dst, 'leagues', 'vacuum', f)
         if os.path.isfile(p):
             os.remove(p)
+    # ---- Official mode is a REFEREE control, not a team one ----
+    # It locks the code, the house and the speed for an official match. In the
+    # teams' copy there is nobody to lock anything against, so the button and
+    # its keyboard shortcut go rather than sit there doing nothing.
+    idx = os.path.join(dst, 'index.html')
+    h = io.open(idx, encoding='utf-8').read()
+    keep = []
+    for ln in h.split('\n'):
+        if 'id="lockBtn"' in ln:
+            continue
+        keep.append(ln)
+    h = '\n'.join(keep)
+    h = h.replace("'relocBlue', 'lockBtn', 'dlBaseBtn'", "'relocBlue', 'dlBaseBtn'")
+    io.open(idx, 'w', encoding='utf-8').write(h)
+
     io.open(os.path.join(dst, 'README.md'), 'w', encoding='utf-8').write(TEAM_README)
     report(dst)
 

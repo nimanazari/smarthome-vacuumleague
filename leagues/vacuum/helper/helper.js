@@ -55,6 +55,25 @@
   const L = (en, fa) => (PAGE_LANG === 'fa' && fa != null ? fa : en);
 
   const SAVE_KEY = 'shl_helper_' + LEAGUE + '_rules';   // this page's own answers
+  /* ---- the team's own name ----
+     Remembered per division, and written into every file this page generates
+     as a plain "# TEAM:" line. The game reads that line when the file is
+     loaded onto a robot, so the referee sees whose code it is. */
+  const TEAM_KEY = 'shl_teamname_' + LEAGUE;
+  let TEAM_NAME = '';
+  try { TEAM_NAME = localStorage.getItem(TEAM_KEY) || ''; } catch (e) { /* private mode */ }
+  (function wireTeamName() {
+    const box = document.getElementById('teamNameIn');
+    if (!box) return;
+    box.value = TEAM_NAME;
+    box.addEventListener('input', () => {
+      TEAM_NAME = box.value.trim().slice(0, 40);
+      try { localStorage.setItem(TEAM_KEY, TEAM_NAME); } catch (e) { /* private mode */ }
+      if (typeof refresh === 'function') refresh();
+    });
+  }());
+  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:');
+
   const HANDOFF_KEY = 'shl_helper_code';                // how the game receives the file
   const GAME_URL = '../../../index.html';   // back to the game, three folders up
 
@@ -1716,6 +1735,7 @@
     const BAR = '# ============================================================';
     const cls = clauses();
 
+    P(teamLine());
     P('# type: ignore');
     P('# cspell:ignore frontleft frontright bumperfront bumperback wheelleft wheelright movetime');
     P(BAR);

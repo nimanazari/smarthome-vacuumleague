@@ -35,9 +35,24 @@
   body.sidescore #scene, body.finale #scene { top: 108px; }
   body.sidescore #scoreboard, body.finale #scoreboard { display: contents !important; }
   body.sidescore .sbrow, body.finale .sbrow { display: contents; }
-  body.sidescore #teamRed, body.finale #teamRed { position: fixed; left: 12px; top: 8px; z-index: 6; }
-  body.sidescore #teamBlue, body.finale #teamBlue { position: fixed; right: 12px; top: 8px; z-index: 6; }
+  /* the two scores flank the clock in the MIDDLE. In the corners the left
+     one landed on the hamburger button and could not be read or tapped. */
+  body.sidescore #teamRed, body.finale #teamRed {
+    position: fixed; left: 50%; top: 8px; z-index: 6;
+    transform: translateX(calc(-100% - 104px));
+  }
+  body.sidescore #teamBlue, body.finale #teamBlue {
+    position: fixed; left: 50%; top: 8px; z-index: 6;
+    transform: translateX(104px);
+  }
   body.sidescore #timer, body.finale #timer { position: fixed; left: 50%; top: 6px; transform: translateX(-50%); z-index: 6; }
+  /* narrow screens: pull the pair in so the row still fits */
+  @media (max-width: 720px) {
+    body.sidescore #teamRed, body.finale #teamRed { transform: translateX(calc(-100% - 74px)); }
+    body.sidescore #teamBlue, body.finale #teamBlue { transform: translateX(74px); }
+    body.sidescore .team, body.finale .team { padding: 6px 10px; min-width: 108px; }
+    body.sidescore .team .score, body.finale .team .score { font-size: 21px; }
+  }
   /* compact cards so the whole bar fits in 92px */
   body.sidescore .team, body.finale .team { padding: 7px 16px; min-width: 150px; }
   body.sidescore .team .score, body.finale .team .score { font-size: 26px; }
@@ -1282,9 +1297,16 @@
     border-radius: 999px; padding: 7px 0; margin-top: 4px;
     background: color-mix(in srgb, var(--acc) 16%, transparent);
     border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
-    transition: background .18s;
+    /* the rule above this one paints dark text for a SOLID accent fill; this
+       one makes the fill a faint tint, so the text has to change with it or
+       it reads as black on black */
+    color: var(--acc);
+    transition: background .18s, color .18s;
   }
-  .dvcard:hover .dv-go { background: color-mix(in srgb, var(--acc) 34%, transparent); }
+  .dvcard:hover .dv-go {
+    background: var(--acc);
+    color: #0d1117;
+  }
 
   /* the group cards get the same shine */
   .lcard { overflow: hidden; position: relative; border-radius: 18px; }
@@ -3108,6 +3130,21 @@ else:                            # 7) nothing in the way -> full speed ahead
         $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name;
         sha12(text).then((h) => { if (h) $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name + ' · #' + h; });
         cheer(statusId === 'statusRed' ? 'red' : 'blue');   // robot hops when its code arrives
+        // A helper writes the team's own name into the file as a plain
+        // "# TEAM: ..." line. Put it straight into this robot's name box, so
+        // the referee sees whose file just went in without having to ask.
+        try {
+          const tm = /^[ \t]*#[ \t]*TEAM[ \t]*:[ \t]*(.+)$/m.exec(text);
+          if (tm) {
+            const nm = tm[1].trim().slice(0, 40);
+            const box = $(inputId === 'fileRed' ? 'inRed' : 'inBlue');
+            if (nm && box) {
+              box.value = nm;
+              box.dispatchEvent(new Event('input'));
+            }
+          }
+        } catch (e) { /* a file without one is perfectly normal */ }
+
         // A file written by a helper carries its model as one comment line.
         // The game NEVER writes the helper's own save slot — a passive file
         // load must not be able to destroy work sitting in the helper. It

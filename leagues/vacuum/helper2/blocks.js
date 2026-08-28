@@ -28,6 +28,25 @@
   document.documentElement.lang = LANG;
   document.documentElement.dir = LANG === 'fa' ? 'rtl' : 'ltr';
   const SAVE_KEY = 'shl_helper_' + LEAGUE + '_rules';   // THE shared file (helper 1's key)
+  /* ---- the team's own name ----
+     Remembered per division, and written into every file this page generates
+     as a plain "# TEAM:" line. The game reads that line when the file is
+     loaded onto a robot, so the referee sees whose code it is. */
+  const TEAM_KEY = 'shl_teamname_' + LEAGUE;
+  let TEAM_NAME = '';
+  try { TEAM_NAME = localStorage.getItem(TEAM_KEY) || ''; } catch (e) { /* private mode */ }
+  (function wireTeamName() {
+    const box = document.getElementById('teamNameIn');
+    if (!box) return;
+    box.value = TEAM_NAME;
+    box.addEventListener('input', () => {
+      TEAM_NAME = box.value.trim().slice(0, 40);
+      try { localStorage.setItem(TEAM_KEY, TEAM_NAME); } catch (e) { /* private mode */ }
+      if (typeof refresh === 'function') refresh();
+    });
+  }());
+  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:');
+
   const HANDOFF_KEY = 'shl_helper_code';
   const GAME_URL = '../../../index.html';
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -174,6 +193,7 @@
     const P = (s) => L.push(s == null ? '' : s);
     const BAR = '# ============================================================';
     const cls = R().map((r, i) => ({ r, i: i + 1 })).filter((c) => c.r.on !== false && (c.r.members || []).length);
+    P(teamLine());
     P('# type: ignore');
     P('# cspell:ignore frontleft frontright bumperfront bumperback wheelleft wheelright movetime');
     P(BAR);

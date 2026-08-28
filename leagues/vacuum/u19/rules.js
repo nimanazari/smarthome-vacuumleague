@@ -12,11 +12,12 @@
 
   // THE STANDARD, applied: U19 navigates by POSITION (GPS / goto), so the
   // one-colour marker rugs that guide FS and U14 through the doorways are
-  // stripped from its floor — only the slowing green rug and the wet pair
-  // stay. The map itself is untouched for the other divisions.
+  // stripped from its floor. The wet floor goes too — U19's discipline is the
+  // battery, not puddles — so only the slowing green rug stays. The map itself
+  // is untouched for the other divisions.
   const NO_MARKERS = Object.assign({}, GROWN_ROOMS, {
     name: GROWN_ROOMS.name + '-u19',
-    rugs: GROWN_ROOMS.rugs.filter((r) => r.kind === 'green' || r.kind === 'wet'),
+    rugs: GROWN_ROOMS.rugs.filter((r) => r.kind === 'green'),
   });
 
   L.register({
@@ -73,7 +74,8 @@
     // the bin never fills and reaching it once is worth +5, exactly as before
     // the dump stays OFF until the route helper can plan emptying trips;
     // battery (and its charger pad) is the one resource U19 manages for now
-    rules: { pets: true, wet: true, penalty: 5, battery: true, dump: false },
+    // U19 has the battery to manage; the wet floor is U14's problem
+    rules: { pets: true, wet: false, penalty: 5, battery: true, dump: false },
     create: mk,
   });
 })(typeof self !== 'undefined' ? self : this);

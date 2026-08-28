@@ -359,3 +359,11 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
 
 /* form controls do not inherit the page font on their own */
 button, input, select, textarea, optgroup { font-family: inherit; }
+
+/* the team's own name — it travels inside the generated .py so the
+   referee can tell whose file a robot just loaded */
+.teamname { font-family: inherit; font-size: 12px; font-weight: 700;
+  padding: 7px 11px; border-radius: 9px; min-width: 132px;
+  border: 1px solid var(--line, #2a3140); background: var(--panel2, #10141c);
+  color: var(--text, #e7edf7); }
+.teamname:focus { outline: none; border-color: var(--accent, #22d3ee); }

@@ -837,6 +837,10 @@ class Renderer3D {
       if (rb) this._cinePoses[k] = { x: ox + rb.x, z: oz + rb.y, h: rb.heading };
     }
     this._cineScores = engine.mode && engine.mode.scores ? engine.mode.scores : { red: 0, blue: 0 };
+    // how long is left — the director holds the wide shot for the finish
+    this._cineLeft = (engine.cfg && isFinite(engine.cfg.matchSeconds))
+      ? Math.max(0, engine.cfg.matchSeconds - engine.elapsed) : null;
+    this._cineRunning = !!engine.running;
     // a robot held by SHIFT+drag stays pinned under the cursor, whatever its
     // own wheels are trying to do
     if (this.carry && this._carryPos && engine.robots[this.carry]) {
@@ -1256,6 +1260,40 @@ class Renderer3D {
     }
   }
 
+  // BOTH robots at once, split down the middle — the close shots keep the
+  // whole match on screen instead of losing one robot off camera.
+  _renderPair(poses, mode) {
+    const el = this.renderer.domElement;
+    const W = el.width / this.renderer.getPixelRatio();
+    const H = el.height / this.renderer.getPixelRatio();
+    const halves = [
+      { pose: poses.red, vp: { x: 0, y: 0, w: W / 2 - 1, h: H } },
+      { pose: poses.blue, vp: { x: W / 2 + 1, y: 0, w: W / 2 - 1, h: H } },
+    ];
+    this.renderer.setScissorTest(true);
+    for (const half of halves) {
+      if (!half.pose) continue;
+      if (mode === 'chase') this._renderChaseOf(half.pose, half.vp);
+      else this._renderPovOf(half.pose, half.vp);
+    }
+    this.renderer.setScissorTest(false);
+    this.renderer.setViewport(0, 0, W, H);
+    this.camera.aspect = W / (H || 1);
+    this.camera.updateProjectionMatrix();
+  }
+
+  // over-the-shoulder on one robot (full frame or a half)
+  _renderChaseOf(pose, vp) {
+    const cx = Math.cos(pose.h), sz = Math.sin(pose.h);
+    this.camera.aspect = vp ? vp.w / vp.h : (this.container.clientWidth / (this.container.clientHeight || 1));
+    this.camera.fov = 58;
+    this.camera.updateProjectionMatrix();
+    this.camera.position.set(pose.x - cx * 2.3, 1.7, pose.z - sz * 2.3);
+    this.camera.lookAt(pose.x + cx * 2, 0.2, pose.z + sz * 2);
+    if (vp) { this.renderer.setViewport(vp.x, vp.y, vp.w, vp.h); this.renderer.setScissor(vp.x, vp.y, vp.w, vp.h); }
+    this.renderer.render(this.scene, this.camera);
+  }
+
   // one POV draw, reusable by the director (full frame or a half)
   _renderPovOf(pose, vp) {
     const cx = Math.cos(pose.h), sz = Math.sin(pose.h);
@@ -1272,12 +1310,36 @@ class Renderer3D {
   // orbits, robot POVs, a split-screen duel, the leader's chase cam.
   _renderCine() {
     const now = performance.now();
+
+    // THE FINISH belongs to the wide shot. In the last 20 seconds the director
+    // stops cutting and holds the main camera above the whole house, so the
+    // moment the match is decided is seen in full.
+    const ENDGAME = 20;
+    const endgame = this._cineRunning && this._cineLeft != null && this._cineLeft <= ENDGAME;
+    if (endgame) {
+      if (!this._cine || this._cine.shot !== 'finale') {
+        this._cine = { shot: 'finale', until: Infinity, az: this._cine ? this._cine.az : Math.PI * 0.70 };
+      }
+      const c0 = this._cine;
+      c0.az += 0.0006;                       // barely moving — a held wide shot
+      this.camera.fov = 40;
+      this.camera.updateProjectionMatrix();
+      const pol = 0.34, sp0 = Math.sin(pol), cp0 = Math.cos(pol);
+      this.camera.position.set(20 * sp0 * Math.cos(c0.az), 20 * cp0, 20 * sp0 * Math.sin(c0.az));
+      this.camera.lookAt(0, 0.3, 0);
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
+    if (this._cine && this._cine.shot === 'finale') this._cine = null;   // a new match
+
     if (!this._cine || now > this._cine.until) {
-      const SHOTS = ['orbit', 'pov-red', 'pov-blue', 'split', 'top', 'chase', 'orbit-low'];
+      // every close shot is a TWO-UP: both robots stay on screen.
+      const SHOTS = ['orbit', 'pov-both', 'top', 'chase-both', 'orbit-low', 'pov-both', 'orbit'];
       let pick;
       do { pick = SHOTS[Math.floor(Math.random() * SHOTS.length)]; }
       while (this._cine && pick === this._cine.shot);
-      this._cine = { shot: pick, until: now + 3800 + Math.random() * 3200, az: Math.random() * Math.PI * 2 };
+      // longer holds: a shot should breathe, not flicker
+      this._cine = { shot: pick, until: now + 6000 + Math.random() * 3000, az: Math.random() * Math.PI * 2 };
     }
     const c = this._cine;
     const el = this.renderer.domElement;
@@ -1290,30 +1352,25 @@ class Renderer3D {
       this.camera.aspect = Wp / (Hp || 1);
       this.camera.updateProjectionMatrix();
     };
-    if (c.shot === 'split' && poses.red && poses.blue) {
-      this.renderer.setScissorTest(true);
-      this._renderPovOf(poses.red, { x: 0, y: 0, w: Wp / 2 - 1, h: Hp });
-      this._renderPovOf(poses.blue, { x: Wp / 2 + 1, y: 0, w: Wp / 2 - 1, h: Hp });
+    // the close shots: BOTH robots, side by side. With only one robot on the
+    // floor a two-up would waste half the frame, so it falls back to full.
+    const two = poses.red && poses.blue;
+    if (c.shot === 'pov-both') {
+      if (two) { this._renderPair(poses, 'pov'); return; }
       resetVp();
+      this._renderPovOf(poses.red || poses.blue);
+      return;
+    }
+    if (c.shot === 'chase-both') {
+      if (two) { this._renderPair(poses, 'chase'); return; }
+      resetVp();
+      this._renderChaseOf(poses[lead] || poses.red || poses.blue);
       return;
     }
     resetVp();
-    if ((c.shot === 'pov-red' && poses.red) || (c.shot === 'pov-blue' && poses.blue)) {
-      this._renderPovOf(c.shot === 'pov-red' ? poses.red : poses.blue);
-      return;
-    }
-    if (c.shot === 'chase' && poses[lead]) {
-      const p = poses[lead];
-      const cx = Math.cos(p.h), sz = Math.sin(p.h);
-      this.camera.fov = 58;
-      this.camera.updateProjectionMatrix();
-      this.camera.position.set(p.x - cx * 2.3, 1.7, p.z - sz * 2.3);
-      this.camera.lookAt(p.x + cx * 2, 0.2, p.z + sz * 2);
-      this.renderer.render(this.scene, this.camera);
-      return;
-    }
-    // orbits + top: classic crane shots, drifting slowly
-    c.az += 0.0028;
+    // orbits + top: classic crane shots. A third of the old speed — the camera
+    // should drift, not sweep.
+    c.az += 0.0009;
     const cfgS = c.shot === 'top' ? { pol: 0.06, rad: 26, fov: 30 }
       : c.shot === 'orbit-low' ? { pol: 1.15, rad: 17, fov: 40 }
       : { pol: 0.62, rad: 24, fov: 30 };
@@ -1340,7 +1397,7 @@ class Renderer3D {
       return;
     }
     // ---- 360°: the 2.5D framing, slowly circling the house ----
-    if (this.viewMode === 'spin') { this.tAz += 0.004; this.az = this.tAz; }
+    if (this.viewMode === 'spin') { this.tAz += 0.0013; this.az = this.tAz; }
     if (this.anim) {
       this.az += (this.tAz - this.az) * 0.12; this.pol += (this.tPol - this.pol) * 0.12; this.rad += (this.tRad - this.rad) * 0.12;
       this.camera.fov += (this.tFov - this.camera.fov) * 0.12; this.camera.updateProjectionMatrix();
