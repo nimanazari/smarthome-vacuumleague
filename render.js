@@ -1330,14 +1330,24 @@ class Renderer3D {
       this.renderer.render(this.scene, this.camera);
       return;
     }
-    if (this._cine && this._cine.shot === 'finale') this._cine = null;   // a new match
+    if (this._cine && this._cine.shot === 'finale') {
+      this._cine = null;                 // a new match
+      this._cinePovShown = false;        // ...and its own single POV
+    }
 
     if (!this._cine || now > this._cine.until) {
-      // every close shot is a TWO-UP: both robots stay on screen.
-      const SHOTS = ['orbit', 'pov-both', 'top', 'chase-both', 'orbit-low', 'pov-both', 'orbit'];
+      // Every close shot is a TWO-UP: both robots stay on screen. The
+      // over-the-shoulder is the workhorse — it shows the pair AND where they
+      // are going — so the reel leans on it. First person is a flourish: once
+      // per match, then it steps aside.
+      const povDone = !!this._cinePovShown;
+      const SHOTS = povDone
+        ? ['chase-both', 'orbit', 'chase-both', 'top', 'chase-both', 'orbit-low']
+        : ['chase-both', 'orbit', 'pov-both', 'chase-both', 'top', 'orbit-low'];
       let pick;
       do { pick = SHOTS[Math.floor(Math.random() * SHOTS.length)]; }
       while (this._cine && pick === this._cine.shot);
+      if (pick === 'pov-both') this._cinePovShown = true;
       // longer holds: a shot should breathe, not flicker
       this._cine = { shot: pick, until: now + 6000 + Math.random() * 3000, az: Math.random() * Math.PI * 2 };
     }

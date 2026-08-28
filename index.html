@@ -320,7 +320,49 @@
   #vignette { position: fixed; inset: 0; z-index: 3; pointer-events: none; box-shadow: inset 0 0 26vh 8vh rgba(255,40,40,0); transition: box-shadow .25s; }
 
   /* ---------- results ---------- */
-  #results { position: fixed; inset: 0; z-index: 25; display: none; align-items: center; justify-content: center; background: rgba(7,9,13,.72); backdrop-filter: blur(7px); overflow: hidden; }
+  /* The result stands BESIDE the house, not over it. At the whistle the
+     floor is what everyone is looking at — dimming it away loses the moment
+     the match was decided. The card takes one side; the field keeps the rest,
+     lit and sharp. */
+  /* the reel plays over the LIVE floor — the robots are moved back through
+     the moment that mattered, so the house itself is the picture */
+  #reel { position: fixed; inset: 0; z-index: 24; display: none; pointer-events: none; }
+  #reel .reel-cap { position: absolute; left: 50%; top: 18px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px; padding: 9px 18px; border-radius: 14px;
+    background: rgba(10,13,19,.82); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+  #reel .reel-clock { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 15px; color: var(--muted); }
+  #reel .reel-score { font-variant-numeric: tabular-nums; font-weight: 900; font-size: 17px; }
+  #reel .reel-score .r { color: var(--red); } #reel .reel-score .b { color: var(--blue); }
+  #reel .reel-score i { color: var(--muted); font-style: normal; margin: 0 4px; }
+  #reel .reel-note { font-size: 12.5px; color: var(--muted); }
+  #reel .reel-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.08); }
+  #reel .reel-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+  #reel .reel-skip { position: absolute; right: 16px; bottom: 16px; pointer-events: auto;
+    font: 700 12.5px inherit; padding: 8px 14px; border-radius: 10px; cursor: pointer;
+    border: 1px solid var(--line); background: rgba(10,13,19,.86); color: var(--text); }
+  #reel .reel-skip:hover { border-color: var(--accent); }
+  #results { position: fixed; inset: 0; z-index: 25; display: none;
+    align-items: center; justify-content: flex-start;
+    background: none; backdrop-filter: none; overflow: hidden;
+    pointer-events: none; }
+  #results > * { pointer-events: auto; }
+  #results .rcard {
+    margin-inline-start: 3.5vw;
+    max-width: min(560px, 46vw);
+    background: linear-gradient(180deg, rgba(10,13,19,.93), rgba(10,13,19,.87));
+    border: 1px solid var(--line); border-radius: 22px;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,.9);
+    backdrop-filter: blur(10px);
+  }
+  /* the floor slides over to make room, instead of vanishing behind a blur */
+  body.resultopen #scene { transform: translateX(14vw) scale(.86); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+  body.resultopen #scoreboard { opacity: .35; transition: opacity .5s; }
+  @media (max-width: 900px) {
+    /* no room to sit beside it on a phone — fall back to over the top */
+    #results { justify-content: center; background: rgba(7,9,13,.72); backdrop-filter: blur(7px); }
+    #results .rcard { margin-inline-start: 0; max-width: 92vw; }
+    body.resultopen #scene { transform: none; }
+  }
   .rcard { position: relative; text-align: center; padding: 20px 40px; animation: rise .6s cubic-bezier(.2,.8,.2,1); }
   @keyframes rise { 0% { transform: translateY(40px) scale(.9); opacity: 0; } 100% { transform: none; opacity: 1; } }
   #rTrophy { color: #ffcf5a; filter: drop-shadow(0 10px 24px rgba(255,200,60,.4)); animation: bob 2.4s ease-in-out infinite; }
@@ -1609,6 +1651,16 @@
       <div class="ssRow"><i class="dot-blue"></i><label><input type="checkbox" id="ssAutoBlue" checked> face middle</label><input type="range" id="ssRotBlue" min="0" max="359" value="180" disabled></div>
     </div>
   </div>
+  <!-- the highlight reel: the floor stays where it is, a caption sits over it -->
+  <div id="reel" style="display:none">
+    <div class="reel-cap">
+      <span class="reel-clock" id="reelClock">0:00</span>
+      <span class="reel-score"><b class="r" id="reelRed">0</b> <i>–</i> <b class="b" id="reelBlue">0</b></span>
+      <span class="reel-note fa" id="reelNote"></span>
+    </div>
+    <div class="reel-bar"><i id="reelBar"></i></div>
+    <button class="reel-skip fa" id="reelSkip">رد کردن</button>
+  </div>
   <div id="results">
     <div id="confetti"></div>
     <div class="rcard" id="rcardMain">
@@ -1626,6 +1678,9 @@
         <button class="rbtn ghosty" id="debriefBtn" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/></svg>
           <span class="rb-t">Report</span></button>
+        <button class="rbtn ghosty" id="reelBtn" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="14" height="12" rx="2"/><path d="m16.5 10 5-3v10l-5-3z"/></svg>
+          <span class="rb-t">Highlights</span></button>
         <button class="smallbtn fa" id="bookBtn2" style="display:none">&#127942; دفتر مسابقات</button>
         <button class="smallbtn fa" id="mRetryBtn" style="display:none">&#128260; دوباره</button>
         <button class="smallbtn fa" id="mListBtn" style="display:none">&#127942; مأموریت‌ها</button>
@@ -4425,7 +4480,10 @@ else:                            # 7) nothing in the way -> full speed ahead
         crashTicks: 0, cpuMs: 0, cpuTicks: 0, cpuPeak: 0, slowTicks: 0,
         lx: null, ly: null,          // last logged position (pre-teleport)
       });
-      matchLog = { red: mk(), blue: engine.robots.blue ? mk() : null, series: [], lastSec: -1, events: [] };
+      matchLog = { red: mk(), blue: engine.robots.blue ? mk() : null, series: [], lastSec: -1, events: [],
+        // the reel's raw material: where everyone was, ten times a second
+        frames: [], lastScore: { red: 0, blue: 0 } };
+      seriesSeen = false;        // a new match earns its own chart replay
     }
     // the referee's ledger: every match event, stamped with the MATCH clock.
     // Feeds the debrief's event list and the JSON export — a protest can be
@@ -4466,6 +4524,24 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (sec !== matchLog.lastSec) {
         matchLog.lastSec = sec;
         matchLog.series.push({ t: sec, red: engine.scores.red, blue: engine.scores.blue });
+      }
+      // ---- the highlight reel's recording ----
+      // One frame per tick: the clock, both poses, both scores. A whole match
+      // is a couple of thousand small objects — cheap to keep, and it lets the
+      // reel replay a moment exactly as it happened.
+      if (matchLog.frames.length < 4000) {
+        const fr = { t: engine.elapsed, r: engine.scores.red, b: engine.scores.blue };
+        const rr = engine.robots.red, bb = engine.robots.blue;
+        if (rr) fr.rp = { x: rr.x, y: rr.y, h: rr.heading };
+        if (bb) fr.bp = { x: bb.x, y: bb.y, h: bb.heading };
+        // what changed since the last frame — a steal moves BOTH numbers
+        const dR = engine.scores.red - matchLog.lastScore.red;
+        const dB = engine.scores.blue - matchLog.lastScore.blue;
+        // tiles taken back off the rival are worth more than fresh floor:
+        // the gap swings twice, which is what makes a moment worth watching
+        fr.w = Math.max(0, dR) + Math.max(0, dB) + Math.max(0, -dR) * 2 + Math.max(0, -dB) * 2;
+        matchLog.lastScore = { red: engine.scores.red, blue: engine.scores.blue };
+        matchLog.frames.push(fr);
       }
     }
 
@@ -4579,7 +4655,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       resetMatchLog();
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       fitText($('redName'), redName); fitText($('blueName'), blueName);
-      $('panel').style.display = 'none'; $('results').style.display = 'none';
+      $('panel').style.display = 'none'; $('results').style.display = 'none'; document.body.classList.remove('resultopen');
       $('scoreboard').style.display = 'flex';
       applySens();
 
@@ -4702,11 +4778,12 @@ else:                            # 7) nothing in the way -> full speed ahead
         $('rcardMain').style.display = '';
         $('debriefCard').style.display = 'none';
         $('debriefBtn').style.display = matchLog ? '' : 'none';
+        $('reelBtn').style.display = (matchLog && matchLog.frames && matchLog.frames.length > 20) ? '' : 'none';
         // the league book is TOURNAMENT bookkeeping: only surface it when a
         // bracket match brought us here (?match=), never after a free play
         $('bookBtn2').style.display = new URLSearchParams(location.search).get('match') ? '' : 'none';
         $('missionCard').style.display = 'none';
-        $('results').style.display = 'flex';
+        $('results').style.display = 'flex'; document.body.classList.add('resultopen');
         return;
       }
       // a REAL match: write it into the league book the moment it ends
@@ -4733,9 +4810,10 @@ else:                            # 7) nothing in the way -> full speed ahead
         // a draw belongs to BOTH teams: each side's colour glows on its
         // own half of the backdrop
         const rc = TEAM_COLORS[selCol.red].css, bc = TEAM_COLORS[selCol.blue].css;
-        $('results').style.background =
-          'radial-gradient(720px 560px at 20% 45%, ' + rc + '44, transparent 60%), ' +
-          'radial-gradient(720px 560px at 80% 45%, ' + bc + '44, transparent 60%), rgba(7,9,13,.78)';
+        // a wash of both colours behind the CARD, never over the floor
+        $('results').querySelector('.rcard').style.background =
+          'radial-gradient(520px 420px at 20% 0%, ' + rc + '33, transparent 62%), ' +
+          'radial-gradient(520px 420px at 80% 100%, ' + bc + '33, transparent 62%), rgba(10,13,19,.93)';
         $('rTrophy').innerHTML = ICON.scale; $('rTrophy').style.color = '#cfd6df';
         $('rLabel').textContent = T('نتیجه', 'Result');
         fitText($('rName'), T('مساوی', 'Draw'), true); $('rName').style.color = '#e8eaed';
@@ -4758,15 +4836,16 @@ else:                            # 7) nothing in the way -> full speed ahead
         $('rSub').textContent = sumoG
           ? T('باشو را برد ', 'took the basho ') + engine.scores.red + ' – ' + engine.scores.blue
           : '';
-        $('results').style.background =
-          'radial-gradient(900px 640px at 50% 38%, ' + wc + '55, transparent 62%), rgba(7,9,13,.78)';
+        $('results').querySelector('.rcard').style.background =
+          'radial-gradient(560px 460px at 50% 0%, ' + wc + '44, transparent 64%), rgba(10,13,19,.93)';
         confetti(sumoG ? ['#ff5a4e', '#ffffff', TEAM_COLORS[selCol[w]].css]
           : [wc, '#ffd23b', '#ffffff']);
       }
       $('rcardMain').style.display = '';
       $('debriefCard').style.display = 'none';
       $('debriefBtn').style.display = matchLog ? '' : 'none';
-      $('results').style.display = 'flex';
+        $('reelBtn').style.display = (matchLog && matchLog.frames && matchLog.frames.length > 20) ? '' : 'none';
+      $('results').style.display = 'flex'; document.body.classList.add('resultopen');
     }
 
     /* ---------- the debrief itself ---------- */
@@ -4821,13 +4900,17 @@ else:                            # 7) nothing in the way -> full speed ahead
       g.strokeRect(0.5, 0.5, cv.width - 1, cv.height - 1);
     }
 
-    function drawDebriefSeries() {
+    // `upto` is how much of the match to draw, 0..1. The axes and the labels
+    // are always the FINAL ones, so the picture does not rescale as it fills —
+    // only the two lines grow.
+    function drawDebriefSeries(upto) {
       const cv = $('dbSeries'), g = cv.getContext('2d');
       cv.width = $('dbHeat').width; cv.height = 110;
       cv.style.direction = 'ltr';           // the chart NEVER mirrors with RTL
       g.fillStyle = '#10141a'; g.fillRect(0, 0, cv.width, cv.height);
       const S = matchLog ? matchLog.series : [];
       if (S.length < 2) return;
+      const frac = (upto == null) ? 1 : Math.max(0, Math.min(1, upto));
       const maxT = S[S.length - 1].t || 1;
       let maxV = 1; for (const p of S) maxV = Math.max(maxV, p.red, p.blue);
       // axes: 0 sits at the BOTTOM-LEFT, score climbs up, time runs right
@@ -4849,13 +4932,27 @@ else:                            # 7) nothing in the way -> full speed ahead
       g.textAlign = 'left'; g.fillText('0:00', L, B + 12);
       g.textAlign = 'center'; g.fillText(tickT(maxT / 2), (L + R) / 2, B + 12);
       g.textAlign = 'right'; g.fillText(tickT(maxT), R, B + 12);
+      const tNow = maxT * frac;
       const lineOf = (who, colr) => {
+        const pts = S.filter((p) => p.t <= tNow);
+        if (pts.length < 1) return;
         g.strokeStyle = colr; g.lineWidth = 2; g.beginPath();
-        S.forEach((p, i) => { const x = X(p.t), y = Y(p[who]); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
+        pts.forEach((p, i) => { const x = X(p.t), y = Y(p[who]); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
         g.stroke();
+        // a dot rides the end of the line while it is still growing
+        if (frac < 1) {
+          const last = pts[pts.length - 1];
+          g.fillStyle = colr;
+          g.beginPath(); g.arc(X(last.t), Y(last[who]), 3.2, 0, Math.PI * 2); g.fill();
+        }
       };
       lineOf('red', 'rgba(255,90,80,.95)');
       if (matchLog.blue) lineOf('blue', 'rgba(90,140,255,.95)');
+      // the clock hand, so you can read WHEN as it fills
+      if (frac < 1) {
+        g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(X(tNow), TP); g.lineTo(X(tNow), B); g.stroke();
+      }
     }
 
     function fillDebriefStats() {
@@ -4946,6 +5043,139 @@ else:                            # 7) nothing in the way -> full speed ahead
             (e.info ? '<span class="i">' + escH(e.info) + '</span>' : '') + '</div>';
         }).join('');
     }
+    // Run the chart from 0:00 to the whistle, then stop and let the numbers
+    // underneath appear. Called once when a match ends, and again on demand.
+    let seriesAnim = 0;
+    let seriesSeen = false;      // the replay plays once per match, then rests
+    function playSeries(then) {
+      cancelAnimationFrame(seriesAnim);
+      const S = matchLog ? matchLog.series : [];
+      if (S.length < 2) { drawDebriefSeries(1); if (then) then(); return; }
+      const DUR = 2800;
+      const t0 = performance.now();
+      const step = () => {
+        const k = Math.min(1, (performance.now() - t0) / DUR);
+        // ease out, so it settles into the final frame instead of stopping dead
+        drawDebriefSeries(1 - Math.pow(1 - k, 2));
+        if (k < 1) seriesAnim = requestAnimationFrame(step);
+        else if (then) then();
+      };
+      seriesAnim = requestAnimationFrame(step);
+    }
+
+
+    /* ================================================================
+       THE HIGHLIGHT REEL  —  thirty seconds of the match worth keeping.
+
+       The simulation recorded a frame ten times a second: the clock, both
+       poses, both scores, and how much the gap moved in that tick. Choosing
+       the moments is therefore just picking the heaviest ticks and spreading
+       them out so two clips never show the same seconds twice.
+
+       Playback drives the robots back through the recorded poses at a third
+       speed. Nothing is re-simulated — the reel cannot disagree with what
+       happened, because it IS what happened.
+       ================================================================ */
+    const REEL_TOTAL = 30;        // seconds of finished reel
+    const REEL_CLIP = 3.2;        // seconds of match per clip, before slowing
+    const REEL_SLOW = 3;          // played at a third speed
+    let reelStop = null;
+
+    function pickHighlights() {
+      const F = (matchLog && matchLog.frames) || [];
+      if (F.length < 20) return [];
+      // weight every tick by how much the gap moved, then blur it a little so
+      // a burst of scoring counts as ONE moment rather than ten
+      const w = F.map((f) => f.w || 0);
+      const smooth = w.map((_, i) => {
+        let sum = 0;
+        for (let k = Math.max(0, i - 6); k <= Math.min(w.length - 1, i + 6); k++) sum += w[k];
+        return sum;
+      });
+      const clipTicks = Math.round(REEL_CLIP * 10);
+      const want = Math.max(1, Math.floor(REEL_TOTAL / (REEL_CLIP * REEL_SLOW)));
+      const taken = [];
+      const used = new Array(F.length).fill(false);
+      for (let n = 0; n < want; n++) {
+        let best = -1, bestV = 0;
+        for (let i = 0; i < F.length; i++) {
+          if (used[i] || smooth[i] <= bestV) continue;
+          best = i; bestV = smooth[i];
+        }
+        if (best < 0 || bestV <= 0) break;
+        const from = Math.max(0, best - Math.floor(clipTicks * 0.55));
+        const to = Math.min(F.length - 1, from + clipTicks);
+        for (let i = Math.max(0, from - clipTicks); i <= Math.min(F.length - 1, to + clipTicks); i++) used[i] = true;
+        taken.push({ from: from, to: to, at: F[best].t, weight: bestV });
+      }
+      // nothing dramatic happened? show the closing seconds — there is always
+      // a finish, and an empty reel is worse than a quiet one
+      if (!taken.length) {
+        const to = F.length - 1;
+        taken.push({ from: Math.max(0, to - clipTicks), to: to, at: F[to].t, weight: 0 });
+      }
+      taken.sort((a, b) => a.from - b.from);       // tell it in the order it happened
+      return taken;
+    }
+
+    function playHighlights() {
+      const F = (matchLog && matchLog.frames) || [];
+      const clips = pickHighlights();
+      if (!clips.length) return;
+      const reel = $('reel');
+      const wasResults = $('results').style.display;
+      $('results').style.display = 'none';
+      document.body.classList.remove('resultopen');
+      reel.style.display = 'block';
+      $('reelNote').textContent = T('گلچین مسابقه — آهسته', 'Match highlights — slow motion');
+
+      const place = (fr) => {
+        // put the robots exactly where they were; the renderer draws the rest
+        if (fr.rp && engine.robots.red) Object.assign(engine.robots.red, { x: fr.rp.x, y: fr.rp.y, heading: fr.rp.h });
+        if (fr.bp && engine.robots.blue) Object.assign(engine.robots.blue, { x: fr.bp.x, y: fr.bp.y, heading: fr.bp.h });
+        const mm = Math.floor(fr.t / 60), ss = ('0' + Math.floor(fr.t % 60)).slice(-2);
+        $('reelClock').textContent = mm + ':' + ss;
+        $('reelRed').textContent = fr.r;
+        $('reelBlue').textContent = fr.b;
+      };
+
+      let ci = 0, idx = clips[0].from, last = performance.now(), acc = 0;
+      const totalTicks = clips.reduce((n, c) => n + (c.to - c.from + 1), 0);
+      let doneTicks = 0;
+
+      const finish = () => {
+        reelStop = null;
+        reel.style.display = 'none';
+        $('results').style.display = wasResults || 'flex';
+        if ($('results').style.display !== 'none') document.body.classList.add('resultopen');
+      };
+      reelStop = finish;
+
+      const step = () => {
+        if (!reelStop) return;                       // skipped
+        const now = performance.now();
+        acc += (now - last) / 1000; last = now;
+        const per = 0.1 * REEL_SLOW;                 // a recorded tick, slowed
+        while (acc >= per) {
+          acc -= per;
+          idx++; doneTicks++;
+          if (idx > clips[ci].to) {
+            ci++;
+            if (ci >= clips.length) { finish(); return; }
+            idx = clips[ci].from;
+          }
+        }
+        const fr = F[Math.min(idx, F.length - 1)];
+        if (fr) place(fr);
+        $('reelBar').style.width = Math.min(100, (doneTicks / totalTicks) * 100) + '%';
+        requestAnimationFrame(step);
+      };
+      place(F[idx]);
+      requestAnimationFrame(step);
+    }
+
+    $('reelSkip').onclick = () => { if (reelStop) reelStop(); };
+
     function showDebrief() {
       if (!matchLog) return;
       $('rcardMain').style.display = 'none';
@@ -4954,9 +5184,25 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('dbSeriesCap').textContent = T('امتیاز در طول زمان — عمودی: امتیاز · افقی: زمان', 'Score over time — up: score · right: time');
       $('dbHeatCap').innerHTML = T('پررنگ‌تر = زمان بیشتر در آن نقطه · ✖ = جای جابه‌جایی داور', 'brighter = more time spent there · ✖ = referee relocation') +
         (engine.cfg.seed != null ? ' · <b>seed ' + engine.cfg.seed + '</b>' : '');
-      drawDebriefHeat(); drawDebriefSeries(); fillDebriefStats(); fillDebriefEvents(); $('dbTips').innerHTML = '';
+      drawDebriefHeat();
+      fillDebriefEvents();
+      $('dbTips').innerHTML = '';
+      // first look at a finished match: watch the score build, THEN read the
+      // numbers. Coming back to it later shows the finished chart at once.
+      if (seriesSeen) {
+        drawDebriefSeries(1); fillDebriefStats();
+      } else {
+        seriesSeen = true;
+        $('dbStats').style.opacity = '0';
+        playSeries(() => {
+          fillDebriefStats();
+          $('dbStats').style.transition = 'opacity .5s';
+          $('dbStats').style.opacity = '1';
+        });
+      }
     }
     $('debriefBtn').onclick = showDebrief;
+    $('reelBtn').onclick = playHighlights;
     $('dbBack').onclick = () => { $('debriefCard').style.display = 'none'; $('rcardMain').style.display = ''; };
     // the protest file: the heatmap as a picture, the whole log as data
     $('dbPng').onclick = () => {
@@ -5257,7 +5503,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('bookOverlay').style.display = 'flex';
     }
     $('bookBtn').onclick = openBook;
-    $('bookBtn2').onclick = () => { $('results').style.display = 'none'; openBook(); };
+    $('bookBtn2').onclick = () => { $('results').style.display = 'none'; document.body.classList.remove('resultopen'); openBook(); };
     $('bookClose').onclick = () => { $('bookOverlay').style.display = 'none'; };
     $('bookOverlay').onclick = (ev) => { if (ev.target === $('bookOverlay')) $('bookOverlay').style.display = 'none'; };
     $('bookCsv').onclick = () => {
@@ -5304,7 +5550,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       resetMatchLog();
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       fitText($('redName'), engine.cfg.redName); fitText($('blueName'), '—');
-      $('panel').style.display = 'none'; $('results').style.display = 'none';
+      $('panel').style.display = 'none'; $('results').style.display = 'none'; document.body.classList.remove('resultopen');
       $('scoreboard').style.display = 'flex';
       applySens();
       $('mcTitle').textContent = m.title.fa;
@@ -5339,13 +5585,13 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('mRetryBtn').style.display = 'none'; $('mListBtn').style.display = 'none';
       const rs = document.querySelector('#rcardMain .rscores'); if (rs) rs.style.display = '';
     }
-    $('mRetryBtn').onclick = () => { const m = mission; endMission(); $('results').style.display = 'none'; $('confetti').innerHTML = ''; startMission(m); };
+    $('mRetryBtn').onclick = () => { const m = mission; endMission(); $('results').style.display = 'none'; document.body.classList.remove('resultopen'); $('confetti').innerHTML = ''; startMission(m); };
     $('mListBtn').onclick = () => { endMission(); newMatch(); openTech(); };
 
     function newMatch() {
       endMission();
       cupPending = null; startMatch._mustWin = false;   // walking away from a cup game un-arms it
-      $('scoreboard').style.display = 'none'; $('results').style.display = 'none';
+      $('scoreboard').style.display = 'none'; $('results').style.display = 'none'; document.body.classList.remove('resultopen');
       $('runtimeErr').style.display = 'none'; $('confetti').innerHTML = '';
       $('toast').style.display = 'none';
       showMatchPanel();
@@ -5446,7 +5692,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       engine = new Engine({ map: selectedMap(), league: leagueId, kits: kits, pets: !!($('petsChk') && $('petsChk').checked), players: +(($('playersSel') && $('playersSel').value) || 2) }); renderer.buildScene(engine);
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       redErr = ''; blueErr = '';
-      $('scoreboard').style.display = 'none'; $('results').style.display = 'none';
+      $('scoreboard').style.display = 'none'; $('results').style.display = 'none'; document.body.classList.remove('resultopen');
       $('runtimeErr').style.display = 'none'; $('confetti').innerHTML = ''; $('toast').style.display = 'none';
       showMatchPanel();
       $('burgerMenu').style.display = 'none';

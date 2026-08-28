@@ -281,7 +281,9 @@
             vars[pm] = a[k] !== undefined ? a[k] : 0;
           });
           let ret = 0;
-          try { execBlock(fn.body, vars, { ops: 0, depth: 1 }); }
+          // carry the CALLER's op counter in: a fresh one per call would hand
+          // a loop of calls an unlimited budget and let a match be slowed at will
+          try { execBlock(fn.body, vars, { ops: 0, depth: 1, budget: vars._budget }); }
           catch (r) { if (r && r._return !== undefined) ret = r._return; else { vars._callDepth--; throw r; } }
           fn.params.forEach((pm) => {
             if (saved[pm] === undefined) delete vars[pm]; else vars[pm] = saved[pm];
@@ -297,7 +299,11 @@
 
   function execBlock(stmts, vars, ctx) {
     for (let s = 0; s < stmts.length; s++) {
-      if (++ctx.ops > 500000) throw { runtime: true, msg: 'code ran too long (possible infinite loop)' };
+      // the SHARED budget is what actually caps a step: a per-call counter
+      // would reset on every call and a loop of calls could run for ever
+      ctx.ops++;
+      const budget = ctx.budget || vars._budget;
+      if (budget && ++budget.ops > 500000) throw { runtime: true, msg: 'code ran too long (possible infinite loop)' };
       const st = stmts[s];
       if (st.t === 'expr') {
         evalNode(st.expr, vars);
@@ -350,7 +356,9 @@
       run(vars) {
         const hadHold = vars._holdSteps > 0;
         vars._trace = [];                       // branch lines taken this step
-        try { execBlock(prog, vars, { ops: 0, depth: 0 }); }
+        // ONE budget for the whole step, shared by every block and every call
+        vars._budget = { ops: 0 };
+        try { execBlock(prog, vars, { ops: 0, depth: 0, budget: vars._budget }); }
         catch (e) { throw new Error((e.line ? 'Line ' + e.line + ': ' : '') + (e.msg || e.message || 'runtime error')); }
         // goto(x, y) in progress: steer along the straight A->B line every
         // step (navigation maths from the standalone sensors.js library)

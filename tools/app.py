@@ -34,6 +34,11 @@ import urllib.request
 import webbrowser
 import zipfile
 
+# The build this app was made from. tools/release stamps it; the site
+# publishes the current one at /downloads/version.json.
+BUILD = '44ec49a'
+UPDATE_URL = 'https://smarthomeleague.ir/downloads/version.json'
+DOWNLOAD_PAGE = 'https://smarthomeleague.ir/getting-started'
 LOG = os.path.join(tempfile.gettempdir(), 'shl-log.txt')
 def log(msg):
     try:
@@ -139,6 +144,36 @@ def healthy(base, tries=20):
         time.sleep(0.25)
     return False
 
+def check_for_update():
+    """Ask the site what the current build is. Quiet on every failure: a hall
+    with no internet must still open the app."""
+    try:
+        req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'SmartHomeLeague/' + BUILD})
+        with urllib.request.urlopen(req, timeout=6) as r:
+            import json
+            info = json.loads(r.read().decode('utf-8'))
+    except Exception:
+        return
+    latest = str(info.get('build') or '').strip()
+    if not latest or latest == BUILD:
+        log('up to date (build %s)' % BUILD)
+        return
+    log('a newer build is published: %s (this one is %s)' % (latest, BUILD))
+    note = str(info.get('note') or '').strip()
+    msg = ('A newer version of the Smart Home League app is available.' + chr(10) + chr(10)
+           + 'You have build ' + BUILD + '; the current one is ' + latest + '.' + chr(10)
+           + (note + chr(10) if note else '')
+           + chr(10) + 'Open the download page now?' + chr(10) + chr(10)
+           + 'You can keep playing with this version in the meantime.')
+    try:
+        import ctypes
+        # 0x24 = question icon + Yes/No. 6 = the user said yes.
+        if ctypes.windll.user32.MessageBoxW(None, msg, 'Smart Home League', 0x24) == 6:
+            webbrowser.open(info.get('page') or DOWNLOAD_PAGE)
+    except Exception:
+        pass
+
+
 def find_browser():
     cands = [
         r'%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe',
@@ -186,6 +221,8 @@ def main():
         return
 
     log('health check OK')
+    # ask about updates in the background — never make the app wait for it
+    threading.Thread(target=check_for_update, daemon=True).start()
     exe = find_browser()
     if exe:
         log('browser: ' + exe)
