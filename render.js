@@ -1368,6 +1368,40 @@ class Renderer3D {
 
   // 🎬 THE DIRECTOR: hard cuts every few seconds between real shots —
   // orbits, robot POVs, a split-screen duel, the leader's chase cam.
+  /* Reading the match, four times a second, so the camera can answer it.
+
+     Returns the NAME of whatever is worth cutting to right now, or null for
+     "nothing much is happening". The cooldown keeps it from firing on every
+     tile: one cut, then a good while before the next -- otherwise the
+     excitement stops meaning anything. */
+  _cineDrama(now) {
+    const S = this._cineScores || { red: 0, blue: 0 };
+    const r = S.red || 0, b = S.blue || 0;
+    const w = this._cineWatch
+      || (this._cineWatch = { hist: [], next: 0, cool: now + 12000, lead: 0 });
+    if (now < w.next) return null;
+    w.next = now + 250;
+    const gap = r - b;
+    w.hist.push({ t: now, r: r, b: b, gap: gap });
+    while (w.hist.length > 1 && now - w.hist[0].t > 10000) w.hist.shift();
+    const then = w.hist[0];
+    const sign = gap > 0 ? 1 : gap < 0 ? -1 : 0;
+    const wasLead = w.lead;
+    if (sign) w.lead = sign;
+    if (now < w.cool || !then) return null;
+
+    // the lead changing hands is the biggest thing that can happen
+    if (sign && wasLead && sign !== wasLead) return 'lead';
+    // somebody has clawed back three tiles of the gap
+    if (Math.abs(then.gap) - Math.abs(gap) >= 3) return 'comeback';
+    // ...or gone on a run of five
+    if ((r - then.r) >= 5 || (b - then.b) >= 5) return 'burst';
+    // neck and neck, once there is enough on the board for that to mean
+    // something -- and only now and then, or it would never stop firing
+    if (Math.abs(gap) <= 1 && (r + b) >= 10 && Math.random() < 0.06) return 'close';
+    return null;
+  }
+
   _renderCine() {
     const now = performance.now();
 
@@ -1402,53 +1436,77 @@ class Renderer3D {
       this._cine = null;                 // a new match
       this._cinePovShown = false;        // ...and its own single POV
       this._cineOrder = null;            // ...and its own running order
+      this._cineWatch = null;            // ...and its own reading of the score
     }
 
-    /* THE RUNNING ORDER is shuffled per match, so two matches never play the
-       same sequence. The top view appears most often — it is the shot that
-       shows the whole match — and the over-the-shoulder two-up gets the long
-       holds, because it is the one worth sitting with. */
+    /* WHAT THE DIRECTOR IS FOR
+       Home is the wide shot from above: the one that shows the whole match,
+       both robots, every tile. The camera lives there. Only two things are
+       allowed to take it away, and everything else was cut, because a picture
+       that keeps jumping about is tiring to watch for three minutes.
+
+         A VISIT, about every thirty seconds. One camera, one look, then
+         home. Each of the fancy ones -- spider, orbit, 2.5D, 3D -- gets a
+         SINGLE visit in the whole match, in an order shuffled per match, so
+         no two matches look alike and none of them is overused. Between them
+         comes the over-the-shoulder two-up, which is the shot worth sitting
+         with.
+
+         A MOMENT WORTH SEEING. The director reads the score as the match
+         runs, and when something actually happens -- the lead changes hands,
+         somebody claws a gap back, one of them goes on a run, or the two of
+         them end up neck and neck -- it cuts in close for a few seconds.
+         That cut is the whole point: the camera moves because the MATCH
+         moved, not because a timer went off. */
     if (!this._cineOrder) {
-      // The wide shot from above is HOME. Every other camera gets a visit,
-      // but one at a time, with a long spell at home in between — so a whole
-      // match is watchable without the picture jumping about.
-      const visits = [
-        { shot: 'chase-both', hold: 11000 },
-        { shot: 'spider', hold: 10000 },
-        { shot: '2.5d', hold: 8000 },
-        { shot: '3d', hold: 8000 },
-        { shot: 'pov-both', hold: 5000 },
-        { shot: 'orbit', hold: 8000 },
-      ];
-      for (let i = visits.length - 1; i > 0; i--) {    // a different order each match
+      const specials = ['spider', 'orbit', '2.5d', '3d'];
+      for (let i = specials.length - 1; i > 0; i--) {   // a fresh order per match
         const j = Math.floor(Math.random() * (i + 1));
-        const t = visits[i]; visits[i] = visits[j]; visits[j] = t;
+        const t = specials[i]; specials[i] = specials[j]; specials[j] = t;
       }
+      // third person, then one of the fancy ones, then third person again
       const deck = [];
-      for (const v of visits) {
-        deck.push({ shot: 'top', hold: 13000 + Math.random() * 5000 });   // home
-        deck.push(v);                                                     // one visit
+      for (const sp of specials) {
+        deck.push({ shot: 'chase-both', hold: 8000 });
+        deck.push({ shot: sp, hold: 7500 });
       }
       this._cineOrder = deck;
       this._cineAt = 0;
     }
 
-    if (!this._cine || now > this._cine.until) {
-      let next;
-      for (let tries = 0; tries < this._cineOrder.length; tries++) {
-        next = this._cineOrder[this._cineAt % this._cineOrder.length];
-        this._cineAt++;
-        if (next.shot === 'pov-both' && this._cinePovShown) continue;   // once a match
-        if (this._cine && next.shot === this._cine.shot) continue;      // never twice running
-        break;
-      }
-      if (next.shot === 'pov-both') this._cinePovShown = true;
+    const c0 = this._cine;
+    const drama = this._cineDrama(now);
+    if (drama && (!c0 || c0.shot === 'top')) {
+      // Something happened. Get close to it -- but only ever from HOME, so a
+      // visit already running is never cut in half.
+      this._cineWatch.cool = now + 15000;
+      const usePov = drama === 'lead' && !this._cinePovShown && Math.random() < 0.45;
+      if (usePov) this._cinePovShown = true;
       this._cine = {
-        shot: next.shot,
-        until: now + next.hold,
-        az: Math.random() * Math.PI * 2,      // a different arc every time
-        dir: Math.random() < 0.5 ? -1 : 1,    // ...and it can drift either way
+        shot: usePov ? 'pov-both' : 'chase-both',
+        until: now + (drama === 'lead' ? 7000 : 5500),
+        az: Math.random() * Math.PI * 2,
+        dir: Math.random() < 0.5 ? -1 : 1,
+        why: drama,
       };
+    } else if (!c0 || now > c0.until) {
+      if (!c0 || c0.shot !== 'top') {
+        // home, and stay there: this is the shot the match is watched on
+        this._cine = {
+          shot: 'top', until: now + 26000 + Math.random() * 9000,
+          az: Math.random() * Math.PI * 2,
+          dir: Math.random() < 0.5 ? -1 : 1,
+        };
+      } else {
+        // home has had its thirty seconds -- pay one camera a visit. Once the
+        // fancy ones have each had their turn, the two-up carries the rest.
+        const v = this._cineOrder[this._cineAt++] || { shot: 'chase-both', hold: 8000 };
+        this._cine = {
+          shot: v.shot, until: now + v.hold,
+          az: Math.random() * Math.PI * 2,
+          dir: Math.random() < 0.5 ? -1 : 1,
+        };
+      }
     }
     const c = this._cine;
     const el = this.renderer.domElement;

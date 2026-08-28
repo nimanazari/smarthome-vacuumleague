@@ -363,32 +363,68 @@
     #results .rcard { margin-inline-start: 0; max-width: 92vw; }
     body.resultopen #scene { transform: none; }
   }
-  /* THE SCORE-OVER-TIME CHART, on the floor's side of the screen: score up
-     the side, time along the bottom, drawn on glass over the house itself. */
-  #sideChart { position: fixed; right: 3.2vw; top: 50%; transform: translateY(-50%);
-    width: min(430px, 33vw); display: none; padding: 13px 15px 11px;
-    border-radius: 18px; direction: ltr;
-    background: linear-gradient(180deg, rgba(14,18,25,.88), rgba(10,13,19,.82));
+  /* THE FINISH PANEL — how the score was won, on the floor's own side of the
+     screen: the trend over time, the heat map of where each robot worked,
+     and the buttons you reach for once you have read the score. */
+  #finishPanel { position: fixed; right: 2.6vw; top: 50%; transform: translateY(-50%);
+    width: min(430px, 33vw); max-height: 92vh; overflow: auto; display: none;
+    padding: 15px 16px 13px; border-radius: 20px; direction: ltr;
+    background: linear-gradient(180deg, rgba(15,19,27,.90), rgba(10,13,19,.85));
     border: 1px solid rgba(255,255,255,.13);
-    box-shadow: 0 24px 60px rgba(0,0,0,.5); backdrop-filter: blur(7px);
-    animation: rise .6s cubic-bezier(.2,.8,.2,1); }
-  #sideChart.on { display: block; }
-  #sideChart .sc-h { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
-  #sideChart canvas { display: block; width: 100%; height: auto; border-radius: 10px;
+    box-shadow: 0 26px 64px rgba(0,0,0,.55); backdrop-filter: blur(8px);
+    opacity: 0; animation: fpIn .7s cubic-bezier(.2,.8,.2,1) 1.25s forwards; }
+  #finishPanel.on { display: block; }
+  @keyframes fpIn { 0% { opacity: 0; transform: translateY(-50%) translateX(26px); }
+                    100% { opacity: 1; transform: translateY(-50%) translateX(0); } }
+  #finishPanel .fp-sec { margin-bottom: 13px; }
+  #finishPanel .fp-h { font-size: 12px; font-weight: 800; margin-bottom: 7px;
+    letter-spacing: .3px; color: #dfe4ec; }
+  #finishPanel canvas { display: block; width: 100%; height: auto; border-radius: 11px;
     border: 1px solid rgba(255,255,255,.10); background: #10141a; }
-  #sideChart .sc-cap { margin-top: 7px; font-size: 10.5px; color: var(--muted); }
-  /* on a phone the card covers everything, so there is no floor to sit on */
-  @media (max-width: 900px) { #sideChart.on { display: none; } }
+  #finishPanel .fp-cap { margin-top: 6px; font-size: 10.5px; color: var(--muted); }
+  #finishPanel .fp-btns { padding-top: 3px; border-top: 1px solid rgba(255,255,255,.09); }
+  #finishPanel .fp-btns .rbtnrow { margin-top: 11px; gap: 9px; }
+  /* On a phone nothing sits beside anything: the score, then how it was won,
+     then the buttons — straight down the page, all of it still there. */
+  @media (max-width: 900px) {
+    /* showResults sets display:flex INLINE, which no stylesheet rule can
+       outrank -- so the column is made by turning the flex row on its side
+       rather than by trying to replace it. Score first, then how it was won. */
+    #results { flex-direction: column; align-items: center; justify-content: flex-start;
+      overflow: auto; padding: 16px 0 26px; }
+    #results .rcard { margin: 0 auto; }
+    #finishPanel { position: static; transform: none; width: auto; max-height: none;
+      margin: 16px auto 0; max-width: 92vw; animation: none; opacity: 1; }
+  }
   .rcard { position: relative; text-align: center; padding: 20px 40px; animation: rise .6s cubic-bezier(.2,.8,.2,1); }
+  /* the score arrives BIG and centred, holds a beat so the number lands, and
+     only then glides over to make room for how it was won */
+  body.resultopen #rcardMain { animation: rcomein 1.5s cubic-bezier(.22,.9,.24,1) both; }
+  @keyframes rcomein {
+    0%   { opacity: 0; transform: translateX(21vw) scale(1.16); }
+    26%  { opacity: 1; transform: translateX(21vw) scale(1.16); }
+    62%  { opacity: 1; transform: translateX(21vw) scale(1.16); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @media (max-width: 900px) { body.resultopen #rcardMain { animation: rise .6s cubic-bezier(.2,.8,.2,1); } }
   @keyframes rise { 0% { transform: translateY(40px) scale(.9); opacity: 0; } 100% { transform: none; opacity: 1; } }
   #rTrophy { color: #ffcf5a; filter: drop-shadow(0 10px 24px rgba(255,200,60,.4)); animation: bob 2.4s ease-in-out infinite; }
   #rTrophy svg { width: 92px; height: 92px; }
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   .rlabel { font-size: 16px; letter-spacing: 6px; color: var(--muted); text-transform: uppercase; margin-top: 6px; }
   .rname { font-size: 66px; font-weight: 900; margin: 2px 0 22px; text-shadow: 0 0 44px currentColor; }
-  .rscores { display: flex; align-items: center; justify-content: center; gap: 30px; }
-  .rteam { min-width: 190px; }
-  .rteam .rtn { font-size: 17px; margin-bottom: 4px; max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .rscores { display: flex; align-items: stretch; justify-content: center; gap: 16px; }
+  /* each score in a box of its team's colour — the winner's box is the one
+     that glows, so you see who won before you have read a word */
+  .rteam { min-width: 168px; padding: 15px 18px 13px; border-radius: 18px;
+    background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.10);
+    transition: box-shadow .5s, border-color .5s, background .5s; }
+  .rteam.red { background: linear-gradient(180deg, rgba(255,90,80,.13), rgba(255,90,80,.04)); border-color: rgba(255,90,80,.30); }
+  .rteam.blue { background: linear-gradient(180deg, rgba(90,140,255,.13), rgba(90,140,255,.04)); border-color: rgba(90,140,255,.30); }
+  .rteam.won.red { border-color: rgba(255,90,80,.75); box-shadow: 0 0 0 1px rgba(255,90,80,.35), 0 16px 46px -14px rgba(255,90,80,.55); }
+  .rteam.won.blue { border-color: rgba(90,140,255,.75); box-shadow: 0 0 0 1px rgba(90,140,255,.35), 0 16px 46px -14px rgba(90,140,255,.55); }
+  .rteam .rtn { font-size: 15.5px; font-weight: 700; margin-bottom: 4px; max-width: 260px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .rteam .runit { margin-top: 3px; font-size: 10.5px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--muted); }
   .rname { max-width: 92vw; overflow: hidden; white-space: nowrap; margin-left: auto; margin-right: auto; }
   .rbig { font-size: 86px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
   .rteam.red .rbig, .rteam.red .rtn { color: var(--red); } .rteam.blue .rbig, .rteam.blue .rtn { color: var(--blue); }
@@ -1594,6 +1630,7 @@
   </div>
   <div id="burgerMenu">
     <button class="mitem" id="mainMenuBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span id="mainMenuLbl">Main menu</span></button>
+    <button class="mitem" id="exitHomeBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span id="exitHomeLbl">Exit to the first page</span></button>
     <!-- the league's own tools, straight from the menu: the map maker and
          whichever helpers THIS division declares (helper: / helper2:) -->
     <div class="mhead" id="mhLearn"></div>
@@ -1693,9 +1730,9 @@
       <div class="rlabel" id="rLabel">&nbsp;</div>
       <div class="rname" id="rName">&nbsp;</div>
       <div class="rscores">
-        <div class="rteam red"><div class="rtn" id="rRedName">Team 1</div><div class="rbig" id="rRed">0</div></div>
+        <div class="rteam red" id="rBoxRed"><div class="rtn" id="rRedName">Team 1</div><div class="rbig" id="rRed">0</div><div class="runit" id="rUnitRed"></div></div>
         <div class="rvs">–</div>
-        <div class="rteam blue"><div class="rtn" id="rBlueName">Team 2</div><div class="rbig" id="rBlue">0</div></div>
+        <div class="rteam blue" id="rBoxBlue"><div class="rtn" id="rBlueName">Team 2</div><div class="rbig" id="rBlue">0</div><div class="runit" id="rUnitBlue"></div></div>
       </div>
       <div class="rsub" id="rSub"></div>
       <div class="rsaved fa" id="rSaved" style="display:none"></div>
@@ -1733,11 +1770,19 @@
         <button class="btn" id="newMatch3">New Match</button>
       </div>
     </div>
-    <!-- score over time, over the floor on the right -->
-    <div id="sideChart">
-      <div class="sc-h fa" id="scTitle"></div>
-      <canvas id="sideSeries" width="440" height="150"></canvas>
-      <div class="sc-cap fa" id="scCap"></div>
+    <!-- how the score was won: the trend, the ground covered, the way on -->
+    <div id="finishPanel">
+      <div class="fp-sec">
+        <div class="fp-h fa" id="fpTrendH"></div>
+        <canvas id="fpSeries" width="440" height="150"></canvas>
+        <div class="fp-cap fa" id="fpTrendC"></div>
+      </div>
+      <div class="fp-sec">
+        <div class="fp-h fa" id="fpHeatH"></div>
+        <canvas id="fpHeat" width="440" height="300"></canvas>
+        <div class="fp-cap fa" id="fpHeatC"></div>
+      </div>
+      <div class="fp-btns" id="fpBtns"></div>
     </div>
   </div>
 
@@ -4379,10 +4424,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       get vacuum() {
         return T(
           ['هر کاشی‌ای که ربات از رویش رد شود رنگ او را می‌گیرد',
-            'فرش کندش می‌کند و کف خیس کاشی از او کم می‌کند',
+            'فرش کندش می‌کند و هیچ امتیازی ندارد',
             'U19: باتری خالی می‌شود \u2014 ایستگاه شارژ ثابت پرش می‌کند',
             'هر که در پایان زمان کاشی بیشتری داشته باشد برنده است'],
-          ['Every tile the robot crosses turns its colour', 'Rug slows it, wet floor costs tiles',
+          ['Every tile the robot crosses turns its colour', 'A rug slows it and scores nothing',
             'U19: the battery drains \u2014 the fixed dock refills it', 'Most tiles when the clock ends wins']);
       },
       assistive: ['The person walks BEHIND, holding the handle', 'Tour: sofa \u2192 kitchen \u2192 BED, then chores alone',
@@ -4850,7 +4895,8 @@ else:                            # 7) nothing in the way -> full speed ahead
         $('results').querySelector('.rcard').style.background =
           'radial-gradient(520px 420px at 20% 0%, ' + rc + '33, transparent 62%), ' +
           'radial-gradient(520px 420px at 80% 100%, ' + bc + '33, transparent 62%), rgba(10,13,19,.93)';
-        $('rTrophy').innerHTML = ICON.scale; $('rTrophy').style.color = '#cfd6df';
+        $('rTrophy').style.display = 'none';        // the score says it better
+        $('rBoxRed').classList.add('won'); $('rBoxBlue').classList.add('won');
         $('rLabel').textContent = T('نتیجه', 'Result');
         fitText($('rName'), T('مساوی', 'Draw'), true); $('rName').style.color = '#e8eaed';
         $('rSub').textContent = sumoG
@@ -4863,8 +4909,12 @@ else:                            # 7) nothing in the way -> full speed ahead
         // in the winner's own colour does the celebrating, and the whole
         // backdrop glows that colour too: you SEE who won before you read.
         const wc = TEAM_COLORS[selCol[w]].css;
-        $('rTrophy').innerHTML = sumoG ? '<div class="yushoDisc">&#21213;</div>' : ICON.star;
-        $('rTrophy').style.color = sumoG ? '#ff5a4e' : wc;
+        // no star: a big bland shape over the one thing worth reading. The
+        // winner's own score box glows instead.
+        if (sumoG) { $('rTrophy').style.display = ''; $('rTrophy').innerHTML = '<div class="yushoDisc">&#21213;</div>'; $('rTrophy').style.color = '#ff5a4e'; }
+        else $('rTrophy').style.display = 'none';
+        $('rBoxRed').classList.toggle('won', w === 'red');
+        $('rBoxBlue').classList.toggle('won', w === 'blue');
         $('rLabel').textContent = sumoG
           ? T('یوشو · قهرمان رینگ', 'YŪSHŌ · champion of the ring')
           : T('برنده', 'Winner');
@@ -4882,7 +4932,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('debriefBtn').style.display = matchLog ? '' : 'none';
         $('reelBtn').style.display = (matchLog && matchLog.frames && matchLog.frames.length > 20) ? '' : 'none';
       $('results').style.display = 'flex'; document.body.classList.add('resultopen');
-      openSideChart();
+      openFinish();
     }
 
     /* ---------- the debrief itself ---------- */
@@ -4991,22 +5041,41 @@ else:                            # 7) nothing in the way -> full speed ahead
       const a = $('dbSeries');
       a.width = $('dbHeat').width; a.height = 110;
       drawSeriesInto(a, upto);
-      const b = $('sideSeries');
-      if (b && $('sideChart').classList.contains('on')) {
-        b.width = 440; b.height = 150;
+      const b = $('fpSeries');
+      if (b && $('finishPanel').classList.contains('on')) {
+        b.width = 460; b.height = 155;
         drawSeriesInto(b, upto);
       }
     }
 
-    /* The chart belongs beside the floor the moment the result appears, and it
-       fills from 0:00 to the whistle rather than arriving finished. */
-    function openSideChart() {
-      const panel = $('sideChart');
-      const S = (matchLog && matchLog.series) || [];
-      if (S.length < 2) { panel.classList.remove('on'); return; }
-      $('scTitle').textContent = T('امتیاز در طول زمان', 'Score over time');
-      $('scCap').textContent = T('عمودی: امتیاز · افقی: زمان', 'up: score · right: time');
+    /* THE FINISH PANEL opens with the result and says how the score was won:
+       the trend from 0:00 to the whistle (drawn filling, not arriving
+       finished), the heat map of where each robot actually spent the match,
+       and the buttons underneath. */
+    function openFinish() {
+      const panel = $('finishPanel');
+      if (!matchLog) { panel.classList.remove('on'); return; }
+      // the buttons belong under all of this — moved once, handlers and all
+      const row = $('results').querySelector('.rbtnrow');
+      if (row && row.parentNode !== $('fpBtns')) $('fpBtns').appendChild(row);
+
+      $('fpTrendH').textContent = T('امتیاز در طول زمان', 'Score over time');
+      $('fpTrendC').textContent = T('عمودی: امتیاز · افقی: زمان', 'up: score · right: time');
+      $('fpHeatH').textContent = T('کجا کار کردند', 'Where they worked');
+      $('fpHeatC').textContent = T('پررنگ‌تر = زمان بیشتر در آن نقطه', 'brighter = more time spent there');
       panel.classList.add('on');
+
+      // the heat map is drawn once at full detail and copied across, so the
+      // panel and the full report can never disagree about the same match
+      try {
+        drawDebriefHeat();
+        const src = $('dbHeat'), dst = $('fpHeat');
+        dst.width = src.width; dst.height = src.height;
+        dst.getContext('2d').drawImage(src, 0, 0);
+      } catch (e) { /* no map to draw yet */ }
+
+      const S = (matchLog && matchLog.series) || [];
+      if (S.length < 2) { drawDebriefSeries(1); return; }
       seriesSeen = true;                    // it has been watched filling once
       playSeries(null);
     }
@@ -5687,6 +5756,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       // speed, sensors, relocations - nothing that belongs to the lobby
       const live = $('scoreboard').style.display === 'flex';
       $('mainMenuLbl').textContent = T('منوی اصلی', 'Main menu');
+      $('exitHomeLbl').textContent = T('خروج — صفحه‌ی اول', 'Exit — first page');
       // section titles (a head hides itself when empty via CSS)
       // the results buttons follow the language too
       if ($('debriefBtn') && $('debriefBtn').querySelector('.rb-t')) $('debriefBtn').querySelector('.rb-t').textContent = T('گزارش مسابقه', 'Report');
@@ -5744,7 +5814,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         label('restartBtn', T('شروع دوباره', 'Restart match'), 'inner');
         label('helpBtn', T('راهنما', 'Guide'), 'last');
         label('dlBaseBtn', T('کد پایه .py', 'Base code .py'), 'last');
-        label('lockLbl', T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off')));
+      label('lockLbl', T('مسابقه‌ی رسمی', 'Official mode') + ': ' + (window.SHL_LOCK ? T('روشن', 'ON') : T('خاموش', 'off')));
       }
       m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
     };
@@ -5765,10 +5835,15 @@ else:                            # 7) nothing in the way -> full speed ahead
       setHouseEdit(false); $('houseBtn').style.display = 'none';
       applySens();
       loadDraw();
-      // "Main menu" means the FRONT page -- where you pick the league and then
-      // the division -- not the setup screen of whichever league you happened
-      // to be in. Coming home should let you change your mind about both.
+    };
+
+    /* EXIT: all the way out to the first screen -- the league, then the age
+       division. Main menu goes back one page, to this league's own setup;
+       this goes home. */
+    $('exitHomeBtn').onclick = () => {
+      $('mainMenuBtn').click();          // the same clean teardown, once
       $('lobbyBar').style.display = 'none';
+      $('burgerMenu').style.display = 'none';
       showLeaguePicker();
     };
 
@@ -6302,7 +6377,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -8     # عقبِ کج: هم دور می‌شوی هم می‌چرخی\n\nelif color == green:    # فرش بزرگ\n    timer = 8\n\nelif color == purple:   # فرش کوچک\n    timer = 5\n',
         expect: 'باید ببینی: نرسیده به فرش سبز، با قوسِ عقب‌گرد ازش جدا می‌شود و مسیر تازه می‌گیرد. timer فرش سبز عمداً بلندتر است (۸ در برابر ۵) — سبز گران‌تر است!',
         en: { title: 'Lesson 2 — Rugs pay nothing',
-          body: 'The colour sensor sees a rug BEFORE you enter: <b>green</b> is the big rug — half speed and zero points; <b>purple</b> is a small rug — zero points. U14 also has wet floor, a 2-tile fine the colour sensor cannot see — so the habit of avoiding rugs also builds safer routes.',
+          body: 'The colour sensor sees a rug BEFORE you enter: <b>green</b> is the big rug — half speed and zero points; <b>purple</b> is a small rug — zero points. Reading the floor before you drive onto it is the habit that builds a good route.',
           code: 'wheelleft = 25\nwheelright = 25\n\nif timer > 0:\n    timer -= 1\n    wheelleft = -25\n    wheelright = -8     # curved reverse: leave AND turn\n\nelif color == green:    # the big rug\n    timer = 8\n\nelif color == purple:   # a small rug\n    timer = 5\n',
           expect: 'You should see: just before the green rug it peels away with a curved reverse and picks a fresh path. The green timer is deliberately longer (8 vs 5) — green costs more!' },
         setup(eng) { const r = eng.robots.red; r.x = 5.6; r.y = 8.7; r.heading = Math.PI / 2; }

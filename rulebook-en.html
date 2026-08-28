@@ -111,7 +111,7 @@ can. Alongside the matches, participants also take part in a <b>technical challe
 <div class="cap">Figure 2 — The competition robot on the official field</div>
 <h3>1.2 Sensors overview</h3>
 <img class="shot" id="shotSensors" alt="Figure 3 — sensor placement">
-<div class="cap">Figure 3 — Sensor placement: the three ultrasonic distance sensors (<code>front</code>, <code>frontleft</code>, <code>frontright</code>), the front bumper and the drive wheels</div>
+<div class="cap">Figure 3 — Sensor placement: the three ultrasonic distance sensors (<code>front</code>, <code>frontleft</code>, <code>frontright</code>), the bumper ring in its two halves (<code>bumperfront</code> and <code>bumperback</code>) and the drive wheels</div>
 <table>
 <tr><th>Sensor</th><th>Function · variable names</th><th>Application</th><th>Leagues</th></tr>
 <tr><td><b>1.2.1 Distance sensors (Ultrasonic Sensor — US)</b></td>
@@ -507,9 +507,12 @@ in the event of any discrepancy, the official PDF document prevails.</div>
       // shell
       g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
       g.fillStyle = '#dfe7f4'; g.fill(); g.lineWidth = 5; g.strokeStyle = '#8fa3c4'; g.stroke();
-      // bumper arc (front)
-      g.beginPath(); g.arc(cx, cy, R + 9, -Math.PI * 0.78, -Math.PI * 0.22);
-      g.lineWidth = 12; g.strokeStyle = '#f59e0b'; g.stroke();
+      // the bumper ring is in TWO halves, and the robot can tell them apart:
+      // a hit on the front reads bumperfront, a hit from behind bumperback.
+      g.lineWidth = 12; g.strokeStyle = '#f59e0b';
+      g.beginPath(); g.arc(cx, cy, R + 9, -Math.PI * 0.78, -Math.PI * 0.22); g.stroke();
+      g.strokeStyle = '#c2410c';
+      g.beginPath(); g.arc(cx, cy, R + 9, Math.PI * 0.22, Math.PI * 0.78); g.stroke();
       // wheels
       g.fillStyle = '#5b6880';
       g.fillRect(cx - R - 4, cy - 42, 16, 84); g.fillRect(cx + R - 12, cy - 42, 16, 84);
@@ -524,10 +527,12 @@ in the event of any discrepancy, the official PDF document prevails.</div>
       g.fillStyle = '#20437e'; g.font = '700 24px "Segoe UI", sans-serif'; g.textAlign = 'center';
       g.fillText(RB_EN ? 'front' : 'جلو', cx, 68);
       g.fillStyle = '#b45309';
-      g.fillText(RB_EN ? 'bumper' : 'بامپر (سپر)', cx, 130);
+      g.fillText(RB_EN ? 'bumperfront' : 'بامپر جلو — bumperfront', cx, 130);
+      g.fillStyle = '#c2410c';
+      g.fillText(RB_EN ? 'bumperback' : 'بامپر عقب — bumperback', cx, 556);
       g.fillStyle = '#374a68'; g.font = '600 20px "Segoe UI", sans-serif';
       g.fillText(RB_EN ? 'F = front · FL = frontleft (front-left) · FR = frontright (front-right) · colour sensor underneath'
-                       : 'F = front (جلو) · FL = frontleft (جلو-چپ) · FR = frontright (جلو-راست) · سنسور رنگ زیر بدنه', cx, 585);
+                       : 'F = front (جلو) · FL = frontleft (جلو-چپ) · FR = frontright (جلو-راست) · سنسور رنگ زیر بدنه', cx, 600);
       put('shotSensors', c.toDataURL('image/png'));
     })();
 

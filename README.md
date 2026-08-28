@@ -65,7 +65,7 @@ It **must** be served over HTTP. Opening `index.html` straight off the disk
 | ages | 8 – 11 | 11 – 14 | 14 – 19 |
 | match length | 120 s | 180 s | 180 s |
 | cat + dog | off | on | on |
-| wet floor | off | −2 tiles per entry | −2 tiles per entry |
+| wet floor | off — and off every map | off | off |
 | relocate cost | 2 tiles | 5 tiles | 5 tiles |
 | battery + pad | off | off | on |
 | dust bin (1P only) | off | off | 30 tiles, then go empty |
@@ -190,7 +190,7 @@ a house without one simply plays the old way. The robot's code reads `dust`,
 ## Scoring
 
 Scoring is this league's own, in `VacuumMode` inside `league.js`: one point per
-tile owned, stolen back on last touch, minus the relocate and wet-floor
+tile owned, stolen back on last touch, minus the relocate
 penalties. The scoreboard reads `scores`, `hud()` and `result()`.
 
 ## Changing things

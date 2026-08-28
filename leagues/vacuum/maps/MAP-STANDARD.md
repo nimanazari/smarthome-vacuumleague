@@ -22,7 +22,7 @@ Every official map follows this checklist and passes the validator.
    U19 plays them filtered out.*
 5. **فرش وسط پذیرایی رنگ متفاوت + کندکننده** (`kind: 'green'`).
    *The living-room rug is a different colour and slows the robot.*
-6. کف خیس فقط U14/U19 (FS در `fs/rules.js` خشک می‌شود)، جفتِ آینه‌ای و
+6. کف خیس دیگر در هیچ رده‌ای نیست — هر سه رده لکه‌ها را از نقشه‌ی خود فیلتر می‌کنند، و
    کاشی‌چین. *Wet pair mirrored + tile-aligned; FS auto-dried.*
 7. `rooms:` برای هر اتاق شماره داشته باشد: ۰ هال · ۱ آشپزخانه ·
    ۲/۳/۴ خواب‌ها · ۵ سرویس.

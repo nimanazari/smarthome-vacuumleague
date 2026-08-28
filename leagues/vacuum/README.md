@@ -6,12 +6,15 @@ driving over the rival's tiles steals them back. The match ends on the clock, an
 the side owning more tiles wins. A draw keeps playing: +10 s, then +5 s at a time.
 
 Two things take tiles away again: the referee's relocate (a robot that has not
-moved for the stuck timeout is teleported and loses `penalty` tiles) and wet floor
+moved for the stuck timeout is teleported and loses `penalty` tiles)
 (rolling onto a wet tile costs 2 tiles — it fires once per *entry*, so crossing the
 same puddle again costs again). In FINAL mode — a checkbox in the UI, not a
 division setting — the cat also erases painted tiles it walks over.
 
-The wet floor is two puddles in `HOUSE.rugs`, `kind: 'wet'`, tile-aligned and
+The wet floor is GONE from every division. Its two puddles still exist in
+`HOUSE.rugs` as `kind: 'wet'` so old maps still load, but every division
+filters them out of its own map. What follows is kept for that history:
+they were tile-aligned and
 mirrored about the centre of the house (tiles 9–10,13 and 5–6,2) so they sit the
 same distance from each starting corner. They are what the `wet` rule punishes:
 with no `kind: 'wet'` rug in the map, `physics.js` builds an empty `puddles` list
@@ -36,7 +39,7 @@ with SIX zones and 2-tile doorways: the hall/living (room 0), the kitchen
 | ages | 8 – 11 | 11 – 14 | 14 – 19 |
 | match length | 120 s | 180 s | 180 s |
 | cat + dog (`pets`) | off | on | on |
-| wet floor (`wet`) | off — and the puddles are mopped out of the map too | on, −2 tiles per entry | on, −2 tiles per entry |
+| wet floor (`wet`) | off — the puddles are mopped out of the map | off, likewise | off, likewise |
 | cleanable tiles | 431 | 427 | 427 |
 | relocate cost (`penalty`) | 2 tiles | 5 tiles | 5 tiles |
 | battery + charging pad (`battery`) | off | off | on |
@@ -116,7 +119,7 @@ just benefits):
   heatmap of where each robot spent its time (furniture drawn on top, ✖ where
   the referee relocated it), score-over-time, and a stats table — coverage,
   distance, time stuck (the referee's own 0.85 m watchdog definition),
-  relocations, wet-floor hits, seconds at 0 % battery — plus one auto-coaching
+  relocations, seconds at 0 % battery — plus one auto-coaching
   tip per team, in Persian with an English subline.
 
 ## The folder
