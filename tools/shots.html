@@ -80,7 +80,40 @@
     g.fillText(text, x, y + 1);
   };
 
-  if (fig === 'hero') {
+  // ---- one frame from each camera, for showing the set ----
+  const CAMS = ['top', '3d', '2.5d', 'spider', 'chase', 'finale'];
+  if (CAMS.indexOf(fig) >= 0) {
+    const s0 = scene('u14');
+    // pose the robots somewhere photogenic, and tell the director where
+    const R = s0.eng.robots, ox = -s0.W / 2, oz = -s0.H / 2;
+    if (R.red) { R.red.x = 4.2; R.red.y = 6.0; R.red.heading = 0.6; }
+    if (R.blue) { R.blue.x = 8.6; R.blue.y = 4.4; R.blue.heading = 3.3; }
+    s0.r3.sync(s0.eng);
+    s0.r3._cinePoses = {};
+    for (const k of ['red', 'blue']) {
+      const rb = R[k];
+      if (rb) s0.r3._cinePoses[k] = { x: ox + rb.x, z: oz + rb.y, h: rb.heading };
+    }
+    s0.r3._cineScores = { red: 12, blue: 9 };
+    s0.r3._cineRunning = true;
+    s0.r3._cineLeft = 120;
+    s0.r3.renderer.setSize(1280, 760);
+    if (fig === 'spider') {
+      s0.r3.viewMode = 'spider';
+      for (let i = 0; i < 500; i++) s0.r3._renderSpider();
+    } else if (fig === 'finale') {
+      s0.r3.viewMode = 'cine'; s0.r3._cineLeft = 4;
+      for (let i = 0; i < 900; i++) s0.r3._renderCine();
+    } else if (fig === 'chase') {
+      s0.r3.viewMode = 'cine';
+      s0.r3._cine = { shot: 'chase-both', until: 1e15, az: 0 };
+      s0.r3._renderCine();
+    } else {
+      s0.r3.viewMode = fig; s0.r3.setView(fig);
+      for (let i = 0; i < 300; i++) s0.r3.render();
+    }
+    show(s0.r3.renderer.domElement.toDataURL('image/png'));
+  } else if (fig === 'hero') {
     const s = scene('u14');
     s.r3.renderer.setSize(1600, 900);
     s.r3.render();
