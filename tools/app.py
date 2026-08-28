@@ -59,9 +59,22 @@ MIME = {'.js': 'text/javascript', '.mjs': 'text/javascript',
         '.woff2': 'font/woff2', '.wasm': 'application/wasm',
         '.html': 'text/html; charset=utf-8'}
 
+# A secret this run of the app invents. The health check asks for it back,
+# so a DIFFERENT program listening on the same port can never be mistaken
+# for ours and shown to the teams as if it were the league.
+ALIVE = base64.urlsafe_b64encode(os.urandom(18)).decode('ascii').rstrip('=')
+
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split('?')[0].split('#')[0]
+        if path == '/__shl_alive':
+            body = ALIVE.encode('ascii')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path.endswith('/'):
             path += 'index.html'
         body = FILES.get(path)
@@ -84,28 +97,46 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass
 
 class Server(socketserver.ThreadingTCPServer):
-    allow_reuse_address = True
+    # NOT allow_reuse_address: on Windows SO_REUSEADDR lets you bind a port
+    # another process is already listening on, and then the two race and the
+    # browser can be handed somebody else's page. Better to fail and move on.
+    allow_reuse_address = False
     daemon_threads = True
 
 def start_server():
-    for port in (8000, 8080, 8801, 0):
+    # Port 0 asks the OS for a free ephemeral port: random, and free by
+    # definition, so it can never collide with a site the teacher already runs
+    # on 8000. A few named ports are tried first only when SHL_PORT asks.
+    wanted = os.environ.get('SHL_PORT', '').strip()
+    tries = []
+    if wanted.isdigit():
+        tries.append(int(wanted))
+    tries.append(0)
+    srv = None
+    for port in tries:
         try:
             srv = Server(('127.0.0.1', port), Handler)
             break
         except OSError:
             continue
+    if srv is None:
+        raise OSError('no free port on 127.0.0.1')
     port = srv.server_address[1]
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return port
 
-def healthy(url, tries=20):
+def healthy(base, tries=20):
+    """True only when the server on this port is OURS. The token is generated
+    fresh each run, so another program answering on the same port cannot pass."""
+    probe = base + '/__shl_alive'
     for _ in range(tries):
         try:
-            with urllib.request.urlopen(url, timeout=1) as r:
-                if r.status == 200:
+            with urllib.request.urlopen(probe, timeout=1) as r:
+                if r.status == 200 and r.read().decode('utf-8', 'replace').strip() == ALIVE:
                     return True
         except OSError:
-            time.sleep(0.25)
+            pass
+        time.sleep(0.25)
     return False
 
 def find_browser():
@@ -128,18 +159,31 @@ def main():
     log('--- Smart Home League starting ---')
     log('game source: ' + log_src)
     port = start_server()
-    url = 'http://127.0.0.1:%d/index.html' % port
-    log('server on port %d' % port)
+    base = 'http://127.0.0.1:%d' % port
+    url = base + '/index.html'
+    log('server on port %d (chosen by the system, so nothing else can hold it)' % port)
 
     if os.environ.get('SHL_SERVER_ONLY'):
         open(os.path.join(tempfile.gettempdir(), 'shl-port.txt'), 'w').write(str(port))
         log('server-only mode')
         threading.Event().wait()
 
-    if not healthy(url):
-        log('SERVER NEVER ANSWERED')
-        webbrowser.open(url)
-        threading.Event().wait()
+    # Only OUR server may be opened. If the token does not come back, something
+    # else is on this port and showing it would hand the teams the wrong page.
+    if not healthy(base):
+        log('THE SERVER ON THIS PORT IS NOT OURS - refusing to open a browser')
+        try:
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(
+                None,
+                'Smart Home League could not start its own local server.\n\n'
+                'Another program on this computer answered first. Close any other '
+                'local server (or restart the computer) and open the app again.\n\n'
+                'Details are in: ' + LOG,
+                'Smart Home League', 0x10)
+        except Exception:
+            pass
+        return
 
     log('health check OK')
     exe = find_browser()
