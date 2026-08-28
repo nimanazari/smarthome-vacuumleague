@@ -363,6 +363,22 @@
     #results .rcard { margin-inline-start: 0; max-width: 92vw; }
     body.resultopen #scene { transform: none; }
   }
+  /* THE SCORE-OVER-TIME CHART, on the floor's side of the screen: score up
+     the side, time along the bottom, drawn on glass over the house itself. */
+  #sideChart { position: fixed; right: 3.2vw; top: 50%; transform: translateY(-50%);
+    width: min(430px, 33vw); display: none; padding: 13px 15px 11px;
+    border-radius: 18px; direction: ltr;
+    background: linear-gradient(180deg, rgba(14,18,25,.88), rgba(10,13,19,.82));
+    border: 1px solid rgba(255,255,255,.13);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5); backdrop-filter: blur(7px);
+    animation: rise .6s cubic-bezier(.2,.8,.2,1); }
+  #sideChart.on { display: block; }
+  #sideChart .sc-h { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
+  #sideChart canvas { display: block; width: 100%; height: auto; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.10); background: #10141a; }
+  #sideChart .sc-cap { margin-top: 7px; font-size: 10.5px; color: var(--muted); }
+  /* on a phone the card covers everything, so there is no floor to sit on */
+  @media (max-width: 900px) { #sideChart.on { display: none; } }
   .rcard { position: relative; text-align: center; padding: 20px 40px; animation: rise .6s cubic-bezier(.2,.8,.2,1); }
   @keyframes rise { 0% { transform: translateY(40px) scale(.9); opacity: 0; } 100% { transform: none; opacity: 1; } }
   #rTrophy { color: #ffcf5a; filter: drop-shadow(0 10px 24px rgba(255,200,60,.4)); animation: bob 2.4s ease-in-out infinite; }
@@ -1214,15 +1230,22 @@
     box-shadow: 0 16px 40px rgba(0,0,0,.45);
   }
   body #tug { border-radius: 999px; overflow: hidden; box-shadow: 0 6px 22px rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.10); }
-  body #results {
-    background:
-      radial-gradient(1000px 620px at 12% -8%, rgba(77,139,255,.17), transparent 62%),
-      radial-gradient(900px 560px at 88% 108%, rgba(47,208,138,.13), transparent 62%),
-      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
-      rgba(10,13,19,.94);
-    background-size: auto, auto, 46px 46px, 46px 46px, auto;
-    backdrop-filter: none;
+  /* The result sits BESIDE the floor, so this layer paints nothing -- the
+     house stays fully lit on the right, at full brightness, while you read
+     the score on the left. (It used to paint a 94%-opaque sheet right here,
+     which covered the floor completely.) The heavy background comes back
+     only on a phone, where the card really does cover the screen. */
+  body #results { background: none; backdrop-filter: none; }
+  @media (max-width: 900px) {
+    body #results {
+      background:
+        radial-gradient(1000px 620px at 12% -8%, rgba(77,139,255,.17), transparent 62%),
+        radial-gradient(900px 560px at 88% 108%, rgba(47,208,138,.13), transparent 62%),
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        rgba(10,13,19,.94);
+      background-size: auto, auto, 46px 46px, 46px 46px, auto;
+    }
   }
   body #results #rcardMain, body #results #debriefCard {
     padding: 24px 42px 22px; border-radius: 26px;
@@ -1709,6 +1732,12 @@
         <button class="smallbtn" id="dbBack">&#8592; back</button>
         <button class="btn" id="newMatch3">New Match</button>
       </div>
+    </div>
+    <!-- score over time, over the floor on the right -->
+    <div id="sideChart">
+      <div class="sc-h fa" id="scTitle"></div>
+      <canvas id="sideSeries" width="440" height="150"></canvas>
+      <div class="sc-cap fa" id="scCap"></div>
     </div>
   </div>
 
@@ -4853,6 +4882,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('debriefBtn').style.display = matchLog ? '' : 'none';
         $('reelBtn').style.display = (matchLog && matchLog.frames && matchLog.frames.length > 20) ? '' : 'none';
       $('results').style.display = 'flex'; document.body.classList.add('resultopen');
+      openSideChart();
     }
 
     /* ---------- the debrief itself ---------- */
@@ -4896,13 +4926,6 @@ else:                            # 7) nothing in the way -> full speed ahead
       for (const p of engine.pillars) { g.beginPath(); g.arc(X(p.x), Y(p.y), p.r * sc, 0, 7); g.fill(); }
       if (engine.arena) { g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 2; g.beginPath(); g.arc(X(engine.arena.x), Y(engine.arena.y), engine.arena.r * sc, 0, 7); g.stroke(); }
       if (engine.dock) { const dx = X(engine.dock.x), dy = Y(engine.dock.y); g.fillStyle = '#ffd166'; g.beginPath(); g.moveTo(dx + 2, dy - 9); g.lineTo(dx - 5, dy + 1); g.lineTo(dx, dy + 1); g.lineTo(dx - 2, dy + 9); g.lineTo(dx + 6, dy - 2); g.lineTo(dx + 1, dy - 2); g.closePath(); g.fill(); }
-      // ✖ where the referee had to pick a robot up
-      if (matchLog) for (const e of matchLog.events) {
-        if (e.type !== 'reloc' || e.x == null) continue;
-        g.fillStyle = e.who === 'red' ? '#ff9c94' : '#9cbaff';
-        g.font = 'bold 13px sans-serif'; g.textAlign = 'center';
-        g.fillText('✖', X(e.x), Y(e.y) + 4);
-      }
       g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 1;
       g.strokeRect(0.5, 0.5, cv.width - 1, cv.height - 1);
     }
@@ -4910,9 +4933,10 @@ else:                            # 7) nothing in the way -> full speed ahead
     // `upto` is how much of the match to draw, 0..1. The axes and the labels
     // are always the FINAL ones, so the picture does not rescale as it fills —
     // only the two lines grow.
-    function drawDebriefSeries(upto) {
-      const cv = $('dbSeries'), g = cv.getContext('2d');
-      cv.width = $('dbHeat').width; cv.height = 110;
+    // Draws into ANY canvas, so the same picture can appear in the report and
+    // on the glass panel over the floor without two copies of the maths.
+    function drawSeriesInto(cv, upto) {
+      const g = cv.getContext('2d');
       cv.style.direction = 'ltr';           // the chart NEVER mirrors with RTL
       g.fillStyle = '#10141a'; g.fillRect(0, 0, cv.width, cv.height);
       const S = matchLog ? matchLog.series : [];
@@ -4962,6 +4986,31 @@ else:                            # 7) nothing in the way -> full speed ahead
       }
     }
 
+    // both charts, in step: the one in the report and the one over the floor
+    function drawDebriefSeries(upto) {
+      const a = $('dbSeries');
+      a.width = $('dbHeat').width; a.height = 110;
+      drawSeriesInto(a, upto);
+      const b = $('sideSeries');
+      if (b && $('sideChart').classList.contains('on')) {
+        b.width = 440; b.height = 150;
+        drawSeriesInto(b, upto);
+      }
+    }
+
+    /* The chart belongs beside the floor the moment the result appears, and it
+       fills from 0:00 to the whistle rather than arriving finished. */
+    function openSideChart() {
+      const panel = $('sideChart');
+      const S = (matchLog && matchLog.series) || [];
+      if (S.length < 2) { panel.classList.remove('on'); return; }
+      $('scTitle').textContent = T('امتیاز در طول زمان', 'Score over time');
+      $('scCap').textContent = T('عمودی: امتیاز · افقی: زمان', 'up: score · right: time');
+      panel.classList.add('on');
+      seriesSeen = true;                    // it has been watched filling once
+      playSeries(null);
+    }
+
     function fillDebriefStats() {
       const two = !!(matchLog && matchLog.blue);
       const el = $('dbStats');
@@ -4981,7 +5030,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       row('شروع ← پایان', 'start → end', (t) => t.sx == null ? null : cmPt(t.sx, t.sy) + ' ← ' + cmPt(t.lx, t.ly) + ' cm');
       row('مسافت پیموده', 'distance', (t) => Math.round(t.dist) + ' m');
       row('زمان گیر کرده', 'time stuck', (t) => secs(t.stuck));
-      row('جابه‌جایی داور', 'relocations', (t) => t.reloc + (t.relocLost ? ' (−' + t.relocLost + ')' : ''));
+      // (no relocation row: what the referee did belongs to the league book)
       if (engine.puddles.length) row('ورود به کف خیس', 'wet-floor hits', (t) => t.wet + (t.wetLost ? ' (−' + t.wetLost + ')' : ''));
       row('برخورد با دیوار و وسایل', 'wall touches', (t) => t.bumps);
       if (engine.dock) row('توقف شارژ', 'charge stops', (t) => t.chgVisits + ' × · ' + Math.round(t.chgSecs) + ' s');
@@ -5015,9 +5064,6 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (t.stuck > Math.max(10, matchLen * 0.08)) return {
           fa: '«' + name + '» حدود ' + Math.round(t.stuck) + ' ثانیه سر جایش گیر کرده بود. لکه‌های پُررنگ نقشه را پیدا کن — همان‌جا وقت تلف شده. واکنش به bumper و مقدار timer را قوی‌تر کن.',
           en: 'Stuck for ~' + Math.round(t.stuck) + 's. Find the bright blobs on the map — strengthen the bumper reaction and the timer.' };
-        if (t.reloc >= 1) return {
-          fa: 'داور ' + t.reloc + ' بار «' + name + '» را جابه‌جا کرد و ' + t.relocLost + ' کاشی جریمه شد. پانزده ثانیه بی‌حرکتی یعنی جریمه — علامت ✖ روی نقشه جای گیرکردن است.',
-          en: 'Relocated ' + t.reloc + '× (−' + t.relocLost + ' tiles). The ✖ marks on the map show where it got stuck.' };
         if (t.wet >= 2) return {
           fa: '«' + name + '» ' + t.wet + ' بار وارد کف خیس شد و ' + t.wetLost + ' کاشی از دست داد. مسیر را طوری بچین که از کنار پازل‌های خیس رد شود.',
           en: 'Hit the wet floor ' + t.wet + '× (−' + t.wetLost + ' tiles). Route around the puddles.' };
@@ -5039,7 +5085,9 @@ else:                            # 7) nothing in the way -> full speed ahead
     const EV_FA = { reloc: '↺ جابه‌جایی', wet: '💧 کف خیس', end: '⏹ پایان توسط داور', pause: '⏸ توقف', resume: '▶ ادامه', speed: '⏩ سرعت', houseedit: '🛠 ویرایش خانه', overtime: '⏱ وقت اضافه', crash: '⚠ خطای برنامه', restart: '⟲ شروع دوباره', lock: '🔒 قفل رسمی', unlock: '🔓 باز شدن قفل' };
     function fillDebriefEvents() {
       const el = $('dbEvents');
-      const evs = (matchLog && matchLog.events) || [];
+      // the referee's own moves are the referee's business -- a team's report
+      // is about what the ROBOT did, so relocations are left out of it
+      const evs = ((matchLog && matchLog.events) || []).filter((e) => e.type !== 'reloc');
       if (!evs.length) { el.innerHTML = ''; return; }
       el.innerHTML = '<div class="db-evh fa">' + T('رویدادهای مسابقه', 'Match events') + '</div>' +
         evs.map((e) => {
@@ -5189,7 +5237,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('debriefCard').style.display = 'block';
       $('dbTitle').innerHTML = T('&#128202; گزارش مسابقه', '&#128202; Match report');
       $('dbSeriesCap').textContent = T('امتیاز در طول زمان — عمودی: امتیاز · افقی: زمان', 'Score over time — up: score · right: time');
-      $('dbHeatCap').innerHTML = T('پررنگ‌تر = زمان بیشتر در آن نقطه · ✖ = جای جابه‌جایی داور', 'brighter = more time spent there · ✖ = referee relocation') +
+      $('dbHeatCap').innerHTML = T('پررنگ‌تر = زمان بیشتر در آن نقطه', 'brighter = more time spent there') +
         (engine.cfg.seed != null ? ' · <b>seed ' + engine.cfg.seed + '</b>' : '');
       drawDebriefHeat();
       fillDebriefEvents();
@@ -5717,6 +5765,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       setHouseEdit(false); $('houseBtn').style.display = 'none';
       applySens();
       loadDraw();
+      // "Main menu" means the FRONT page -- where you pick the league and then
+      // the division -- not the setup screen of whichever league you happened
+      // to be in. Coming home should let you change your mind about both.
+      $('lobbyBar').style.display = 'none';
+      showLeaguePicker();
     };
 
     // game speed: 1x -> 2x -> 4x -> 8x -> back. The physics step costs
