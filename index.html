@@ -5624,13 +5624,17 @@ else:                            # 7) nothing in the way -> full speed ahead
     window.SHL_LOCK = false;
     function applyLock() {
       const on = window.SHL_LOCK;
-      $('lockLbl').textContent = T(on ? 'حالت رسمی: روشن' : 'حالت رسمی: خاموش', 'Official mode: ' + (on ? 'ON' : 'off'));
+      // the team build ships without this button — the label may not exist
+      const lbl = $('lockLbl');
+      if (lbl) lbl.textContent = T(on ? 'حالت رسمی: روشن' : 'حالت رسمی: خاموش', 'Official mode: ' + (on ? 'ON' : 'off'));
       document.body.classList.toggle('shl-locked', on);
       for (const id of ['loadRed', 'loadBlue', 'selRed', 'selBlue', 'fsBlockBtn', 'fsBlocks2Btn', 'mapEdit']) {
         const e = $(id); if (e) e.disabled = on;
       }
     }
-    $('lockBtn').onclick = () => {
+    // Official mode is a REFEREE control: the team build has no such button,
+    // and wiring a click onto nothing would throw and stop the rest of setup.
+    if ($('lockBtn')) $('lockBtn').onclick = () => {
       if (!window.SHL_LOCK) {
         const pin = prompt('حالت مسابقه‌ی رسمی — یک PIN برای داور بگذار:');
         if (!pin) return;
