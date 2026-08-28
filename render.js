@@ -83,7 +83,8 @@ class Renderer3D {
   }
 
   cycleView() {
-    const keys = ['top', '3d', '2.5d', 'spider', 'spin', 'pov', 'cine'];
+    // the top view is home, and the reel built around it comes next
+    const keys = ['top', 'cine', '3d', '2.5d', 'spider', 'spin', 'pov'];
     this._vi = ((this._vi || 0) + 1) % keys.length;
     const k = keys[this._vi];
     this.viewMode = k;
@@ -1315,14 +1316,17 @@ class Renderer3D {
 
     const now = performance.now();
     if (!this._spider || now > this._spider.until) {
-      // a new anchor, high and off to one side, never straight above the action
+      // Mostly it hangs back and high, framing the house the way the opening
+      // view does. Now and then — one time in four — it drops in closer for a
+      // look, then climbs back out. Constant swooping is what tires the eye.
       const ang = Math.random() * Math.PI * 2;
-      const reach = 7 + Math.random() * 5;
+      const close = Math.random() < 0.25;
+      const reach = close ? (6 + Math.random() * 2) : (12 + Math.random() * 5);
       this._spider = {
         tx: look.x + Math.cos(ang) * reach,
         tz: look.z + Math.sin(ang) * reach,
-        ty: 5.5 + Math.random() * 3,
-        until: now + 4200 + Math.random() * 3200,
+        ty: close ? (4.5 + Math.random() * 1.5) : (9 + Math.random() * 3),
+        until: now + 7000 + Math.random() * 4000,
         x: this._spider ? this._spider.x : look.x + reach,
         y: this._spider ? this._spider.y : 7,
         z: this._spider ? this._spider.z : look.z + reach,
@@ -1331,13 +1335,15 @@ class Renderer3D {
       };
     }
     const sp = this._spider;
-    // ease toward the anchor — a wire has weight, it does not snap
-    sp.x += (sp.tx - sp.x) * 0.012;
-    sp.y += (sp.ty - sp.y) * 0.012;
-    sp.z += (sp.tz - sp.z) * 0.012;
-    // and the lens leads the action a little rather than jittering with it
-    sp.lx += (look.x - sp.lx) * 0.06;
-    sp.lz += (look.z - sp.lz) * 0.06;
+    // ease toward the anchor — a wire has weight, it does not snap. Less than
+    // half the old rate: at a match you want to follow the robots, not the
+    // camera work.
+    sp.x += (sp.tx - sp.x) * 0.005;
+    sp.y += (sp.ty - sp.y) * 0.005;
+    sp.z += (sp.tz - sp.z) * 0.005;
+    // and the lens leads the action rather than jittering with it
+    sp.lx += (look.x - sp.lx) * 0.025;
+    sp.lz += (look.z - sp.lz) * 0.025;
 
     this.camera.aspect = vp ? vp.w / vp.h : (this.container.clientWidth / (this.container.clientHeight || 1));
     this.camera.fov = 46;
@@ -1403,21 +1409,25 @@ class Renderer3D {
        shows the whole match — and the over-the-shoulder two-up gets the long
        holds, because it is the one worth sitting with. */
     if (!this._cineOrder) {
-      const deck = [
-        { shot: 'top', hold: 7000 },
-        { shot: 'chase-both', hold: 10000 },
-        { shot: 'spider', hold: 8000 },
-        { shot: 'top', hold: 6500 },
-        { shot: '2.5d', hold: 7000 },
-        { shot: 'chase-both', hold: 10000 },
-        { shot: 'top', hold: 7000 },
-        { shot: 'spider', hold: 8000 },
-        { shot: 'pov-both', hold: 5500 },
-        { shot: 'orbit', hold: 7500 },
+      // The wide shot from above is HOME. Every other camera gets a visit,
+      // but one at a time, with a long spell at home in between — so a whole
+      // match is watchable without the picture jumping about.
+      const visits = [
+        { shot: 'chase-both', hold: 11000 },
+        { shot: 'spider', hold: 10000 },
+        { shot: '2.5d', hold: 8000 },
+        { shot: '3d', hold: 8000 },
+        { shot: 'pov-both', hold: 5000 },
+        { shot: 'orbit', hold: 8000 },
       ];
-      for (let i = deck.length - 1; i > 0; i--) {      // shuffle
+      for (let i = visits.length - 1; i > 0; i--) {    // a different order each match
         const j = Math.floor(Math.random() * (i + 1));
-        const t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+        const t = visits[i]; visits[i] = visits[j]; visits[j] = t;
+      }
+      const deck = [];
+      for (const v of visits) {
+        deck.push({ shot: 'top', hold: 13000 + Math.random() * 5000 });   // home
+        deck.push(v);                                                     // one visit
       }
       this._cineOrder = deck;
       this._cineAt = 0;
