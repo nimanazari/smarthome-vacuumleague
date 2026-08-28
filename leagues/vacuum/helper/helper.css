@@ -44,7 +44,7 @@ html, body { height: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+  font-family: 'Vazirmatn', "Segoe UI", Tahoma, system-ui, sans-serif;
   direction: ltr;
   padding-bottom: 92px;                 /* room for the sticky action bar */
 }
@@ -412,7 +412,7 @@ body.dragging { cursor: grabbing; user-select: none; }
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
 }
 .bridge b { white-space: nowrap; }
-.bridge .en { display: block; flex-basis: 100%; direction: ltr; text-align: left; font-size: 11px; color: var(--muted); font-family: "Segoe UI", Tahoma, sans-serif; }
+.bridge .en { display: block; flex-basis: 100%; direction: ltr; text-align: left; font-size: 11px; color: var(--muted); font-family: 'Vazirmatn', "Segoe UI", Tahoma, system-ui, sans-serif; }
 .bridge .btn { text-decoration: none; }
 
 /* ---------------- the sticky action bar ---------------- */
@@ -500,3 +500,6 @@ body.lang-fa .bridge .en { display: none; }
 
 /* code reads left-to-right in BOTH page directions */
 #code, .mypy, pre, code { direction: ltr; text-align: left; }
+
+/* form controls do not inherit the page font on their own */
+button, input, select, textarea, optgroup { font-family: inherit; }

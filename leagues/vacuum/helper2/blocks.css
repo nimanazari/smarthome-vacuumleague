@@ -356,3 +356,6 @@ body.light .codecard pre { background: #241f47; color: #e7e3ff; }
 .asknext button:hover { background: var(--acc, #4fc3f7); color: #06210f; }
 @keyframes askblink { 50% { border-color: transparent; } }
 .palglow { outline: 3px solid var(--acc, #4fc3f7); outline-offset: 4px; border-radius: 12px; animation: askblink 1.1s 2; }
+
+/* form controls do not inherit the page font on their own */
+button, input, select, textarea, optgroup { font-family: inherit; }

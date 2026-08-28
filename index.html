@@ -18,7 +18,10 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --red: #ff4d4d; --blue: #3b78ff; --bg: #0c0f14; --card: #171b22; --line: #2a2f3a; --text: #e8eaed; --muted: #9aa3af; --accent: #4d8bff; }
   html, body { height: 100%; }
-  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+  html { font-family: 'Vazirmatn', "Segoe UI", Tahoma, system-ui, sans-serif; }
+  /* form controls do not inherit the page font on their own */
+  button, input, select, textarea, optgroup { font-family: inherit; }
+  body { font-family: 'Vazirmatn', "Segoe UI", Tahoma, system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
   #scene { position: fixed; inset: 0; }
   .ic { width: 1.05em; height: 1.05em; vertical-align: -2px; flex: none; }
   /* in the menu, the old inline icons wear the same small tile as ui-icons */
@@ -321,6 +324,8 @@
   /* ---------- the post-match debrief: the heatmap + the numbers ---------- */
   @font-face { font-family: 'Vazirmatn'; src: url('fonts/Vazirmatn-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
   @font-face { font-family: 'Vazirmatn'; src: url('fonts/Vazirmatn-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'Vazirmatn'; src: url('fonts/Vazirmatn-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+  @font-face { font-family: 'Vazirmatn'; src: url('fonts/Vazirmatn-Black.woff2') format('woff2'); font-weight: 800 900; font-display: swap; }
   .fa { font-family: 'Vazirmatn', system-ui, sans-serif; }
   #debriefCard { display: none; text-align: center; padding: 16px 22px 18px; background: linear-gradient(180deg,#1b2028,#12151b); border: 1px solid #2c3340; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.55); max-width: 94vw; max-height: 92vh; overflow: auto; animation: rise .5s cubic-bezier(.2,.8,.2,1); }
   #debriefCard .db-h { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
@@ -1316,7 +1321,7 @@
   .dv-q {
     position: absolute; top: 10px; left: 11px; z-index: 2;
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
-    font: 800 13px/1 "Segoe UI", Tahoma, sans-serif; color: var(--muted);
+    font: 800 13px/1 'Vazirmatn', "Segoe UI", Tahoma, sans-serif; color: var(--muted);
     background: rgba(255, 255, 255, .05); border: 1px solid var(--line);
     transition: color .15s, border-color .15s, background .15s;
   }
@@ -1363,7 +1368,7 @@
   }
   .dvi-go:hover { filter: brightness(1.12); transform: translateY(-1px); }
   /* English-first: the hero and picker drop the RTL font when lang=en */
-  body.lang-en #leaguePanel .fa { font-family: "Segoe UI", Tahoma, system-ui, sans-serif; direction: ltr; }
+  body.lang-en #leaguePanel .fa { font-family: 'Vazirmatn', "Segoe UI", Tahoma, system-ui, sans-serif; direction: ltr; }
 
   /* ---- the lobby: the house IS the page ---- */
   #lobbyBar {
