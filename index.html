@@ -1192,9 +1192,10 @@
   body.vac-setup .startrow #startBtn {
     flex: 0 1 340px; padding: 14px 26px; font-size: 17px; font-weight: 800; color: #0d1117;
     background: linear-gradient(140deg, var(--age), color-mix(in srgb, var(--age) 50%, #ffffff));
-    box-shadow: 0 14px 40px -8px var(--age); animation: dvpulse 2.6s ease-in-out infinite;
+    /* no shadow. It was painted in the division colour with no alpha, so on
+       U14 it was a solid yellow halo rather than a shadow — and it pulsed. */
+    box-shadow: none;
   }
-  @keyframes dvpulse { 0%,100% { box-shadow: 0 14px 40px -8px var(--age); } 50% { box-shadow: 0 14px 52px -4px var(--age); } }
   body.vac-setup .startrow #startBtn .fa { font-size: 17px; }
   body.vac-setup #startBtn:hover { filter: brightness(1.1); }
   /* the settings sheet keeps the same stage language */
@@ -1236,7 +1237,8 @@
   #refMenu .rm-card { display: flex; flex-direction: column; gap: 9px; width: 270px; padding: 17px 18px; direction: rtl; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
   #refMenu .rm-card b { font-size: 14.5px; margin-bottom: 3px; }
   #pausedBanner { position: fixed; inset: 0; z-index: 8; display: none; align-items: flex-start; justify-content: center; pointer-events: none; }
-  #pausedBanner .pb { margin-top: 16vh; font-size: 29px; font-weight: 800; padding: 13px 36px; border-radius: 18px; background: rgba(10,13,19,.9); border: 1px solid rgba(255,200,87,.55); color: #ffc857; box-shadow: 0 20px 50px rgba(0,0,0,.55); text-align: center; animation: dvpulse 2s ease-in-out infinite; }
+  #pausedBanner .pb { margin-top: 16vh; font-size: 29px; font-weight: 800; padding: 13px 36px; border-radius: 18px; background: rgba(10,13,19,.9); border: 1px solid rgba(255,200,87,.55); color: #ffc857; box-shadow: 0 20px 50px rgba(0,0,0,.55); text-align: center; animation: pbpulse 2s ease-in-out infinite; }
+  @keyframes pbpulse { 0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,.55); } 50% { box-shadow: 0 20px 62px rgba(0,0,0,.7); } }
   #pausedBanner .pb small { display: block; font-size: 10.5px; letter-spacing: 5px; color: var(--muted); margin-top: 3px; }
   .shl-locked #mapmakerLink { pointer-events: none; opacity: .4; }
   .shl-locked #loadRed, .shl-locked #loadBlue, .shl-locked #selRed, .shl-locked #selBlue, .shl-locked #fsBlockBtn, .shl-locked #mapEdit { opacity: .4; }
@@ -4654,6 +4656,11 @@ else:                            # 7) nothing in the way -> full speed ahead
       wireRelocate();
       resetMatchLog();
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
+      // Official mode means this match counts, and a match that counts is
+      // filmed. The referee should never have to remember to press record.
+      if (window.SHL_LOCK && !matchRec.on) {
+        try { matchRec.toggle(); } catch (e) { /* no recorder in this browser */ }
+      }
       fitText($('redName'), redName); fitText($('blueName'), blueName);
       $('panel').style.display = 'none'; $('results').style.display = 'none'; document.body.classList.remove('resultopen');
       $('scoreboard').style.display = 'flex';

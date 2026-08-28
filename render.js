@@ -18,8 +18,13 @@ const RAMP_H = 0.30;
 const TR_VIEW = (fa, en) => ((typeof window !== 'undefined' && window.LANG === 'fa') ? fa : en);
 
 const VIEWS = {
-  top:    { az: Math.PI * 0.70, pol: 0.34, rad: 20, fov: 44, get label() { return TR_VIEW('نمای بالا', 'Top view'); } },
-  '3d':   { az: Math.PI * 0.72, pol: 0.92, rad: 16, fov: 48, get label() { return TR_VIEW('نمای سه‌بعدی', '3D view'); } },
+  // straight down on the whole house — a TOP view, not a high one. `pol` is
+  // the angle off vertical, so a small number is what puts the camera overhead.
+  top:    { az: Math.PI * 0.70, pol: 0.12, rad: 22, fov: 40, get label() { return TR_VIEW('نمای بالا', 'Top view'); } },
+  // the establishing shot. It used to sit 16 units out at 53 degrees, close
+  // enough that the near wall cut across the frame and the far rooms fell off
+  // the edge. Further back and higher: the whole house, with depth.
+  '3d':   { az: Math.PI * 0.72, pol: 0.74, rad: 24, fov: 40, get label() { return TR_VIEW('نمای سه‌بعدی', '3D view'); } },
   '2.5d': { az: Math.PI * 0.75, pol: 0.60, rad: 32, fov: 22, get label() { return TR_VIEW('نمای ۲.۵ بعدی', '2.5D view'); } },
 };
 
@@ -78,10 +83,11 @@ class Renderer3D {
   }
 
   cycleView() {
-    const keys = ['top', '3d', '2.5d', 'spin', 'pov', 'cine'];
+    const keys = ['top', '3d', '2.5d', 'spider', 'spin', 'pov', 'cine'];
     this._vi = ((this._vi || 0) + 1) % keys.length;
     const k = keys[this._vi];
     this.viewMode = k;
+    if (k === 'spider') { this._spider = null; return TR_VIEW('اسپایدرکم', 'Spider cam'); }
     if (k === 'spin') { this.setView('2.5d'); return TR_VIEW('چرخش ۳۶۰ درجه', '360° orbit'); }
     if (k === 'pov') return TR_VIEW('از نگاه ربات', 'Robot POV');
     if (k === 'cine') { this._cine = null; return TR_VIEW('🎬 سینماتیک', '🎬 Cinematic'); }
@@ -1294,6 +1300,54 @@ class Renderer3D {
     this.renderer.render(this.scene, this.camera);
   }
 
+  /* THE SPIDER CAM — a camera on a wire above the floor.
+
+     A stadium cable-cam does two things at once: it slides between anchor
+     points high above the pitch, and it keeps the ball framed while it moves.
+     This does the same. The rig drifts to a new anchor every few seconds and
+     eases toward it, while the lens always looks at the action — the midpoint
+     between the robots, or the single robot if only one is out there. */
+  _renderSpider(vp) {
+    const poses = this._cinePoses || {};
+    const a = poses.red, b = poses.blue;
+    const look = (a && b) ? { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 }
+      : (a || b) ? { x: (a || b).x, z: (a || b).z } : { x: 0, z: 0 };
+
+    const now = performance.now();
+    if (!this._spider || now > this._spider.until) {
+      // a new anchor, high and off to one side, never straight above the action
+      const ang = Math.random() * Math.PI * 2;
+      const reach = 7 + Math.random() * 5;
+      this._spider = {
+        tx: look.x + Math.cos(ang) * reach,
+        tz: look.z + Math.sin(ang) * reach,
+        ty: 5.5 + Math.random() * 3,
+        until: now + 4200 + Math.random() * 3200,
+        x: this._spider ? this._spider.x : look.x + reach,
+        y: this._spider ? this._spider.y : 7,
+        z: this._spider ? this._spider.z : look.z + reach,
+        lx: this._spider ? this._spider.lx : look.x,
+        lz: this._spider ? this._spider.lz : look.z,
+      };
+    }
+    const sp = this._spider;
+    // ease toward the anchor — a wire has weight, it does not snap
+    sp.x += (sp.tx - sp.x) * 0.012;
+    sp.y += (sp.ty - sp.y) * 0.012;
+    sp.z += (sp.tz - sp.z) * 0.012;
+    // and the lens leads the action a little rather than jittering with it
+    sp.lx += (look.x - sp.lx) * 0.06;
+    sp.lz += (look.z - sp.lz) * 0.06;
+
+    this.camera.aspect = vp ? vp.w / vp.h : (this.container.clientWidth / (this.container.clientHeight || 1));
+    this.camera.fov = 46;
+    this.camera.updateProjectionMatrix();
+    this.camera.position.set(sp.x, sp.y, sp.z);
+    this.camera.lookAt(sp.lx, 0.25, sp.lz);
+    if (vp) { this.renderer.setViewport(vp.x, vp.y, vp.w, vp.h); this.renderer.setScissor(vp.x, vp.y, vp.w, vp.h); }
+    this.renderer.render(this.scene, this.camera);
+  }
+
   // one POV draw, reusable by the director (full frame or a half)
   _renderPovOf(pose, vp) {
     const cx = Math.cos(pose.h), sz = Math.sin(pose.h);
@@ -1311,21 +1365,29 @@ class Renderer3D {
   _renderCine() {
     const now = performance.now();
 
-    // THE FINISH belongs to the wide shot. In the last 20 seconds the director
-    // stops cutting and holds the main camera above the whole house, so the
-    // moment the match is decided is seen in full.
-    const ENDGAME = 20;
+    /* THE FINISH belongs to one shot. In the last ten seconds the director
+       stops cutting and lifts into a slow overhead reveal of the whole floor:
+       every tile, both robots, the moment it was decided. */
+    const ENDGAME = 10;
     const endgame = this._cineRunning && this._cineLeft != null && this._cineLeft <= ENDGAME;
     if (endgame) {
       if (!this._cine || this._cine.shot !== 'finale') {
-        this._cine = { shot: 'finale', until: Infinity, az: this._cine ? this._cine.az : Math.PI * 0.70 };
+        this._cine = {
+          shot: 'finale', until: Infinity,
+          az: this._cine ? this._cine.az : Math.PI * 0.70,
+          pol: this._cine && this._cine.pol != null ? this._cine.pol : 0.5,
+          rad: this._cine && this._cine.rad != null ? this._cine.rad : 24,
+        };
       }
       const c0 = this._cine;
-      c0.az += 0.0006;                       // barely moving — a held wide shot
+      // rise to straight overhead and widen out, slowly, over the last seconds
+      c0.pol += (0.10 - c0.pol) * 0.012;
+      c0.rad += (23 - c0.rad) * 0.012;
+      c0.az += 0.0007;
       this.camera.fov = 40;
       this.camera.updateProjectionMatrix();
-      const pol = 0.34, sp0 = Math.sin(pol), cp0 = Math.cos(pol);
-      this.camera.position.set(20 * sp0 * Math.cos(c0.az), 20 * cp0, 20 * sp0 * Math.sin(c0.az));
+      const sp0 = Math.sin(c0.pol), cp0 = Math.cos(c0.pol);
+      this.camera.position.set(c0.rad * sp0 * Math.cos(c0.az), c0.rad * cp0, c0.rad * sp0 * Math.sin(c0.az));
       this.camera.lookAt(0, 0.3, 0);
       this.renderer.render(this.scene, this.camera);
       return;
@@ -1333,23 +1395,50 @@ class Renderer3D {
     if (this._cine && this._cine.shot === 'finale') {
       this._cine = null;                 // a new match
       this._cinePovShown = false;        // ...and its own single POV
+      this._cineOrder = null;            // ...and its own running order
+    }
+
+    /* THE RUNNING ORDER is shuffled per match, so two matches never play the
+       same sequence. The top view appears most often — it is the shot that
+       shows the whole match — and the over-the-shoulder two-up gets the long
+       holds, because it is the one worth sitting with. */
+    if (!this._cineOrder) {
+      const deck = [
+        { shot: 'top', hold: 7000 },
+        { shot: 'chase-both', hold: 10000 },
+        { shot: 'spider', hold: 8000 },
+        { shot: 'top', hold: 6500 },
+        { shot: '2.5d', hold: 7000 },
+        { shot: 'chase-both', hold: 10000 },
+        { shot: 'top', hold: 7000 },
+        { shot: 'spider', hold: 8000 },
+        { shot: 'pov-both', hold: 5500 },
+        { shot: 'orbit', hold: 7500 },
+      ];
+      for (let i = deck.length - 1; i > 0; i--) {      // shuffle
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+      }
+      this._cineOrder = deck;
+      this._cineAt = 0;
     }
 
     if (!this._cine || now > this._cine.until) {
-      // Every close shot is a TWO-UP: both robots stay on screen. The
-      // over-the-shoulder is the workhorse — it shows the pair AND where they
-      // are going — so the reel leans on it. First person is a flourish: once
-      // per match, then it steps aside.
-      const povDone = !!this._cinePovShown;
-      const SHOTS = povDone
-        ? ['chase-both', 'orbit', 'chase-both', 'top', 'chase-both', 'orbit-low']
-        : ['chase-both', 'orbit', 'pov-both', 'chase-both', 'top', 'orbit-low'];
-      let pick;
-      do { pick = SHOTS[Math.floor(Math.random() * SHOTS.length)]; }
-      while (this._cine && pick === this._cine.shot);
-      if (pick === 'pov-both') this._cinePovShown = true;
-      // longer holds: a shot should breathe, not flicker
-      this._cine = { shot: pick, until: now + 6000 + Math.random() * 3000, az: Math.random() * Math.PI * 2 };
+      let next;
+      for (let tries = 0; tries < this._cineOrder.length; tries++) {
+        next = this._cineOrder[this._cineAt % this._cineOrder.length];
+        this._cineAt++;
+        if (next.shot === 'pov-both' && this._cinePovShown) continue;   // once a match
+        if (this._cine && next.shot === this._cine.shot) continue;      // never twice running
+        break;
+      }
+      if (next.shot === 'pov-both') this._cinePovShown = true;
+      this._cine = {
+        shot: next.shot,
+        until: now + next.hold,
+        az: Math.random() * Math.PI * 2,      // a different arc every time
+        dir: Math.random() < 0.5 ? -1 : 1,    // ...and it can drift either way
+      };
     }
     const c = this._cine;
     const el = this.renderer.domElement;
@@ -1362,6 +1451,7 @@ class Renderer3D {
       this.camera.aspect = Wp / (Hp || 1);
       this.camera.updateProjectionMatrix();
     };
+
     // the close shots: BOTH robots, side by side. With only one robot on the
     // floor a two-up would waste half the frame, so it falls back to full.
     const two = poses.red && poses.blue;
@@ -1378,12 +1468,14 @@ class Renderer3D {
       return;
     }
     resetVp();
-    // orbits + top: classic crane shots. A third of the old speed — the camera
-    // should drift, not sweep.
-    c.az += 0.0009;
-    const cfgS = c.shot === 'top' ? { pol: 0.06, rad: 26, fov: 30 }
-      : c.shot === 'orbit-low' ? { pol: 1.15, rad: 17, fov: 40 }
-      : { pol: 0.62, rad: 24, fov: 30 };
+    if (c.shot === 'spider') { this._renderSpider(); return; }
+
+    // the wide shots: the same geometry the standing views use, drifting.
+    // A third of the old speed — the camera should drift, not sweep.
+    c.az += 0.0009 * (c.dir || 1);
+    const cfgS = c.shot === 'top' ? { pol: 0.12, rad: 22, fov: 40 }
+      : c.shot === '2.5d' ? { pol: 0.60, rad: 32, fov: 22 }
+        : { pol: 0.62, rad: 24, fov: 34 };
     this.camera.fov = cfgS.fov;
     this.camera.updateProjectionMatrix();
     const sp = Math.sin(cfgS.pol), cp = Math.cos(cfgS.pol);
@@ -1395,6 +1487,8 @@ class Renderer3D {
   render() {
     // ---- 🎬 CINEMATIC: the auto-director takes the wheel ----
     if (this.viewMode === 'cine') { this._renderCine(); return; }
+    // ---- SPIDER CAM: the wire rig, following the action from above ----
+    if (this.viewMode === 'spider') { this._renderSpider(); return; }
     // ---- ROBOT POV: ride team 1's shell, look where it looks ----
     if (this.viewMode === 'pov' && this._povPose) {
       const p = this._povPose;
