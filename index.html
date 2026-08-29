@@ -1321,6 +1321,27 @@
   }
   .rsaved { margin-top: 9px; font-size: 11.5px; color: #7ee7b4; }
 
+  /* THE COACH: one column per team, worst finding first, each ending at the
+     lesson that teaches the fix. */
+  .db-coach { text-align: start; margin-top: 14px; padding: 13px 15px; border-radius: 14px;
+    background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.09); }
+  .db-coach.red { border-inline-start: 3px solid var(--red); }
+  .db-coach.blue { border-inline-start: 3px solid var(--blue); }
+  .db-coach .dc-head { font-size: 13px; font-weight: 800; margin-bottom: 9px; }
+  .db-coach.red .dc-head { color: var(--red); }
+  .db-coach.blue .dc-head { color: var(--blue); }
+  .dc-f { position: relative; padding-inline-start: 16px; margin-bottom: 11px; }
+  .dc-f:last-child { margin-bottom: 0; }
+  .dc-f::before { content: ''; position: absolute; inset-inline-start: 0; top: 7px;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .dc-f.bad::before { background: #ff5a4e; }
+  .dc-f.warn::before { background: #ffc928; }
+  .dc-f.good::before { background: #2fd08a; }
+  .dc-t { font-size: 12.5px; line-height: 1.95; color: var(--text); }
+  .dc-l { display: inline-block; margin-top: 4px; font-size: 11.5px; font-weight: 700;
+    color: #4d8bff; text-decoration: none; }
+  .dc-l:hover { text-decoration: underline; }
+
   /* the camera list: every camera named, the current one marked */
   #camPick { position: fixed; inset: 0; z-index: 33; display: flex; align-items: center;
     justify-content: center; padding: 18px; background: rgba(7,9,13,.66); backdrop-filter: blur(5px); }
@@ -5244,33 +5265,184 @@ else:                            # 7) nothing in the way -> full speed ahead
       el.innerHTML = head + rows.join('');
     }
 
+    /* ================================================================
+       THE COACH — what the numbers mean, and what to change.
+
+       Every check below reads something the match actually recorded. They
+       are ranked by what they cost the team, the worst first, and only the
+       top few are shown: a child who is handed nine things to fix fixes
+       none of them.
+
+       Each finding carries the lesson that teaches the fix. The links are
+       absolute so they still work from the downloaded app when there is
+       internet, and the lesson is NAMED as well as linked so it is still
+       useful when there is not.
+       ================================================================ */
+    const LESSON = 'https://smarthomeleague.ir';
+
+    function coachFindings(who) {
+      const t = matchLog && matchLog[who];
+      if (!t) return [];
+      const out = [];
+      const secs = Math.max(1, engine.elapsed);
+      const dist = Math.max(0.1, t.dist || 0);
+      const score = who === 'red' ? engine.scores.red : engine.scores.blue;
+      const other = who === 'red' ? matchLog.blue : matchLog.red;
+      const otherScore = who === 'red' ? engine.scores.blue : engine.scores.red;
+      const add = (level, fa, en, href, lfa, len) => out.push({
+        level: level, text: T(fa, en),
+        lesson: href ? { href: LESSON + href, label: T(lfa, len) } : null,
+      });
+
+      // ---- 1. the program itself broke. Nothing else matters until this does not.
+      if (t.crashTicks > 0) {
+        const lost = Math.round(t.crashTicks / 10);
+        add('bad',
+          'برنامه‌ات وسط مسابقه خطا داد و ربات حدود ' + lost + ' ثانیه هیچ فرمانی نگرفت. '
+          + 'تا این درست نشود، بقیه‌ی کارها بی‌فایده است — ربات آن مدت اصلاً کار نمی‌کرده.',
+          'The program threw an error mid-match and the robot took no command for about '
+          + lost + 's. Nothing else matters until this is fixed.',
+          '/errors', 'خطاهای رایج و رفعشان', 'Common errors and their fixes');
+      }
+
+      // ---- 2. the battery reached zero (U19 only): a dead robot scores nothing
+      if (engine.dock && t.flat > 3) {
+        add('bad',
+          'باتری تمام شد و ربات ' + Math.round(t.flat) + ' ثانیه مرده ایستاد. '
+          + 'زودتر راهی شارژ شو: قبل از حرکت حساب کن رسیدن به پد چقدر شارژ می‌خواهد و '
+          + 'کمی حاشیه بگذار.',
+          'The battery hit zero and the robot stood dead for ' + Math.round(t.flat) + 's. '
+          + 'Leave for the dock earlier — work out what the trip costs, then add a margin.',
+          '/sensors#battery', 'درس باتری و ایستگاه شارژ', 'The battery lesson');
+      }
+
+      // ---- 3. stuck. The single most common way a match is lost.
+      const stuckLimit = Math.max(8, secs * 0.06);
+      if (t.stuck > stuckLimit) {
+        add(t.stuck > secs * 0.15 ? 'bad' : 'warn',
+          'حدود ' + Math.round(t.stuck) + ' ثانیه سر جایت گیر کرده بودی — '
+          + Math.round(t.stuck / secs * 100) + '٪ کل مسابقه. لکه‌های پررنگِ نقشه‌ی بالا '
+          + 'همان‌جاهاست. معمولاً یعنی وقتی به مانع می‌خوری فقط یک قدم عقب می‌روی و '
+          + 'قدم بعد دوباره همان مانع را می‌بینی. با timer چند قدم عقب برو و هم‌زمان بچرخ.',
+          'Stuck for about ' + Math.round(t.stuck) + 's — '
+          + Math.round(t.stuck / secs * 100) + '% of the match. The bright blobs on the map '
+          + 'above are where. Usually it means you back off for one step, then meet the same '
+          + 'obstacle again. Use timer to reverse for several steps AND turn while you do.',
+          '/sensors#memory', 'درس حافظه‌ی بین قدم‌ها', 'The step-to-step memory lesson');
+      }
+
+      // ---- 4. hitting things often for the ground covered: the eyes are unused
+      const bumpsPerM = (t.bumps || 0) / dist;
+      if (t.bumps >= 6 && bumpsPerM > 0.5) {
+        add('warn',
+          t.bumps + ' بار به دیوار و مبلمان خوردی — یعنی هر ' + (1 / bumpsPerM).toFixed(1)
+          + ' متر یک برخورد. سنسور فاصله تا ۲۰۰ سانتی‌متر جلو را می‌بیند؛ اگر زودتر '
+          + 'تصمیم بگیری اصلاً نباید به چیزی بخوری. شرط front را از عدد بزرگ‌تری شروع کن.',
+          'You hit walls and furniture ' + t.bumps + ' times — one every '
+          + (1 / bumpsPerM).toFixed(1) + ' m. The distance sensor sees 200 cm ahead; decide '
+          + 'earlier and you need not touch anything at all.',
+          '/sensors#dist', 'درس سنسور فاصله', 'The distance-sensor lesson');
+      }
+
+      // ---- 5. drove a long way for few tiles -- measured against the rival,
+      //         which calibrates itself to this map and this match length
+      // Only worth comparing against a rival that actually DROVE. A robot that
+      // sat still and cleaned the one tile under it scores a magnificent
+      // tiles-per-metre, and measuring yourself against that is nonsense.
+      const theirDist = (other && other.dist) || 0;
+      if (other && otherScore > 0 && score > 0 && theirDist > 2 && theirDist > dist * 0.4) {
+        const mine = score / dist;
+        const theirs = otherScore / theirDist;
+        if (mine < theirs * 0.65) {
+          add('warn',
+            'به‌ازای هر متری که رفتی ' + mine.toFixed(1) + ' کاشی گرفتی، حریف '
+            + theirs.toFixed(1) + '. یعنی مسافت را رفته‌ای ولی روی کاشی‌هایی که از قبل '
+            + 'مال خودت بود. با سنسور رنگ دنبال white بگرد و از جایی که رنگ خودت است رد شو.',
+            'You took ' + mine.toFixed(1) + ' tiles per metre driven; your rival took '
+            + theirs.toFixed(1) + '. You covered the ground but over tiles already yours. '
+            + 'Use the colour sensor to hunt for white.',
+            '/sensors#color', 'درس سنسور رنگ', 'The colour-sensor lesson');
+        }
+      }
+
+      // ---- 6. barely moved at all
+      if (dist < secs * 0.06) {
+        add('bad',
+          'در کل مسابقه فقط ' + dist.toFixed(1) + ' متر حرکت کردی. یعنی برنامه اصلاً '
+          + 'فرمان حرکت نمی‌دهد یا شرط‌هایش هیچ‌وقت درست نمی‌شوند. با یک forward(1) ساده '
+          + 'شروع کن و مطمئن شو ربات راه می‌افتد، بعد شرط اضافه کن.',
+          'The robot travelled only ' + dist.toFixed(1) + ' m all match — the program is not '
+          + 'driving, or its conditions never come true. Start from a plain forward(1) and '
+          + 'build up from there.',
+          '/sensors#move', 'درس حرکت ربات', 'The movement lesson');
+      }
+
+      // ---- 7. slow code: the simulator waited for it
+      if ((t.slowTicks || 0) > 20 || (t.cpuPeak || 0) > 6) {
+        add('warn',
+          'برنامه‌ات در بعضی قدم‌ها کند بود (اوج ' + (t.cpuPeak || 0).toFixed(1) + ' میلی‌ثانیه). '
+          + 'معمولاً حلقه‌ی تودرتو یا محاسبه‌ی سنگین است. هر قدم باید سریع تصمیم بگیرد.',
+          'Some steps were slow (peak ' + (t.cpuPeak || 0).toFixed(1) + ' ms) — usually a '
+          + 'nested loop or heavy maths. A step should decide quickly.',
+          '/errors', 'خطاهای رایج', 'Common errors');
+      }
+
+      // ---- 8. all the time in one corner of the house
+      const heat = (t.heat || []).filter(function (v) { return v > 0; })
+        .sort(function (a, b) { return b - a; });
+      if (heat.length > 25) {
+        const total = heat.reduce(function (a, b) { return a + b; }, 0);
+        let acc = 0, n = 0;
+        for (const v of heat) { acc += v; n++; if (acc >= total / 2) break; }
+        if (n / heat.length < 0.18) {
+          add('warn',
+            'نصف وقتت روی ' + Math.round(n / heat.length * 100) + '٪ از جاهایی گذشت که رفتی '
+            + '— یعنی در یک گوشه چرخیده‌ای و بقیه‌ی خانه دست‌نخورده مانده. '
+            + 'با شماره‌ی اتاق و درصد تمیزی، اتاقِ تمام‌شده را رها کن و برو بعدی.',
+            'Half your time went on ' + Math.round(n / heat.length * 100) + '% of the ground '
+            + 'you covered — you circled one corner while the rest of the house sat untouched. '
+            + 'Read room and clean1..clean5 and move on when a room is done.',
+            '/sensors#clean', 'درس درصد تمیزی اتاق', 'The room-progress lesson');
+        }
+      }
+
+      // ---- nothing went wrong: say what to reach for next
+      if (!out.length) {
+        add('good',
+          'ربات تمیز و بدون گیر کردن کار کرد. قدم بعدی سرعت پوشش است: ترکیب قطب‌نما با '
+          + 'درصد تمیزیِ اتاق یعنی جاروکشیِ منظم به‌جای چرخیدن تصادفی — همان چیزی که در '
+          + 'عمل قهرمان می‌سازد.',
+          'The robot ran cleanly and never got stuck. Next comes coverage speed: combining '
+          + 'the compass with each room\'s clean-% turns wandering into a proper sweep.',
+          '/sensors#combine', 'درس ترکیب سنسورها', 'The combining-sensors lesson');
+      }
+
+      const rank = { bad: 0, warn: 1, good: 2 };
+      out.sort(function (a, b) { return rank[a.level] - rank[b.level]; });
+      return out.slice(0, 3);
+    }
+
     function fillDebriefTips() {
       const el = $('dbTips'); el.innerHTML = '';
       if (!matchLog || engine.arena) return;
-      const matchLen = Math.max(1, engine.elapsed);
-      const tipOf = (who) => {
-        const t = matchLog[who]; if (!t) return null;
-        const name = who === 'red' ? engine.cfg.redName : engine.cfg.blueName;
-        if (engine.dock && t.flat > 3) return {
-          fa: 'باتری «' + name + '» تمام شد و ربات ' + Math.round(t.flat) + ' ثانیه بی‌حرکت ماند. زودتر راهیِ ایستگاه شارژ شو — قانون سرانگشتی: بیشتر از distto(dockx, docky) / 25 درصد شارژ نگه دار.',
-          en: 'Battery hit 0% — the robot stood dead for ' + Math.round(t.flat) + 's. Leave for the dock earlier.' };
-        if (t.stuck > Math.max(10, matchLen * 0.08)) return {
-          fa: '«' + name + '» حدود ' + Math.round(t.stuck) + ' ثانیه سر جایش گیر کرده بود. لکه‌های پُررنگ نقشه را پیدا کن — همان‌جا وقت تلف شده. واکنش به bumper و مقدار timer را قوی‌تر کن.',
-          en: 'Stuck for ~' + Math.round(t.stuck) + 's. Find the bright blobs on the map — strengthen the bumper reaction and the timer.' };
-        if (t.wet >= 2) return {
-          fa: '«' + name + '» ' + t.wet + ' بار وارد کف خیس شد و ' + t.wetLost + ' کاشی از دست داد. مسیر را طوری بچین که از کنار پازل‌های خیس رد شود.',
-          en: 'Hit the wet floor ' + t.wet + '× (−' + t.wetLost + ' tiles). Route around the puddles.' };
-        return {
-          fa: '«' + name + '» روان حرکت کرد؛ حالا سرعت پوشش را بالا ببر — مسیرهای تکراری (لکه‌های پررنگ) یعنی کاشی‌ای که دوباره تمیز شده و امتیاز تازه‌ای نداده.',
-          en: 'Drove cleanly — now improve coverage: repeated paths (bright areas) clean tiles that were already yours.' };
-      };
+      let html = '';
       for (const who of ['red', 'blue']) {
-        const tip = tipOf(who); if (!tip) continue;
-        const d = document.createElement('div');
-        d.className = 'db-tip ' + who;
-        d.innerHTML = escH(LANG === 'fa' ? tip.fa : tip.en);
-        el.appendChild(d);
+        if (!matchLog[who]) continue;
+        const found = coachFindings(who);
+        if (!found.length) continue;
+        const name = who === 'red' ? engine.cfg.redName : engine.cfg.blueName;
+        html += '<div class="db-coach ' + who + '">'
+          + '<div class="dc-head">' + escH(name) + '</div>'
+          + found.map(function (f) {
+            return '<div class="dc-f ' + f.level + '">'
+              + '<div class="dc-t">' + escH(f.text) + '</div>'
+              + (f.lesson ? '<a class="dc-l" href="' + f.lesson.href + '" target="_blank" '
+                + 'rel="noopener">' + escH(f.lesson.label) + ' &rarr;</a>' : '')
+              + '</div>';
+          }).join('')
+          + '</div>';
       }
+      el.innerHTML = html;
     }
 
     // the referee's ledger, rendered: every event with its match-clock stamp
@@ -5434,7 +5606,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         (engine.cfg.seed != null ? ' · <b>seed ' + engine.cfg.seed + '</b>' : '');
       drawDebriefHeat();
       fillDebriefEvents();
-      $('dbTips').innerHTML = '';
+      fillDebriefTips();          // the coach -- this was never being called
       // first look at a finished match: watch the score build, THEN read the
       // numbers. Coming back to it later shows the finished chart at once.
       if (seriesSeen) {
