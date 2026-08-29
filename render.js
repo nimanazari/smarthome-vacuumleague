@@ -1325,35 +1325,85 @@ class Renderer3D {
   }
 
   // BOTH robots at once, split down the middle — the close shots keep the
-  // whole match on screen instead of losing one robot off camera.
+  // whole match on screen instead of losing one robot off camera. The gap
+  // between them is a real gap, edged in each team's colour, so the split
+  // reads as one deliberate frame rather than two pictures pushed together.
   _renderPair(poses, mode) {
     const el = this.renderer.domElement;
     const W = el.width / this.renderer.getPixelRatio();
     const H = el.height / this.renderer.getPixelRatio();
+    const GAP = 5;                                   // the seam down the middle
+    const halfW = Math.max(1, (W - GAP) / 2);
     const halves = [
-      { pose: poses.red, vp: { x: 0, y: 0, w: W / 2 - 1, h: H } },
-      { pose: poses.blue, vp: { x: W / 2 + 1, y: 0, w: W / 2 - 1, h: H } },
+      { who: 'red', pose: poses.red, vp: { x: 0, y: 0, w: halfW, h: H } },
+      { who: 'blue', pose: poses.blue, vp: { x: halfW + GAP, y: 0, w: halfW, h: H } },
     ];
     this.renderer.setScissorTest(true);
     for (const half of halves) {
       if (!half.pose) continue;
-      if (mode === 'chase') this._renderChaseOf(half.pose, half.vp);
+      if (mode === 'chase') this._renderChaseOf(half.pose, half.vp, half.who);
       else this._renderPovOf(half.pose, half.vp);
     }
+    // the seam: a dark line with each side's own colour licking its edge
+    const paint = (x, w, css) => {
+      if (w <= 0) return;
+      this.renderer.setScissor(x, 0, w, H);
+      this.renderer.setViewport(x, 0, w, H);
+      this.renderer.setClearColor(css, 1);
+      this.renderer.clear(true, false, false);
+    };
+    const keep = this.renderer.getClearColor(new THREE.Color());
+    const keepA = this.renderer.getClearAlpha();
+    const col = (who) => {
+      const st = this.teamStyle && this.teamStyle[who];
+      return st && st.accent != null ? st.accent : (who === 'blue' ? 0x4d8bff : 0xff5a4e);
+    };
+    // the dark base covers the WHOLE seam first, so pixel rounding at either
+    // edge shows the seam's own colour rather than a hole through to nothing
+    paint(halfW, GAP, 0x05070b);
+    paint(halfW, 1.5, col('red'));
+    paint(halfW + GAP - 1.5, 1.5, col('blue'));
+    this.renderer.setClearColor(keep, keepA);
+
     this.renderer.setScissorTest(false);
     this.renderer.setViewport(0, 0, W, H);
     this.camera.aspect = W / (H || 1);
     this.camera.updateProjectionMatrix();
   }
 
-  // over-the-shoulder on one robot (full frame or a half)
-  _renderChaseOf(pose, vp) {
+  /* OVER THE SHOULDER of one robot (full frame, or one half of the split).
+
+     A chase camera has weight. Snapping it to a fixed point behind a robot
+     that turns on the spot makes the whole world whip around, which is exactly
+     what this used to do. Instead the rig EASES toward where it wants to be,
+     so it trails the robot, swings wide through a turn and settles after it —
+     and the lens eases toward a point ahead of the robot rather than at its
+     back, so you watch where it is going, not where it has been. */
+  _renderChaseOf(pose, vp, who) {
     const cx = Math.cos(pose.h), sz = Math.sin(pose.h);
+    // where the rig would like to be, and what it would like to be looking at
+    const wantX = pose.x - cx * 2.5, wantZ = pose.z - sz * 2.5;
+    const aimX = pose.x + cx * 2.4, aimZ = pose.z + sz * 2.4;
+
+    const key = who || 'solo';
+    this._chase = this._chase || {};
+    let rig = this._chase[key];
+    // a rig that has been away for a while starts where it should be, so
+    // coming back to this shot does not open with a long swoop
+    if (!rig || performance.now() - rig.t > 900) {
+      rig = this._chase[key] = { x: wantX, y: 1.62, z: wantZ, lx: aimX, lz: aimZ, t: 0 };
+    }
+    rig.t = performance.now();
+    rig.x += (wantX - rig.x) * 0.085;                // the body has weight...
+    rig.z += (wantZ - rig.z) * 0.085;
+    rig.lx += (aimX - rig.lx) * 0.13;                // ...and the lens leads it
+    rig.lz += (aimZ - rig.lz) * 0.13;
+
     this.camera.aspect = vp ? vp.w / vp.h : (this.container.clientWidth / (this.container.clientHeight || 1));
-    this.camera.fov = 58;
+    this.camera.fov = 55;
     this.camera.updateProjectionMatrix();
-    this.camera.position.set(pose.x - cx * 2.3, 1.7, pose.z - sz * 2.3);
-    this.camera.lookAt(pose.x + cx * 2, 0.2, pose.z + sz * 2);
+    this.camera.position.set(rig.x, 1.62, rig.z);
+    this.camera.lookAt(rig.lx, 0.24, rig.lz);
     if (vp) { this.renderer.setViewport(vp.x, vp.y, vp.w, vp.h); this.renderer.setScissor(vp.x, vp.y, vp.w, vp.h); }
     this.renderer.render(this.scene, this.camera);
   }
