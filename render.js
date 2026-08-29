@@ -122,9 +122,16 @@ class Renderer3D {
       return;
     }
     const t = this._tint;
-    const C = lead === 'blue' ? [0x4d, 0x8b, 0xff] : [0xff, 0x5a, 0x4e];
-    if (this._tintKey !== lead + '|' + Math.round(t * 24)) {
-      this._tintKey = lead + '|' + Math.round(t * 24);
+    // the team's OWN colour, whichever of the six they picked -- orange,
+    // purple, green, anything. Falling back to red/blue only if the game
+    // has not told us yet.
+    const style = this.teamStyle && this.teamStyle[lead];
+    const hex = style && style.accent != null ? style.accent
+      : (lead === 'blue' ? 0x4d8bff : 0xff5a4e);
+    const C = [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255];
+    const key = lead + '|' + hex + '|' + Math.round(t * 24);
+    if (this._tintKey !== key) {
+      this._tintKey = key;
       this.scene.background = this._gradientBg(C, t);
       this._tinted = true;
     }
