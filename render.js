@@ -58,6 +58,10 @@ class Renderer3D {
     sun.shadow.camera.left = -14; sun.shadow.camera.right = 14; sun.shadow.camera.top = 14; sun.shadow.camera.bottom = -14;
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
     this.scene.add(sun);
+    // the game opens on 2.5D, so say so -- otherwise the camera list shows
+    // nothing ticked until you have already changed camera once
+    this.viewMode = '2.5d';
+    this._vi = 0;
     this._sun = sun;                 // the endgame tints this, and the shadows with it
     this._sunBase = sun.color.clone();
     this._tint = 0;                  // 0 = neutral room, 1 = fully the leader's
@@ -83,6 +87,18 @@ class Renderer3D {
   setWallColor(hex) {
     try { localStorage.setItem('shl_wallcolor', hex); } catch (e) { /* private mode */ }
     if (this._wallMat) this._wallMat.color.setHex(parseInt(hex.slice(1), 16));
+  }
+
+  /* Go straight to a named camera. cycleView() steps through the ring one at
+     a time; this is the same set reachable directly, which is what the camera
+     LIST needs -- picking the eighth camera should not mean eight lurches
+     through the other seven. */
+  setViewByKey(k) {
+    const keys = ['2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
+    const i = keys.indexOf(k);
+    if (i < 0) return this.cycleView();
+    this._vi = (i - 1 + keys.length) % keys.length;   // so the next cycle carries on from here
+    return this.cycleView();
   }
 
   cycleView() {

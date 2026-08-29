@@ -1321,6 +1321,28 @@
   }
   .rsaved { margin-top: 9px; font-size: 11.5px; color: #7ee7b4; }
 
+  /* the camera list: every camera named, the current one marked */
+  #camPick { position: fixed; inset: 0; z-index: 33; display: flex; align-items: center;
+    justify-content: center; padding: 18px; background: rgba(7,9,13,.66); backdrop-filter: blur(5px); }
+  #camPick .cp-card { position: relative; width: min(390px, 94vw); max-height: 86vh; overflow: auto;
+    padding: 18px 16px 14px; border-radius: 20px; text-align: start;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219;
+    border: 1px solid rgba(255,255,255,.13); box-shadow: 0 28px 66px rgba(0,0,0,.6);
+    animation: rise .45s cubic-bezier(.2,.8,.2,1); }
+  #camPick .cp-h { font-size: 12px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted); margin: 0 4px 11px; }
+  #camPick .cp-x { position: absolute; inset-inline-end: 13px; top: 11px; width: 29px; height: 29px;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.16); background: transparent;
+    color: var(--muted); font-size: 17px; line-height: 1; cursor: pointer; }
+  #camPick .cp-i { display: block; width: 100%; text-align: start; margin-bottom: 6px;
+    padding: 10px 13px; border-radius: 13px; cursor: pointer; font: inherit;
+    background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.09); color: var(--text); }
+  #camPick .cp-i:hover { border-color: #4d8bff; background: rgba(77,139,255,.10); }
+  #camPick .cp-i.on { border-color: #4d8bff; background: rgba(77,139,255,.16); }
+  #camPick .cp-i.on .cp-n::after { content: ' \2713'; color: #4d8bff; }
+  #camPick .cp-n { display: block; font-size: 13.5px; font-weight: 700; }
+  #camPick .cp-d { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
   /* ---------- referee tools ---------- */
   #refMenu { position: fixed; inset: 0; z-index: 31; display: none; align-items: center; justify-content: center; background: rgba(7,9,13,.62); backdrop-filter: blur(4px); }
   #refMenu .rm-card { display: flex; flex-direction: column; gap: 9px; width: 270px; padding: 17px 18px; direction: rtl; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
@@ -5830,9 +5852,44 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('startBtn').onclick = startMatch;
     $('newMatch2').onclick = newMatch;
     $('newMatch3').onclick = newMatch;
+    /* THE CAMERA LIST. Eight cameras behind one cycling button meant seven of
+       them were invisible and the eighth took three presses. The button opens
+       the list instead: every camera named, the current one marked, one click
+       to any of them. */
     $('viewBtn').onclick = () => {
       if (matchRec.on) { showToast(T('در حین ضبط رسمی، دوربین قفل است', 'The camera is locked while the official recording runs')); return; }
-      $('viewLabel').textContent = renderer.cycleView();
+      const old = $('camPick'); if (old) { old.remove(); return; }
+      const CAMS = [
+        { k: '2.5d',   fa: 'نمای ۲.۵ بعدی',        en: '2.5D view',                  note: ['کل خانه با عمق — نمای پیشنهادی', 'the whole house, with depth'] },
+        { k: 'cine',   fa: '🎬 سینماتیک',           en: '🎬 Cinematic',                note: ['کارگردان خودکار؛ روی امتیاز برش می‌زند', 'the auto-director, cutting on the score'] },
+        { k: 'chase',  fa: 'سوم‌شخص — هر دو ربات',  en: 'Third person — both robots', note: ['از پشت شانه‌ی هر دو ربات، کنار هم', 'over both robots\' shoulders, side by side'] },
+        { k: 'top',    fa: 'نمای بالا',             en: 'Top view',                   note: ['مستقیم از بالا، کل زمین', 'straight down on the whole floor'] },
+        { k: '3d',     fa: 'نمای سه‌بعدی',          en: '3D view',                    note: ['نمای معرفیِ خانه', 'the establishing shot'] },
+        { k: 'spider', fa: 'اسپایدرکم',            en: 'Spider cam',                 note: ['دوربین روی سیم، بالای زمین', 'a camera on a wire above the floor'] },
+        { k: 'spin',   fa: 'چرخش ۳۶۰ درجه',        en: '360° orbit',                 note: ['آرام دور خانه می‌چرخد', 'circling the house slowly'] },
+        { k: 'pov',    fa: 'از نگاه ربات‌ها',       en: 'Robot POV — both',           note: ['از چشم هر دو ربات، کنار هم', 'down both robots\' noses, side by side'] },
+      ];
+      const ov = document.createElement('div');
+      ov.id = 'camPick';
+      ov.innerHTML = '<div class="cp-card' + (LANG === 'fa' ? ' fa' : '') + '">'
+        + '<button type="button" class="cp-x">&times;</button>'
+        + '<div class="cp-h">' + T('دوربین', 'Camera') + '</div>'
+        + CAMS.map((c) => '<button type="button" class="cp-i'
+            + (renderer.viewMode === c.k ? ' on' : '') + '" data-k="' + c.k + '">'
+            + '<span class="cp-n">' + T(c.fa, c.en) + '</span>'
+            + '<span class="cp-d">' + T(c.note[0], c.note[1]) + '</span></button>').join('')
+        + '</div>';
+      const close = () => ov.remove();
+      ov.onclick = (e) => { if (e.target === ov) close(); };
+      ov.querySelector('.cp-x').onclick = close;
+      for (const b of ov.querySelectorAll('.cp-i')) {
+        b.onclick = () => {
+          $('viewLabel').textContent = renderer.setViewByKey(b.dataset.k);
+          close();
+          $('burgerMenu').style.display = 'none';
+        };
+      }
+      document.body.appendChild(ov);
     };
     // hamburger menu: one click opens everything, another click closes it
     // language: toggle + RELOAD, so the whole page starts over in it
