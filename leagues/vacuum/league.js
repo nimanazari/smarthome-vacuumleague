@@ -413,11 +413,16 @@
      Every floor plan is ITS OWN FILE under maps/ — one map, one file —
      loaded before this one (the `pre:` list in leagues/manifest.js).
      Edit a house there and nothing else moves. */
-  const { HOUSE, ROOMS, GROWN, GROWN_ROOMS, OPEN, STANDARD } = root.VacuumMaps;
+  const { HOUSE, ROOMS, GROWN, GROWN_ROOMS, OPEN, STANDARD, CORRIDOR, VILLA, COURTYARD } = root.VacuumMaps;
 
   // the picker lists a group's own maps right after the official one
   L.getGroup('vacuum').maps = [
     { name: 'خانه‌ی استاندارد ۲۲×۲۲ (در + چمن) · The STANDARD house', map: STANDARD },
+    // three more houses to the SAME standard, each with its own floor plan —
+    // so a program that only memorised one house is found out
+    { name: 'خانه‌ی راهرودار ۲۲×۲۲ · The Corridor house', map: CORRIDOR },
+    { name: 'خانه‌ی ویلایی ۲۲×۲۲ · The Villa house', map: VILLA },
+    { name: 'خانه‌ی حیاط‌مرکزی ۲۲×۲۲ · The Courtyard house', map: COURTYARD },
     { name: 'خانه‌ی اتاق‌دار کوچک ۱۶×۱۶ · Cosy rooms house', map: ROOMS },
     { name: 'خانه‌ی کلاسیک ۱۶×۱۶ · Classic house (no rooms)', map: HOUSE },
     { name: 'خانه‌ی بزرگ بدون اتاق ۲۲×۲۲ · Big open-plan house', map: GROWN },

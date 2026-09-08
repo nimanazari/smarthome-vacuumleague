@@ -1,3 +1,22 @@
+## 2026-09-08 — three more houses to the standard, none alike
+
+- سه خانه‌ی جدید برای منوی نقشه‌های FS / U14 (و همه‌ی رده‌ها)، هر سه به
+  استاندارد نقشه ولی با پلان کاملاً متفاوت — اتاق‌ها، جای وسایل و شکل خانه
+  عوض شده تا برنامه‌ای که فقط یک خانه را حفظ کرده لو برود:
+  **خانه‌ی راهرودار** (`maps/corridor.js` — پذیرایی راهرویی وسط، سه خواب کنار
+  هم بالا، آشپزخانه و سرویس پایین)، **خانه‌ی ویلایی** (`maps/villa.js` —
+  پذیرایی L شکل، سه خواب روی هم کنار دیوار شرقی، محوطه‌ی سنگی)، و
+  **خانه‌ی حیاط‌مرکزی** (`maps/courtyard.js` — پذیرایی مربعی وسط و اتاق‌ها
+  دورش، فویه‌ی جنوب‌شرقی برای شروع).
+- Three new houses in the map picker, all to MAP-STANDARD.md (3 bedrooms +
+  kitchen + living with TV/sofa + bathroom, ONE push-open door, purple
+  markers, slowing green rug, no wet floor) with floor plans that share
+  nothing: the Corridor house, the Villa house, the Courtyard house.
+- The doored room is `room == 2` in every one of them, so a program that
+  targets "the doored room" keeps working — only its position moves.
+- `node tools/validate-map.js CORRIDOR | VILLA | COURTYARD`: every room
+  100% reachable, zero sealed cells.
+
 ## 2026-08-24 (b) — the charger has queue rules now
 
 - AUTOMATIC referee, no hands: ANY robot that stays inside one small circle

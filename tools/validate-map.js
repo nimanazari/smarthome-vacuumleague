@@ -21,6 +21,9 @@ require('../leagues/vacuum/maps/grown.js');
 require('../leagues/vacuum/maps/grown-rooms.js');
 require('../leagues/vacuum/maps/open.js');
 require('../leagues/vacuum/maps/standard.js');
+require('../leagues/vacuum/maps/corridor.js');
+require('../leagues/vacuum/maps/villa.js');
+require('../leagues/vacuum/maps/courtyard.js');
 
 const NAME = process.argv[2] || 'GROWN_ROOMS';
 const MAP = global.VacuumMaps[NAME];
