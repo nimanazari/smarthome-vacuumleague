@@ -78,11 +78,10 @@ def sync_site_game():
     n = sum(len(fs) for _, _, fs in os.walk(dst))
     print('  site /game refreshed from TeamKit (%d files) -> %s' % (n, dst))
 
-sync_site_game()
-
 rc, out = run([sys.executable, os.path.join(ROOT, 'tools', 'make-kits.py')], ROOT)
 print(out.splitlines()[-1] if out else '')
 if rc: sys.exit('make-kits failed')
+sync_site_game()          # AFTER the kits: the site gets the TeamKit just built
 
 # 2 — the full game repo
 print('pushing the full game ...')
