@@ -26,6 +26,14 @@ in the TeamKit or the public teams repo.
 
 ## ریلیز مپ به تیم‌ها · handing a map to the teams
 
+**ساده‌ترین راه (نصب = کپی یک فایل):** پوشه‌ی `handout/` برای هر مپ
+`mapN.json` و `mapN.html` دارد. فایل `map1.json` را به تیم بده؛ تیم آن را
+**کنار `serve.bat`** (یا کنار `.exe`) کپی می‌کند و بازی را باز می‌کند — بازی
+خودش پیدا می‌کند، با 📁 در منوی نقشه می‌آید و انتخاب می‌شود. هیچ منویی لازم
+نیست. `map1..map5` هر پنج تا را می‌شناسد؛ پوشه‌ی `maps/` کنار بازی هم قبول است.
+*Copy `mapN.json` next to the game; it is found and selected on start.*
+
+
 کنار هر `map.json` یک **`map.html`** هم هست (با `python tools/make-map-html.py`
 ساخته می‌شود؛ release.py خودش می‌سازد). این یک فایل مستقل است: نقشه‌ی
 کشیده‌شده با اسم وسایل و شماره‌ی اتاق‌ها، مشخصات، دکمه‌ی چاپ، **دانلود JSON**

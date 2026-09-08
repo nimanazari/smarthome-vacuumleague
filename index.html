@@ -3601,6 +3601,47 @@ else:                            # 7) nothing in the way -> full speed ahead
     function mapStore(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
     let serverMaps = {};                      // maps admins uploaded to the site — visible to everyone
     let siteEditorLocked = false;             // the site said: no Map Maker for this visitor
+    /* ---- DROPPED-IN maps: the simplest install there is ----
+       The organiser hands a team `map1.json` (or the handout `map1.html`);
+       the team COPIES IT NEXT TO THE GAME (beside index.html / the .exe, or
+       into a maps/ folder). Nothing to click: every start the game looks for
+       map1..map5 in those places, lists whatever it finds as 📁, and plays
+       the newest one unless this division already has a chosen map. */
+    let droppedMaps = {};
+    async function loadDroppedMaps() {
+      const found = {};
+      const jobs = [];
+      for (let n = 1; n <= 5; n++) {
+        for (const p of ['map' + n + '.json', 'map' + n + '.html', 'maps/map' + n + '.json', 'maps/map' + n + '.html']) {
+          jobs.push(fetch(p, { cache: 'no-store' }).then(async (r) => {
+            if (!r.ok) return;
+            let txt = await r.text();
+            const emb = txt.match(/<script[^>]*id="map"[^>]*>([\s\S]*?)<\/script>/i);
+            if (emb) txt = emb[1].replace(/<\\\//g, '</');
+            else if (/^\s*</.test(txt)) return;          // some other HTML page, not a map
+            let j; try { j = JSON.parse(txt); } catch (e) { return; }
+            if (!j || !j.cols || !j.rows) return;
+            if (!found[n]) found[n] = Object.assign({}, j, { name: j.name || ('map ' + n) });
+          }).catch(() => { /* not there — fine */ }));
+        }
+      }
+      await Promise.all(jobs);
+      droppedMaps = found;
+      if (!Object.keys(found).length) return;
+      populateMaps();
+      // play it, unless the division has an explicit choice already
+      let chosen = '';
+      try { chosen = localStorage.getItem(mapChoiceKey()) || ''; } catch (e) { /* private mode */ }
+      if (!chosen || chosen.indexOf('drop:') === 0) {
+        const n = Math.max.apply(null, Object.keys(found).map(Number));
+        const sel = $('mapSel');
+        if (sel && sel.value !== 'drop:' + n) {
+          sel.value = 'drop:' + n;
+          showToast(T('📁 نقشه‌ی مسابقه پیدا شد و انتخاب شد: ' + found[n].name, '📁 competition map found and selected: ' + found[n].name));
+          if (typeof previewScene === 'function') previewScene();
+        }
+      }
+    }
     async function loadServerMaps() {
       // The ORGANISER's copy runs tools/mapserver.py (serve.bat picks it when
       // it exists), which answers /api/maps with the competition maps kept in
@@ -3645,6 +3686,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       const grpDef = curGroup && Leagues.getGroup(curGroup);
       ((grpDef && grpDef.maps) || []).forEach((m, i) => opt('grp:' + i, '🏠 ' + m.name));
       for (const n of Object.keys(serverMaps)) if (mapFits(serverMaps[n])) opt('srv:' + n, '🏁 ' + n);
+      for (const n of Object.keys(droppedMaps)) if (mapFits(droppedMaps[n])) opt('drop:' + n, '📁 ' + droppedMaps[n].name);
       const draft = mapStore('shl_play_map');
       if (draft && mapFits(draft)) opt('::draft', '🛠 Map Maker draft');
       const all = mapStore('shl_maps') || {};
@@ -3680,14 +3722,16 @@ else:                            # 7) nothing in the way -> full speed ahead
         return (g && g.maps && g.maps[+v.slice(4)]) ? g.maps[+v.slice(4)].map : null;
       }
       if (v.indexOf('srv:') === 0) return serverMaps[v.slice(4)] || null;
+      if (v.indexOf('drop:') === 0) return droppedMaps[v.slice(5)] || null;
       if (v.indexOf('name:') === 0) { const all = mapStore('shl_maps') || {}; return all[v.slice(5)] || null; }
       return null;
     }
     populateMaps();
     loadServerMaps();
+    loadDroppedMaps();
     // coming back from the Map Maker tab: re-read the maps (they self-save on
     // every edit over there) and rebuild the 3D preview with the fresh copy
-    window.addEventListener('focus', () => { populateMaps(); loadServerMaps(); previewScene(); });
+    window.addEventListener('focus', () => { populateMaps(); loadServerMaps(); loadDroppedMaps(); previewScene(); });
     // ✏️ — edit the map you are looking at, tagged for the league you are on
     $('mapEdit').onclick = () => {
       const d = leagueDef();

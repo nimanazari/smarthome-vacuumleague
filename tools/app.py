@@ -24,6 +24,7 @@ import http.server
 import io
 import mimetypes
 import os
+import re
 import socketserver
 import subprocess
 import sys
@@ -36,7 +37,7 @@ import zipfile
 
 # The build this app was made from. tools/release stamps it; the site
 # publishes the current one at /downloads/version.json.
-BUILD = '1984cbf'
+BUILD = '3bfe958'
 UPDATE_URL = 'https://smarthomeleague.ir/downloads/version.json'
 DOWNLOAD_PAGE = 'https://smarthomeleague.ir/getting-started'
 LOG = os.path.join(tempfile.gettempdir(), 'shl-log.txt')
@@ -49,6 +50,7 @@ def log(msg):
 
 # ---- the game: from the embedded blob (exe) or the repo (dev) ----
 FILES = {}
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # dev checkout root
 try:
     import game_blob
     zf = zipfile.ZipFile(io.BytesIO(base64.b64decode(game_blob.DATA)))
@@ -83,6 +85,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path.endswith('/'):
             path += 'index.html'
         body = FILES.get(path)
+        # DROPPED-IN competition maps: map1..map5 .json/.html placed next to
+        # the .exe (or in a maps/ folder there) are served from disk, so a
+        # team installs a map by copying ONE file beside the app.
+        if body is None and re.match(r'^/(maps/)?map\d+\.(json|html)$', path):
+            base = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else ROOT_DIR
+            p = os.path.normpath(os.path.join(base, path.lstrip('/')))
+            if p.startswith(os.path.normpath(base)) and os.path.isfile(p):
+                body = open(p, 'rb').read()
         if body is None and not FILES:        # dev mode: read from disk
             p = os.path.normpath(os.path.join(ROOT, path.lstrip('/')))
             if p.startswith(ROOT) and os.path.isfile(p):

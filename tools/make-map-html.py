@@ -211,6 +211,12 @@ def main():
             continue
         m = json.loads(io.open(p, encoding='utf-8').read())
         io.open(os.path.join(d, 'map.html'), 'w', encoding='utf-8').write(page(slot, m))
+        # the HANDOUT copies, named per slot: give a team map1.json (or
+        # map1.html); it copies the file next to its game and that map plays
+        hd = os.path.join(MAPS, 'handout')
+        os.makedirs(hd, exist_ok=True)
+        io.open(os.path.join(hd, 'map%d.json' % slot), 'w', encoding='utf-8').write(json.dumps(m, ensure_ascii=False, indent=1))
+        io.open(os.path.join(hd, 'map%d.html' % slot), 'w', encoding='utf-8').write(page(slot, m))
         n += 1
         print('  map%d/map.html  <-  %s' % (slot, m.get('name', '')))
     # an index page listing all of them

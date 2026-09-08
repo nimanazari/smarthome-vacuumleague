@@ -51,6 +51,13 @@ TEAM_README = """# 🤖 Smart Home League — Team Kit · بسته‌ی تیم
    (FS: بلاکی + AI · U14: AI با قطب‌نما · U19: هلپر مسیر)، بعد **ادیتور**.
 3. در **Match mode** برنامه‌ات را مقابل ربات‌های آماده تست کن.
 
+## نقشه‌ی مسابقه · Installing a competition map
+برگزارکننده یک فایل به اسم **`map1.json`** (یا `map1.html`) می‌دهد.
+**فقط همین فایل را کنار `serve.bat` کپی کن** (همان پوشه‌ای که `index.html` هست).
+بازی را باز کن؛ خودش پیدا می‌کند، در منوی نقشه با 📁 می‌آید و انتخاب می‌شود.
+اگر با برنامه‌ی `.exe` بازی می‌کنی، فایل را کنار خودِ exe بگذار. همین.
+*Copy `map1.json` next to `serve.bat` (or next to the .exe). The game finds it by itself.*
+
 ## چه چیزی تحویل بدهیم؟ · What you submit
 فقط **یک فایل `.py`** برای هر رده — همان که هلپر/ادیتور می‌سازد
 (دکمه‌ی Download .py). قبل از تحویل حتماً در Match mode تستش کن.

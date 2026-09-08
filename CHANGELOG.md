@@ -1,3 +1,15 @@
+## 2026-09-08 (d) — installing a map = copying one file
+
+- **نصب نقشه‌ی مسابقه برای تیم‌ها:** فایل `map1.json` (یا `map1.html`) را کنار
+  `serve.bat` / کنار `.exe` کپی کن، تمام. بازی در هر شروع دنبال `map1..map5`
+  (کنار خودش یا در `maps/`) می‌گردد، پیدا شده‌ها را با 📁 در منوی نقشه می‌آورد و
+  تازه‌ترین را انتخاب می‌کند (اگر رده قبلاً انتخاب دستی نداشته باشد). `app.py`
+  همین فایل‌ها را از کنار exe سرو می‌کند. `organizer-only/maps/handout/` فایل‌های
+  آماده‌ی هر مپ را دارد؛ README تیم‌ها توضیح دارد.
+- EN: a team installs a competition map by copying `mapN.json` next to the
+  game; the game finds, lists (📁) and selects it on start. Handout files in
+  `organizer-only/maps/handout/`.
+
 ## 2026-09-08 (c) — a map is ONE file you can hand to a team
 
 - هر مپ مسابقه حالا یک **`map.html` مستقل** هم دارد (`tools/make-map-html.py`،
