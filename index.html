@@ -4004,7 +4004,7 @@ else:                            # 7) nothing in the way -> full speed ahead
           };
           mkBtn('&#128190; <span class="fa">سیو مپ</span>', 'the CURRENT floor becomes this division\'s default map',
             () => { showToast(saveMapAsDefault(currentMapObj()) ? T('💾 به‌عنوان نقشه‌ی این رده ذخیره شد', '💾 saved as this division\'s map') : T('ذخیره نشد', 'could not save')); });
-          mkBtn('&#128194; <span class="fa">لود فایل مپ</span>', 'open a map .json — ONE CLICK and it IS this division\'s map',
+          mkBtn('&#128194; <span class="fa">لود فایل مپ</span>', 'open a map .json or map.html — ONE CLICK and it IS this division\'s map',
             () => $('mapFileIn').click());
           mkBtn('&#128465; <span class="fa">برگشت به مپ اصلی</span>', 'forget the saved map — the shipped floor returns',
             () => clearDefaultMap());
@@ -4024,14 +4024,19 @@ else:                            # 7) nothing in the way -> full speed ahead
             renderer.setWallColor('#1f242e');
           };
           const fin = document.createElement('input');
-          fin.type = 'file'; fin.id = 'mapFileIn'; fin.accept = '.json,application/json'; fin.style.display = 'none';
+          // a map .json — or the self-contained map.html the organiser hands out
+          // (tools/make-map-html.py), which carries the same JSON inside it
+          fin.type = 'file'; fin.id = 'mapFileIn'; fin.accept = '.json,.html,application/json,text/html'; fin.style.display = 'none';
           fin.onchange = () => {
             const f = fin.files[0];
             if (!f) return;
             const rd = new FileReader();
             rd.onload = () => {
               try {
-                const j = JSON.parse(rd.result);
+                let txt = String(rd.result);
+                const emb = txt.match(/<script[^>]*id="map"[^>]*>([\s\S]*?)<\/script>/i);
+                if (emb) txt = emb[1].replace(/<\\\//g, '</');
+                const j = JSON.parse(txt);
                 if (!j || !j.cols) throw 0;
                 showToast(saveMapAsDefault(j) ? T('📂 بارگذاری شد — از این پس نقشه همین است', '📂 loaded — this IS the map now') : T('ذخیره نشد', 'could not save'));
               } catch (e) { showToast(T('این فایل نقشه نیست', 'that file is not a map')); }

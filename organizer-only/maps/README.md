@@ -24,6 +24,24 @@ in the TeamKit or the public teams repo.
    (`doorsOpen: true`) — مپ ۱ این‌طور ساخته شده.
 5. بعد از هر ویرایش: `node tools/validate-map.js map1` (یا map2 … map5).
 
+## ریلیز مپ به تیم‌ها · handing a map to the teams
+
+کنار هر `map.json` یک **`map.html`** هم هست (با `python tools/make-map-html.py`
+ساخته می‌شود؛ release.py خودش می‌سازد). این یک فایل مستقل است: نقشه‌ی
+کشیده‌شده با اسم وسایل و شماره‌ی اتاق‌ها، مشخصات، دکمه‌ی چاپ، **دانلود JSON**
+و **▶ اجرا در بازی**. همین یک فایل را به تیم‌ها بده (تلگرام، سایت، فلش):
+
+- تیم فایل را باز می‌کند و نقشه را می‌بیند (هیچ چیز دیگری لازم نیست).
+- در بازی: منوی ⚙️ نقشه و تنظیمات → **«لود فایل مپ»** → همین `map.html` را
+  انتخاب می‌کند (JSON هم قبول می‌کند) — نقشه‌ی رده همان می‌شود.
+- اگر فایل را کنار `index.html` کیت بگذارد و با `serve.bat` باز کند، دکمه‌ی
+  «اجرا در بازی» مستقیم بازی را با همان نقشه بالا می‌آورد.
+
+`index.html` این پوشه هم فهرست هر پنج مپ است.
+
+*Each map also ships as a self-contained `map.html` (plan + facts + JSON
+inside). Hand that one file to the teams; the game's «لود فایل مپ» opens it.*
+
 ## روی سایت · on the site
 
 همین پنج اسلات روی smarthomeleague.ir هم هست: `/admin` → تب **Maps** →

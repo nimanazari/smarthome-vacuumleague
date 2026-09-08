@@ -78,6 +78,9 @@ def sync_site_game():
     n = sum(len(fs) for _, _, fs in os.walk(dst))
     print('  site /game refreshed from TeamKit (%d files) -> %s' % (n, dst))
 
+# every competition map gets its self-contained map.html (organizer-only/maps/mapN/)
+run([sys.executable, os.path.join(ROOT, 'tools', 'make-map-html.py')], ROOT)
+
 rc, out = run([sys.executable, os.path.join(ROOT, 'tools', 'make-kits.py')], ROOT)
 print(out.splitlines()[-1] if out else '')
 if rc: sys.exit('make-kits failed')

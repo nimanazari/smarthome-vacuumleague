@@ -1,3 +1,14 @@
+## 2026-09-08 (c) — a map is ONE file you can hand to a team
+
+- هر مپ مسابقه حالا یک **`map.html` مستقل** هم دارد (`tools/make-map-html.py`،
+  در release خودکار): نقشه‌ی کشیده‌شده با اسم وسایل، شماره‌ی اتاق‌ها، فرش‌ها و
+  نقطه‌ی شروع ربات‌ها، مشخصات نقشه، دکمه‌ی چاپ، دانلود JSON و «▶ اجرا در
+  بازی». JSON داخل خود فایل است. `organizer-only/maps/index.html` فهرست همه.
+- **«لود فایل مپ»** در بازی حالا `map.html` را هم قبول می‌کند (JSON را از داخلش
+  می‌خواند) — تیم یک فایل می‌گیرد و همان را لود می‌کند.
+- EN: every competition map is also a self-contained `map.html` (drawn plan,
+  facts, embedded JSON, play/download/print); the game's map loader accepts it.
+
 ## 2026-09-08 (b) — the overhead MATCH view is the default; the film says where it went
 
 - **نمای پیش‌فرض عوض شد:** «نمای مسابقه — از بالا» (`over` در render.js) —
