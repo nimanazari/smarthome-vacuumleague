@@ -51,6 +51,35 @@ def stamp_build():
 
 stamp_build()
 
+# ---- the site's /game is the TeamKit, refreshed on every release ----
+# smarthomeleague.ir/game/ serves a copy of the game. It is rebuilt here from
+# the TeamKit (no champion code, no referee lock) PLUS the Map Maker, which
+# server.js hands only to a logged-in admin. Docs (*.md) stay out of the site.
+def sync_site_game():
+    import shutil
+    site = os.path.normpath(os.path.join(ROOT, '..', 'schedule', 'schedule', 'public'))
+    if not os.path.isdir(site):
+        print('  (no site checkout next door - /game not refreshed)')
+        return
+    src = os.path.join(ROOT, 'TeamKit')
+    dst = os.path.join(site, 'game')
+    if os.path.isdir(dst):
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns('*.md', '__pycache__'))
+    # the referee's Map Maker rides along (admin-only on the server) and the
+    # game's pencil button points at it again
+    for f in ['mapmaker.html', 'mapmaker.js']:
+        shutil.copy2(os.path.join(ROOT, 'leagues', 'vacuum', f), os.path.join(dst, 'leagues', 'vacuum', f))
+    lg = os.path.join(dst, 'leagues', 'vacuum', 'league.js')
+    t = io.open(lg, encoding='utf-8').read()
+    if "mapmaker: 'leagues/vacuum/mapmaker.html'" not in t:
+        t = t.replace("    icon: '\U0001f9f9',\n", "    icon: '\U0001f9f9',\n    mapmaker: 'leagues/vacuum/mapmaker.html',\n", 1)
+        io.open(lg, 'w', encoding='utf-8').write(t)
+    n = sum(len(fs) for _, _, fs in os.walk(dst))
+    print('  site /game refreshed from TeamKit (%d files) -> %s' % (n, dst))
+
+sync_site_game()
+
 rc, out = run([sys.executable, os.path.join(ROOT, 'tools', 'make-kits.py')], ROOT)
 print(out.splitlines()[-1] if out else '')
 if rc: sys.exit('make-kits failed')

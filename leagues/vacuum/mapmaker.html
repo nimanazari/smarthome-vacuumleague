@@ -162,6 +162,19 @@
         <div class="mmstate" id="mmState"></div>
         <div class="mmlisth"><span>نقشه‌های ذخیره‌شده</span><span id="mmCount"></span></div>
         <div id="savedList"></div>
+      </div>
+
+      <!-- the COMPETITION maps: three slots kept on disk (organizer-only/maps/mapN/map.json
+           through tools/mapserver.py) or on the site (admin session). Hidden when the
+           server has no /api/maps — the teams' kit never shows it. -->
+      <div class="sec" id="compSec" hidden>
+        <h3>🏁 نقشه‌های مسابقه (مپ ۱ تا ۵)</h3>
+        <div id="compSlots"></div>
+        <div class="brow" style="display:flex;gap:6px;margin-top:6px">
+          <button class="mmbtn primary" id="compSaveBtn" type="button" style="flex:1"><span data-ic="save"></span> <span id="compSaveLbl">ذخیره در مپ</span></button>
+        </div>
+        <div class="mmstate" id="compState"></div>
+        <div class="hint">هر مپ را باز کن، ویرایش کن، «ذخیره در مپ» بزن — همان لحظه در پوشه/سایت ثبت می‌شود. کلید ● روشن/خاموش می‌گوید کدام مپ در لیست بازی دیده شود.</div>
         <div class="hint">هر نقشه با اسم خودش برای همیشه توی همین مرورگر می‌ماند و در لیست نقشه‌های بازی هم می‌آید. بعد از اولین ذخیره، هر تغییری خودکار ذخیره می‌شود.</div>
       </div>
 
@@ -195,6 +208,7 @@
         <h3>حیوانات و شروع</h3>
         <label class="chk"><input type="checkbox" id="catOn" checked> گربه 🐱 توی این مپ باشه</label>
         <label class="chk"><input type="checkbox" id="dogOn" checked> سگ 🐶 توی این مپ باشه</label>
+        <label class="chk"><input type="checkbox" id="doorsOpen"> 🚪 درها کامل باز باشن (درِ هل‌دادنی حذف می‌شود)</label>
         <div class="hint">نشانگرهای R و B (شروع ربات‌ها) و 🐱🐶 رو با درگ روی نقشه جابه‌جا کن.</div>
       </div>
 

@@ -298,7 +298,7 @@ const leagueLabel = (id) => { for (const [k, ic, fa] of MM_LEAGUES) if (k === (i
       // the game serialised the very map its setup page is showing — the
       // division's official house included. Edit a copy; Save names it.
       const d = (() => { try { return JSON.parse(localStorage.getItem('shl_mm_edit') || 'null'); } catch (e) { return null; } })();
-      if (d) { map = Object.assign(starterMap(), d); setSavedAs(null); }
+      if (d) { map = Object.assign(starterMap(), d); setSavedAs(null); if (+d.compSlot >= 1) { compSlot = +d.compSlot; delete map.compSlot; } }
     }
     else if (slot === 'official') { map = officialMap(); setSavedAs(null); }
     else if (slot === '::draft') { const d = (() => { try { return JSON.parse(localStorage.getItem('shl_play_map') || 'null'); } catch (e) { return null; } })(); if (d) { map = Object.assign(starterMap(), d); setSavedAs(null); } }
@@ -449,6 +449,10 @@ $('catOn').checked = map.spawns.cat.on !== false;
 $('dogOn').checked = map.spawns.dog.on !== false;
 $('catOn').onchange = () => { map.spawns.cat.on = $('catOn').checked; touch(); };
 $('dogOn').onchange = () => { map.spawns.dog.on = $('dogOn').checked; touch(); };
+// doors: `doorsOpen` rides in the map JSON; the game drops every door object
+// when it is set, so each doorway is simply open (no pushing needed)
+$('doorsOpen').checked = !!map.doorsOpen;
+$('doorsOpen').onchange = () => { map.doorsOpen = $('doorsOpen').checked; touch(); };
 
 // windows live ON an outer wall: snap the centre to the closest wall line
 function snapToWall(p, len) {
@@ -612,6 +616,9 @@ function fitView() {
   cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
   const pad = 26;
   view.s = Math.min((r.width - pad * 2) / W(), (r.height - pad * 2) / H());
+  // a canvas smaller than the padding (tiny window, hidden pane) used to give a
+  // NEGATIVE scale and every arc() threw — clamp, and draw something sane
+  if (!(view.s > 0.01)) view.s = 0.01;
   view.px = (r.width - W() * view.s) / 2;
   view.py = (r.height - H() * view.s) / 2;
 }
@@ -1687,9 +1694,112 @@ function afterMapSwap() {
   $('mapName').value = map.name || '';
   $('bCols').value = map.cols; $('bRows').value = map.rows; $('bTile').value = String(map.tileSize);
   $('catOn').checked = map.spawns.cat.on !== false; $('dogOn').checked = map.spawns.dog.on !== false;
+  $('doorsOpen').checked = !!map.doorsOpen;
   clampAll(); syncInsp(); touch();
-  mapState();
+  mapState(); compState();
 }
+
+/* ---------- the COMPETITION maps: مپ ۱ تا ۵ ----------
+   Five fixed slots the organiser plays at the event. They live OUTSIDE the
+   browser: on disk in organizer-only/maps/mapN/map.json when the game runs
+   through tools/mapserver.py, or on the site's data volume when this editor
+   is opened by a logged-in admin on smarthomeleague.ir. The same two calls
+   serve both: GET /api/maps (lists them, says whether we may write) and
+   POST /api/maps/slot {slot, map, on}. No server → the section stays hidden. */
+let compSlot = null;            // which slot the open map came from (1..3), if any
+let compSlots = [];             // [{slot, name, on}] as the server last told us
+let compWritable = false;
+const COMP_N = 5;
+function compState(msg) {
+  const el = $('compState'); if (!el) return;
+  if (msg != null) { el.textContent = msg; return; }
+  el.textContent = compSlot ? ('نقشه‌ی باز: مپ ' + compSlot + ' — تغییرات با «ذخیره در مپ ' + compSlot + '» ثبت می‌شود.') : 'هیچ مپ مسابقه‌ای باز نیست — یکی را از بالا باز کن، یا نقشه‌ی فعلی را روی یک مپ ذخیره کن.';
+  const lbl = $('compSaveLbl'); if (lbl) lbl.textContent = compSlot ? ('ذخیره در مپ ' + compSlot) : 'ذخیره در مپ…';
+}
+function renderCompSlots() {
+  const box = $('compSlots'); if (!box) return;
+  box.innerHTML = '';
+  for (let n = 1; n <= COMP_N; n++) {
+    const it = compSlots.find((s) => s.slot === n) || null;
+    const row = document.createElement('div');
+    row.className = 'comprow';
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:4px 0';
+    const on = document.createElement('button');
+    on.type = 'button'; on.className = 'ibtn'; on.style.cssText = 'flex:none;width:auto;padding:5px 9px';
+    on.textContent = !it ? '—' : (it.on !== false ? '● روشن' : '○ خاموش');
+    on.title = !it ? 'این مپ هنوز ساخته نشده' : 'روشن = در لیست نقشه‌های بازی دیده می‌شود';
+    on.disabled = !it || !compWritable;
+    if (it) on.style.color = it.on !== false ? '#2fd08a' : '';
+    on.onclick = () => compToggle(n, !(it && it.on !== false));
+    const open = document.createElement('button');
+    open.type = 'button'; open.className = 'ibtn'; open.style.cssText = 'flex:1;text-align:start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    open.textContent = 'مپ ' + n + (it ? ' — ' + it.name : ' (خالی)');
+    open.disabled = !it;
+    if (compSlot === n) open.style.borderColor = 'var(--accent, #4d8bff)';
+    open.onclick = () => compOpen(n);
+    row.appendChild(on); row.appendChild(open);
+    box.appendChild(row);
+  }
+  compState();
+}
+async function compRefresh() {
+  try {
+    const r = await fetch('/api/maps', { cache: 'no-store' });
+    if (!r.ok) return false;
+    const j = await r.json();
+    compSlots = Array.isArray(j.slots) ? j.slots : [];
+    compWritable = !!j.writable;
+    $('compSec').hidden = !(j.slots || j.writable);
+    $('compSaveBtn').disabled = !compWritable;
+    renderCompSlots();
+    return true;
+  } catch (e) { return false; }
+}
+async function compOpen(n) {
+  try {
+    const r = await fetch('/api/maps?all=1', { cache: 'no-store' });
+    const j = await r.json();
+    const it = (j.all || []).find((x) => x && +x.slot === n)
+      || (j.maps || []).find((x) => x && x.map && +x.map.compSlot === n);
+    if (!it || !it.map) { compState('مپ ' + n + ' روی سرور نیست.'); return; }
+    map = Object.assign(starterMap(), JSON.parse(JSON.stringify(it.map)));
+    delete map.compSlot;
+    setSavedAs(null);
+    compSlot = n;
+    afterMapSwap(); renderCompSlots();
+  } catch (e) { compState('خطا در خواندن مپ ' + n); }
+}
+async function compSave(n) {
+  if (!n) {
+    const a = prompt('این نقشه روی کدام مپ ذخیره شود؟ (۱ تا ۵)');
+    n = parseInt(String(a || '').replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)), 10);
+    if (!(n >= 1 && n <= COMP_N)) return;
+  }
+  const copy = JSON.parse(JSON.stringify(map)); delete copy.compSlot;
+  if (!copy.name) copy.name = 'مپ ' + n;
+  try {
+    const r = await fetch('/api/maps/slot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slot: n, map: copy }) });
+    if (r.status === 401) { alert('ذخیره فقط برای ادمین‌هاست — اول از صفحه‌ی /admin وارد شو.'); return; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert('ذخیره نشد: ' + (j.error || r.status)); return; }
+    compSlot = n;
+    await compRefresh();
+    compState('✅ مپ ' + n + ' ذخیره شد' + (j.file ? ' → ' + j.file : '') + ' — الان در لیست نقشه‌های بازی است.');
+  } catch (e) { alert('خطا در ارتباط با سرور'); }
+}
+async function compToggle(n, on) {
+  try {
+    const r = await fetch('/api/maps/slot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slot: n, on: !!on }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); alert('تغییر نشد: ' + (j.error || r.status)); return; }
+    await compRefresh();
+  } catch (e) { alert('خطا در ارتباط با سرور'); }
+}
+$('compSaveBtn').onclick = () => compSave(compSlot);
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && compSlot && compWritable) { e.preventDefault(); compSave(compSlot); }
+});
+// ?slot=N (the site's admin page, or a bookmark) opens that competition map
+compRefresh().then((ok) => { const n = +BOOT.get('slot'); if (ok && n >= 1 && n <= COMP_N) compOpen(n); });
 
 /* ---------- boot ---------- */
 // quick colour swatches — one click recolours the selected object, Sims-style

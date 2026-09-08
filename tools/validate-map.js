@@ -21,12 +21,15 @@ require('../leagues/vacuum/maps/grown.js');
 require('../leagues/vacuum/maps/grown-rooms.js');
 require('../leagues/vacuum/maps/open.js');
 require('../leagues/vacuum/maps/standard.js');
-require('../leagues/vacuum/maps/corridor.js');
-require('../leagues/vacuum/maps/villa.js');
-require('../leagues/vacuum/maps/courtyard.js');
 
 const NAME = process.argv[2] || 'GROWN_ROOMS';
-const MAP = global.VacuumMaps[NAME];
+// the competition maps live as JSON in organizer-only/maps/mapN/ —
+// `node tools/validate-map.js map1` (or any path ending in .json)
+const fs = require('fs'), path = require('path');
+const jsonPath = /^map\d+$/.test(NAME) ? path.join(__dirname, '..', 'organizer-only', 'maps', NAME, 'map.json')
+  : /\.json$/i.test(NAME) ? NAME : null;
+const MAP = jsonPath ? JSON.parse(fs.readFileSync(jsonPath, 'utf8')) : global.VacuumMaps[NAME];
+if (MAP && MAP.doorsOpen) console.log('  (doorsOpen: the door objects are removed — every doorway is open)');
 if (!MAP) { console.error('unknown map', NAME, '- have:', Object.keys(global.VacuumMaps).join(', ')); process.exit(2); }
 
 const W = MAP.cols * MAP.tileSize, H = MAP.rows * MAP.tileSize;
@@ -37,7 +40,7 @@ const NX = Math.round(W / RES), NY = Math.round(H / RES);
 const rects = [];
 (MAP.walls || []).forEach((w) => rects.push([w.x - w.w / 2, w.y - w.d / 2, w.x + w.w / 2, w.y + w.d / 2]));
 (MAP.objects || []).forEach((o) => {
-  if (o.t === 'dock' || o.t === 'dump' || o.t === 'door' || o.t === 'sconce') return;   // pass-through: doors push open, sconces hang high
+  if (o.t === 'dock' || o.t === 'dump' || o.t === 'door' || o.t === 'sconce') return;   // (doorsOpen maps have no door at all)   // pass-through: doors push open, sconces hang high
   const r = (o.rot || 0) % 2;
   const w = r ? o.d : o.w, d = r ? o.w : o.d;
   rects.push([o.x - w / 2, o.y - d / 2, o.x + w / 2, o.y + d / 2]);

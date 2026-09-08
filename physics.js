@@ -118,6 +118,9 @@
       // model back to the object it came from even after filtering.
       this.obstacles = this.arena ? []
         : m ? (m.objects || []).map((o, idx) => Object.assign(rectC(o), { type: o.t, rot: o.rot || 0, color: o.color, srcIdx: idx }))
+            // `doorsOpen` (Map Maker checkbox / the game's doors switch): every
+            // door object is dropped, so each doorway is simply open
+            .filter((o) => !(m.doorsOpen && o.type === 'door'))
           : OFFICIAL.obstacles.map((o) => Object.assign({}, o));
 
       // Windows are pure decor: rendered on the outer wall, no physics at all

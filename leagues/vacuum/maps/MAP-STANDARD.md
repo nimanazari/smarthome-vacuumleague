@@ -33,13 +33,16 @@ Every official map follows this checklist and passes the validator.
 نقشه‌ی مرجعِ همین استاندارد: [`standard.js`](standard.js)
 («خانه‌ی استاندارد» در منوی نقشه‌ها).
 
-سه خانه‌ی دیگر به همین استاندارد ولی با پلان کاملاً متفاوت — تا برنامه‌ای که
+پنج خانه‌ی دیگر به همین استاندارد ولی با پلان کاملاً متفاوت — تا برنامه‌ای که
 فقط یک خانه را حفظ کرده لو برود (در همه‌شان اتاقِ دردار `room == 2` است):
-*Three more houses to the same standard, each with its own floor plan; the
-doored room is `room == 2` in all of them.*
+*Five more houses to the same standard, each with its own floor plan; the
+doored room is `room == 2` in all of them.* این نقشه‌ها فقط در کیت برگزارکننده‌اند
+(`organizer-only/maps/`, راهنما همان‌جا) و با `node tools/validate-map.js map1` چک می‌شوند.
 
 | نقشه · map | فایل | پلان |
 |---|---|---|
-| خانه‌ی راهرودار · Corridor | [`corridor.js`](corridor.js) | پذیرایی راهرویی وسط، سه خواب کنار هم در شمال، آشپزخانه/سرویس در جنوب |
-| خانه‌ی ویلایی · Villa | [`villa.js`](villa.js) | پذیرایی L شکل جنوب‌غرب + راهروی شرقی، سه خواب روی هم کنار دیوار شرقی |
-| خانه‌ی حیاط‌مرکزی · Courtyard | [`courtyard.js`](courtyard.js) | پذیرایی مربعی وسط، اتاق‌ها دورش، فویه‌ی جنوب‌شرقی |
+| خانه‌ی راهرودار · Corridor (درها باز) | `organizer-only/maps/map1/map.json` | پذیرایی راهرویی وسط، سه خواب کنار هم در شمال، آشپزخانه/سرویس در جنوب |
+| خانه‌ی ویلایی · Villa | `organizer-only/maps/map2/map.json` | پذیرایی L شکل جنوب‌غرب + راهروی شرقی، سه خواب روی هم کنار دیوار شرقی |
+| خانه‌ی حیاط‌مرکزی · Courtyard | `organizer-only/maps/map3/map.json` | پذیرایی مربعی وسط، اتاق‌ها دورش، فویه‌ی جنوب‌شرقی |
+| خانه‌ی باغی · Garden (ورودی ۴ کاشی) | `organizer-only/maps/map4/map.json` | پذیرایی بزرگ شمال‌شرق، دو خواب در غرب، سرویس/فویه/آشپزخانه/خواب در جنوب |
+| خانه‌ی پهن · Wide (ورودی ۴–۵ کاشی) | `organizer-only/maps/map5/map.json` | نوار پذیرایی وسط، سرویس/خواب/آشپزخانه در شمال، دو خواب در گوشه‌های جنوب |

@@ -1,21 +1,31 @@
-## 2026-09-08 — three more houses to the standard, none alike
+## 2026-09-08 — five competition maps, doors on a switch, saved from the browser
 
-- سه خانه‌ی جدید برای منوی نقشه‌های FS / U14 (و همه‌ی رده‌ها)، هر سه به
-  استاندارد نقشه ولی با پلان کاملاً متفاوت — اتاق‌ها، جای وسایل و شکل خانه
-  عوض شده تا برنامه‌ای که فقط یک خانه را حفظ کرده لو برود:
-  **خانه‌ی راهرودار** (`maps/corridor.js` — پذیرایی راهرویی وسط، سه خواب کنار
-  هم بالا، آشپزخانه و سرویس پایین)، **خانه‌ی ویلایی** (`maps/villa.js` —
-  پذیرایی L شکل، سه خواب روی هم کنار دیوار شرقی، محوطه‌ی سنگی)، و
-  **خانه‌ی حیاط‌مرکزی** (`maps/courtyard.js` — پذیرایی مربعی وسط و اتاق‌ها
-  دورش، فویه‌ی جنوب‌شرقی برای شروع).
-- Three new houses in the map picker, all to MAP-STANDARD.md (3 bedrooms +
-  kitchen + living with TV/sofa + bathroom, ONE push-open door, purple
-  markers, slowing green rug, no wet floor) with floor plans that share
-  nothing: the Corridor house, the Villa house, the Courtyard house.
-- The doored room is `room == 2` in every one of them, so a program that
-  targets "the doored room" keeps working — only its position moves.
-- `node tools/validate-map.js CORRIDOR | VILLA | COURTYARD`: every room
-  100% reachable, zero sealed cells.
+- **پنج نقشه‌ی مسابقه در پنج پوشه:** `organizer-only/maps/map1..5/map.json` —
+  **خانه‌ی راهرودار** (مپ ۱، پذیرایی راهرویی وسط، سه خواب در شمال — **درها
+  همه باز**)، **خانه‌ی ویلایی** (مپ ۲، پذیرایی L شکل و سه خواب روی هم در شرق)،
+  **خانه‌ی حیاط‌مرکزی** (مپ ۳، پذیرایی مربعی وسط و اتاق‌ها دورش)، **خانه‌ی باغی**
+  (مپ ۴) و **خانه‌ی پهن** (مپ ۵) — این دو با **ورودی‌های گشاد ۴–۵ کاشی** و
+  درِ ۳ کاشی، تا شانس ورود ربات بیشتر شود، ولی چیدمانی کاملاً دیگر. هر پنج به
+  استاندارد نقشه و با پلان، جای اتاق‌ها و وسایل کاملاً متفاوت؛ اتاق دردار در
+  همه `room == 2`. فقط در کیت برگزارکننده — TeamKit و ریپوی عمومی ندارندشان.
+- **ذخیره از خود مرورگر:** `tools/mapserver.py` (serve.bat خودش انتخابش
+  می‌کند) بازی را سرو می‌کند و `/api/maps` می‌دهد؛ مپ‌ساز بخش **«🏁 نقشه‌های
+  مسابقه»** دارد: باز کن، ویرایش کن، «ذخیره در مپ N» / Ctrl+S — مستقیم در
+  پوشه نوشته می‌شود (با `.bak`). کلید ● روشن / ○ خاموش هر مپ را از لیست
+  بازی می‌برد یا می‌آورد.
+- **درها روی کلید:** کنار منوی نقشه، «🚪 درها: طبق نقشه / همه باز / همه بسته»
+  (برای هر رده جدا یادش می‌ماند)؛ در مپ‌ساز تیک «درها کامل باز باشن» که در
+  خود نقشه ثبت می‌شود (`doorsOpen`). موتور فیزیک با `doorsOpen` همه‌ی
+  آبجکت‌های در را حذف می‌کند.
+- **روی سایت هم:** `/admin` → تب **Maps** (روشن/خاموش، edit در مپ‌سازِ فقط-ادمین،
+  upload / download `map.json`)؛ `/api/maps` سایت اسلات‌های روشن را با 🏁 به
+  بازیِ `/game/` می‌دهد؛ `release.py` حالا `public/game` سایت را از TeamKit
+  تازه می‌کند (+ مپ‌ساز، که سرور فقط به ادمین می‌دهد).
+- EN: five competition maps as JSON folders (maps 4 and 5 with 4–5-tile doorways) (organiser kit only), a
+  browser-side save through `tools/mapserver.py`, a doors switch in the game
+  and a `doorsOpen` flag in the Map Maker, and the same five slots on the
+  site (admin Maps tab, admin-only Map Maker, seed shipped with the app).
+- `node tools/validate-map.js map1 … map5`: every room reachable, no sealed floor.
 
 ## 2026-08-24 (b) — the charger has queue rules now
 

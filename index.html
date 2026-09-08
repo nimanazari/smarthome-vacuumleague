@@ -2464,6 +2464,7 @@ else:                          # turn AND drive toward them
         <div class="setcell" id="mapCell">
           <label for="mapSel">Map</label>
           <select id="mapSel"></select>
+          <select id="doorSel" title="Doors: as drawn in the map, all open, or all closed (push to open)"></select>
           <button type="button" id="mapEdit" class="smallbtn" title="Edit this map in the Map Maker — every change saves itself">&#9999;&#65039;</button>
           <a class="smallbtn" id="mapmakerLink" href="#" target="_blank" style="text-decoration:none;display:none" title="Open this league's Map Maker">&#128736;</a>
         </div>
@@ -3598,17 +3599,21 @@ else:                            # 7) nothing in the way -> full speed ahead
     // ----- custom maps built in the Map Maker (game/mapmaker.html) -----
     function mapStore(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
     let serverMaps = {};                      // maps admins uploaded to the site — visible to everyone
+    let siteEditorLocked = false;             // the site said: no Map Maker for this visitor
     async function loadServerMaps() {
-      // STANDALONE COPY: there is no site behind this folder, so there are no
-      // uploaded maps to pull. Maps you build in the Map Maker are kept in
-      // this browser's localStorage and still show up in the list below.
-      if (true) return;
+      // The ORGANISER's copy runs tools/mapserver.py (serve.bat picks it when
+      // it exists), which answers /api/maps with the competition maps kept in
+      // organizer-only/maps/map1..3/map.json. The teams' kit has neither, so
+      // the fetch 404s and the list shows only the built-in houses.
       try {
         const r = await fetch('/api/maps', { cache: 'no-store' });
         if (!r.ok) return;
         const j = await r.json();
         serverMaps = {};
-        for (const it of (j.maps || [])) if (it && it.name && it.map) serverMaps[it.name] = it.map;
+        for (const it of (j.maps || [])) if (it && it.name && it.map && it.on !== false) serverMaps[it.name] = it.map;
+        // on the league site the Map Maker is a referee tool: only an admin
+        // session may open it, so everyone else loses the ✏️ button
+        if (j.admin === false) { siteEditorLocked = true; for (const id of ['mapEdit', 'mapmakerLink']) if ($(id)) $(id).style.display = 'none'; }
         populateMaps();
       } catch (e) { /* offline is fine */ }
     }
@@ -3638,7 +3643,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       // sit right under the official one, for this league only
       const grpDef = curGroup && Leagues.getGroup(curGroup);
       ((grpDef && grpDef.maps) || []).forEach((m, i) => opt('grp:' + i, '🏠 ' + m.name));
-      for (const n of Object.keys(serverMaps)) if (mapFits(serverMaps[n])) opt('srv:' + n, '🌐 ' + n);
+      for (const n of Object.keys(serverMaps)) if (mapFits(serverMaps[n])) opt('srv:' + n, '🏁 ' + n);
       const draft = mapStore('shl_play_map');
       if (draft && mapFits(draft)) opt('::draft', '🛠 Map Maker draft');
       const all = mapStore('shl_maps') || {};
@@ -3652,9 +3657,22 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     // every division keeps its OWN map choice
     const mapChoiceKey = () => 'shl_map_' + leagueId;
-    function selectedMap() {
+    // ---- the DOORS switch: play the chosen house with its doors as drawn,
+    // all OPEN (the door objects vanish) or all CLOSED (push to open) ----
+    const doorMode = () => ($('doorSel') && $('doorSel').value) || 'map';
+    function withDoors(m) {
+      const mode = doorMode();
+      if (!m || mode === 'map') return m;
+      return Object.assign({}, m, { doorsOpen: mode === 'open' });
+    }
+    function selectedMap() { return withDoors(selectedMapRaw()); }
+    function selectedMapRaw() {
       const v = $('mapSel') ? $('mapSel').value : '';
-      if (!v) return null;
+      if (!v) {
+        // the official slot: only a doors override needs the division's own house
+        const d = Leagues.get ? Leagues.get(leagueId) : null;
+        return (doorMode() !== 'map' && d && d.map) ? d.map : null;
+      }
       if (v === '::draft') return mapStore('shl_play_map');
       if (v.indexOf('grp:') === 0) {
         const g = curGroup && Leagues.getGroup(curGroup);
@@ -4200,7 +4218,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       const mmURL = mapmakerOf(curGroup);     // …and the 🛠 button opens ITS editor
       $('mapmakerLink').href = mmURL || '#';
       $('mapmakerLink').style.display = mmURL ? '' : 'none';
-      $('mapEdit').style.display = mmURL ? '' : 'none';
+      $('mapEdit').style.display = (mmURL && !siteEditorLocked) ? '' : 'none';
       $('techBtn').style.display = techOf(curGroup) ? '' : 'none';   // the mission ladder
       $('rulesBtn').style.display = d.guide ? '' : 'none';           // the division rulebook
       populateMaps();
@@ -4392,6 +4410,18 @@ else:                            # 7) nothing in the way -> full speed ahead
       try { localStorage.setItem(mapChoiceKey(), $('mapSel').value); } catch (e) { /* private mode */ }
       previewScene();
     };
+    // the doors switch — remembered per division, like the map choice
+    (function initDoorSel() {
+      const s = $('doorSel'); if (!s) return;
+      const opts = [['map', T('🚪 درها: طبق نقشه', '🚪 Doors: as drawn')], ['open', T('🚪 درها: همه باز', '🚪 Doors: all open')], ['closed', T('🚪 درها: همه بسته', '🚪 Doors: all closed')]];
+      for (const [v, l] of opts) { const o = document.createElement('option'); o.value = v; o.textContent = l; s.appendChild(o); }
+      try { s.value = localStorage.getItem('shl_doors_' + leagueId) || 'map'; } catch (e) { /* private mode */ }
+      if (!s.value) s.value = 'map';
+      s.onchange = () => {
+        try { localStorage.setItem('shl_doors_' + leagueId, s.value); } catch (e) { /* private mode */ }
+        previewScene();
+      };
+    })();
 
     /* ---------- 1 player / 2 players ---------- */
     function applyPlayers() {
