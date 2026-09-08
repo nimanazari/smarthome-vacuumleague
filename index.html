@@ -1670,6 +1670,7 @@
       <div id="timer">
         <div class="clock" id="clock">3:00</div>
         <div class="lbl" id="timeLbl">TIME LEFT</div>
+        <div class="lbl" id="recBadge" style="display:none;color:#ff4d4d;font-weight:700;letter-spacing:.06em">● REC</div>
         <div id="houseClean">HOUSE <b>0.0%</b> CLEAN</div>
         <div id="padChip">&#9889; PAD 0 , 0</div>
       </div>
@@ -1730,7 +1731,7 @@
     <div class="msep"></div>
     <button class="mitem" id="speedBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg><span id="speedLbl">Speed: 1x</span></button>
     <button class="mitem" id="sensBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span id="sensLbl">Sensors: off</span></button>
-    <button class="mitem" id="viewBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg><span id="viewLabel">2.5D view</span></button>
+    <button class="mitem" id="viewBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg><span id="viewLabel">Match view — overhead</span></button>
     <button class="mitem" id="helpBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Guide</button>
     <button class="mitem" id="dlBaseBtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Base code .py</button>
     <div class="msep"></div>
@@ -3732,7 +3733,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       put('timeLbl', 'زمان باقی‌مانده', 'TIME LEFT');
       put('speedLbl', 'سرعت: 1x', 'Speed: 1x');
       put('sensLbl', 'سنسورها: خاموش', 'Sensors: off');
-      put('viewLabel', 'نمای ۲.۵ بعدی', '2.5D view');
+      put('viewLabel', 'نمای مسابقه — از بالا', 'Match view — overhead');
       put('lockLbl', 'حالت رسمی: خاموش', 'Official mode: off');
       put('exLinks', 'ربات‌های نمونه: ', 'Example robots: ');
       // the two team-name boxes start with a default name and a placeholder
@@ -4950,25 +4951,43 @@ else:                            # 7) nothing in the way -> full speed ahead
         if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
         this.chunks = [];
         this.rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6e6 });
-        this.rec.ondataavailable = (e) => { if (e.data && e.data.size) this.chunks.push(e.data); };
+        this.bytes = 0; this.t0 = performance.now();
+        const badge = $('recBadge');
+        const mb = () => (this.bytes / 1e6).toFixed(1);
+        this.rec.ondataavailable = (e) => {
+          if (e.data && e.data.size) { this.chunks.push(e.data); this.bytes += e.data.size; }
+          // the badge is the proof it is really filming: seconds + megabytes, growing
+          if (badge) badge.textContent = '● REC ' + Math.round((performance.now() - this.t0) / 1000) + 's · ' + mb() + ' MB';
+        };
         this.rec.onstop = () => {
+          if (badge) badge.style.display = 'none';
+          if (!this.chunks.length) {
+            showToast(T('⚠️ فیلمی ضبط نشد — مرورگر چیزی از صحنه نگرفت', '⚠️ nothing was recorded — the browser captured no frames'));
+            return;
+          }
           const blob = new Blob(this.chunks, { type: 'video/webm' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
           const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-          a.download = 'match-' + stamp + '.webm';
+          const name = 'match-' + stamp + '.webm';
+          a.download = name;
           document.body.appendChild(a); a.click(); a.remove();
           setTimeout(() => URL.revokeObjectURL(a.href), 8000);
-          showToast(T('🎞 فیلم مسابقه ذخیره شد — آپلودش کنید تا هر بحثی تمام شود', '🎞 the match video is saved — upload it and end every argument'));
+          this.lastFile = { name, size: blob.size };
+          // say WHERE it went: the browser's Downloads folder, under this name
+          showToast(T('🎞 فیلم مسابقه ذخیره شد → پوشه‌ی Downloads مرورگر: ' + name + ' (' + mb() + ' MB)',
+            '🎞 match video saved → the Downloads folder of your browser: ' + name + ' (' + mb() + ' MB)'));
         };
         this.rec.start(1000);
         this.on = true;
-        // the official film is ONE FIXED view: lock the camera on TOP so a
-        // protest can be judged from the same evidence every time
-        renderer.viewMode = 'top'; renderer.setView('top'); renderer._vi = 0;
-        $('viewLabel').textContent = T('نمای بالا', 'Top view');
-        showToast(T('⏺ ضبط رسمی — دوربین روی نمای بالا قفل شد؛ فایل در پایان مسابقه ذخیره می‌شود',
-          '⏺ OFFICIAL RECORDING — camera locked to Top view; the file saves itself at the whistle'));
+        if (badge) { badge.style.display = ''; badge.textContent = '● REC'; }
+        // the film opens on the overhead MATCH view -- the whole floor, both
+        // robots -- but the camera is NOT locked any more: the organiser asked
+        // for the cinematic (overhead + one third-person cut at half-time) to
+        // be usable in a real match, so the referee picks the view.
+        $('viewLabel').textContent = renderer.setViewByKey('over');
+        showToast(T('⏺ ضبط مسابقه — نمای بالا؛ فایل در پایان مسابقه ذخیره می‌شود',
+          '⏺ RECORDING — overhead view; the file saves itself at the whistle'));
       },
       stop() {
         if (!this.on) return;
@@ -6062,11 +6081,11 @@ else:                            # 7) nothing in the way -> full speed ahead
        the list instead: every camera named, the current one marked, one click
        to any of them. */
     $('viewBtn').onclick = () => {
-      if (matchRec.on) { showToast(T('در حین ضبط رسمی، دوربین قفل است', 'The camera is locked while the official recording runs')); return; }
       const old = $('camPick'); if (old) { old.remove(); return; }
       const CAMS = [
-        { k: '2.5d',   fa: 'نمای ۲.۵ بعدی',        en: '2.5D view',                  note: ['کل خانه با عمق — نمای پیشنهادی', 'the whole house, with depth'] },
-        { k: 'cine',   fa: '🎬 سینماتیک',           en: '🎬 Cinematic',                note: ['کارگردان خودکار؛ روی امتیاز برش می‌زند', 'the auto-director, cutting on the score'] },
+        { k: 'over',   fa: 'نمای مسابقه — از بالا', en: 'Match view — overhead',      note: ['کل زمین از بالا، هر دو ربات — پیش‌فرض', 'the whole floor from above, both robots — the default'] },
+        { k: '2.5d',   fa: 'نمای ۲.۵ بعدی',        en: '2.5D view',                  note: ['کل خانه با عمق', 'the whole house, with depth'] },
+        { k: 'cine',   fa: '🎬 سینماتیک',           en: '🎬 Cinematic',                note: ['نمای بالا؛ یک برش سوم‌شخص در نیمه‌ی بازی', 'overhead; one third-person cut at half-time'] },
         { k: 'chase',  fa: 'سوم‌شخص — هر دو ربات',  en: 'Third person — both robots', note: ['از پشت شانه‌ی هر دو ربات، کنار هم', 'over both robots\' shoulders, side by side'] },
         { k: 'top',    fa: 'نمای بالا',             en: 'Top view',                   note: ['مستقیم از بالا، کل زمین', 'straight down on the whole floor'] },
         { k: '3d',     fa: 'نمای سه‌بعدی',          en: '3D view',                    note: ['نمای معرفیِ خانه', 'the establishing shot'] },

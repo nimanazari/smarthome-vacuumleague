@@ -1,3 +1,23 @@
+## 2026-09-08 (b) — the overhead MATCH view is the default; the film says where it went
+
+- **نمای پیش‌فرض عوض شد:** «نمای مسابقه — از بالا» (`over` در render.js) —
+  تقریباً عمود، کل خانه در قاب، هر دو ربات، کمی شیب تا دیوارها و وسایل ارتفاع
+  داشته باشند. بازی با همین باز می‌شود؛ ۲.۵ بعدی و بقیه سر جایشان در منوی دوربین
+  هستند. فاصله‌ی دوربین حالا از پیش‌تنظیمِ همان نما (نه همیشه ۲.۵ بعدی) با اندازه‌ی
+  زمین مقیاس می‌شود.
+- **سینماتیک بازنویسی شد:** خانه‌اش همین نمای بالاست و فقط **یک بار** آن را ترک
+  می‌کند — در **نیمه‌ی مسابقه** شش ثانیه سوم‌شخص (هر دو ربات)، بعد برمی‌گردد و
+  می‌ماند تا فینال ده‌ثانیه‌ی آخر. بازدیدهای دوره‌ای و برش‌های امتیازی حذف شدند.
+- **ضبط مسابقه:** دوربین دیگر روی «نمای بالا»ی قدیمی قفل نمی‌شود؛ فیلم با نمای
+  مسابقه شروع می‌شود و داور می‌تواند نما (از جمله سینماتیک) را عوض کند. زیر
+  ساعت، **● REC** با ثانیه و مگابایت زنده نشان می‌دهد که واقعاً دارد ضبط می‌شود؛
+  در سوت پایان، پیام می‌گوید فایل با چه اسمی (`match-تاریخ-ساعت.webm`) در پوشه‌ی
+  **Downloads** مرورگر ذخیره شد؛ اگر هیچ فریمی گرفته نشده باشد، هشدار می‌دهد.
+- EN: the overhead match view is the default camera (2.5D still one click
+  away); the cinematic is overhead + ONE six-second third-person cut at
+  half-time + the finale; recording no longer locks the camera, shows a live
+  ● REC badge (seconds · MB) and names the saved file and its folder.
+
 ## 2026-09-08 — five competition maps, doors on a switch, saved from the browser
 
 - **پنج نقشه‌ی مسابقه در پنج پوشه:** `organizer-only/maps/map1..5/map.json` —

@@ -21,6 +21,10 @@ const VIEWS = {
   // straight down on the whole house — a TOP view, not a high one. `pol` is
   // the angle off vertical, so a small number is what puts the camera overhead.
   top:    { az: Math.PI * 0.70, pol: 0.12, rad: 22, fov: 40, get label() { return TR_VIEW('نمای بالا', 'Top view'); } },
+  // THE MATCH VIEW, and the default: nearly overhead with the house square in
+  // the frame and just enough tilt that walls and furniture keep their height
+  // -- the whole floor, both robots, every tile, in one still picture.
+  over:   { az: Math.PI * 0.49, pol: 0.22, rad: 20, fov: 40, get label() { return TR_VIEW('نمای مسابقه — از بالا', 'Match view — overhead'); } },
   // the establishing shot. It used to sit 16 units out at 53 degrees, close
   // enough that the near wall cut across the frame and the far rooms fell off
   // the edge. Further back and higher: the whole house, with depth.
@@ -60,14 +64,15 @@ class Renderer3D {
     this.scene.add(sun);
     // the game opens on 2.5D, so say so -- otherwise the camera list shows
     // nothing ticked until you have already changed camera once
-    this.viewMode = '2.5d';
+    this.viewMode = 'over';
     this._vi = 0;
     this._sun = sun;                 // the endgame tints this, and the shadows with it
     this._sunBase = sun.color.clone();
     this._tint = 0;                  // 0 = neutral room, 1 = fully the leader's
 
-    // camera (2.5D view by default — the whole board in one glance) + smooth view transitions
-    const v = VIEWS['2.5d']; this._vi = 2;
+    // camera (the overhead MATCH view by default — the whole board in one
+    // glance; 2.5D is one click away) + smooth view transitions
+    const v = VIEWS['over']; this._vi = 0;
     this.az = v.az; this.pol = v.pol; this.rad = v.rad;
     this.tAz = v.az; this.tPol = v.pol; this.tRad = v.rad; this.tFov = v.fov;
     this.camera.fov = v.fov; this.camera.updateProjectionMatrix();
@@ -81,7 +86,8 @@ class Renderer3D {
     this._resize();
   }
 
-  setView(name) { const v = VIEWS[name]; if (!v) return; this.tAz = v.az; this.tPol = v.pol; this.tRad = v.rad; this.tFov = v.fov; this.anim = true; }
+  // every preset is drawn for the 16x16 house; `_fitSpan` (set by buildScene) scales the distance to the board actually on the floor
+  setView(name) { const v = VIEWS[name]; if (!v) return; this.tAz = v.az; this.tPol = v.pol; this.tRad = v.rad * (this._fitSpan || 1); this.tFov = v.fov; this.anim = true; }
   // top → 3d → 2.5d → a slow 360° orbit → the ROBOT'S OWN EYES (team 1)
   // live wall recolour from the settings panel
   setWallColor(hex) {
@@ -94,7 +100,7 @@ class Renderer3D {
      LIST needs -- picking the eighth camera should not mean eight lurches
      through the other seven. */
   setViewByKey(k) {
-    const keys = ['2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
+    const keys = ['over', '2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
     const i = keys.indexOf(k);
     if (i < 0) return this.cycleView();
     this._vi = (i - 1 + keys.length) % keys.length;   // so the next cycle carries on from here
@@ -102,9 +108,9 @@ class Renderer3D {
   }
 
   cycleView() {
-    // 2.5D reads best, so it leads; the reel built around it comes next,
-    // then third person -- the shot that shows both robots at once
-    const keys = ['2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
+    // the overhead match view leads (it is the default), 2.5D next, then the
+    // reel, then third person -- the shot that shows both robots at once
+    const keys = ['over', '2.5d', 'cine', 'chase', 'top', '3d', 'spider', 'spin', 'pov'];
     this._vi = ((this._vi || 0) + 1) % keys.length;
     const k = keys[this._vi];
     this.viewMode = k;
@@ -756,7 +762,8 @@ class Renderer3D {
     const span = engine.arena ? (engine.arena.r * 2 + 1.5) / 10 : Math.max(c.W, c.H) / 10;
     if (this._fitSpan !== span) {
       this._fitSpan = span;
-      if (Math.abs(span - 1) > 0.01) { this.tRad = VIEWS['2.5d'].rad * span; this.rad = this.tRad; }
+      // ...from the CURRENT view's own distance, not always 2.5D's
+      if (Math.abs(span - 1) > 0.01) { this.tRad = (VIEWS[this.viewMode] || VIEWS['2.5d']).rad * span; this.rad = this.tRad; }
     }
 
     this.sync(engine);
@@ -920,6 +927,7 @@ class Renderer3D {
     // how long is left — the director holds the wide shot for the finish
     this._cineLeft = (engine.cfg && isFinite(engine.cfg.matchSeconds))
       ? Math.max(0, engine.cfg.matchSeconds - engine.elapsed) : null;
+    this._cineTotal = (engine.cfg && isFinite(engine.cfg.matchSeconds)) ? engine.cfg.matchSeconds : null;
     this._cineRunning = !!engine.running;
     // a robot held by SHIFT+drag stays pinned under the cursor, whatever its
     // own wheels are trying to do
@@ -1558,6 +1566,7 @@ class Renderer3D {
     if (this._cine && this._cine.shot === 'finale') {
       this._cine = null;                 // a new match
       this._cinePovShown = false;        // ...and its own single POV
+      this._cineHalfShown = false;       // ...and its own single half-time cut
       this._cineOrder = null;            // ...and its own running order
       this._cineWatch = null;            // ...and its own reading of the score
     }
@@ -1581,55 +1590,21 @@ class Renderer3D {
          them end up neck and neck -- it cuts in close for a few seconds.
          That cut is the whole point: the camera moves because the MATCH
          moved, not because a timer went off. */
-    if (!this._cineOrder) {
-      const specials = ['spider', 'orbit', 'top', '3d'];
-      for (let i = specials.length - 1; i > 0; i--) {   // a fresh order per match
-        const j = Math.floor(Math.random() * (i + 1));
-        const t = specials[i]; specials[i] = specials[j]; specials[j] = t;
-      }
-      // third person, then one of the fancy ones, then third person again
-      const deck = [];
-      for (const sp of specials) {
-        deck.push({ shot: 'chase-both', hold: 8000 });
-        deck.push({ shot: sp, hold: 7500 });
-      }
-      this._cineOrder = deck;
-      this._cineAt = 0;
-    }
-
+    /* WHAT THE DIRECTOR DOES NOW (the organiser's cut, 2026-09-08)
+       Home is the overhead MATCH view -- the same still picture the game
+       opens on: the whole floor, both robots, every tile. The camera lives
+       there for the whole match and leaves it exactly ONCE: when half the
+       match has gone it drops to the over-the-shoulder two-up for about six
+       seconds, then goes home and stays. The finale (below) is the only
+       other shot. */
     const c0 = this._cine;
-    const drama = this._cineDrama(now);
-    if (drama && (!c0 || c0.shot === '2.5d')) {
-      // Something happened. Get close to it -- but only ever from HOME, so a
-      // visit already running is never cut in half.
-      this._cineWatch.cool = now + 15000;
-      const usePov = drama === 'lead' && !this._cinePovShown && Math.random() < 0.45;
-      if (usePov) this._cinePovShown = true;
-      this._cine = {
-        shot: usePov ? 'pov-both' : 'chase-both',
-        until: now + (drama === 'lead' ? 7000 : 5500),
-        az: Math.random() * Math.PI * 2,
-        dir: Math.random() < 0.5 ? -1 : 1,
-        why: drama,
-      };
-    } else if (!c0 || now > c0.until) {
-      if (!c0 || c0.shot !== '2.5d') {
-        // home, and stay there: 2.5D is the shot the match is watched on
-        this._cine = {
-          shot: '2.5d', until: now + 24000 + Math.random() * 8000,
-          az: Math.random() * Math.PI * 2,
-          dir: Math.random() < 0.5 ? -1 : 1,
-        };
-      } else {
-        // home has had its thirty seconds -- pay one camera a visit. Once the
-        // fancy ones have each had their turn, the two-up carries the rest.
-        const v = this._cineOrder[this._cineAt++] || { shot: 'chase-both', hold: 8000 };
-        this._cine = {
-          shot: v.shot, until: now + v.hold,
-          az: Math.random() * Math.PI * 2,
-          dir: Math.random() < 0.5 ? -1 : 1,
-        };
-      }
+    const total = this._cineTotal;
+    const halfGone = this._cineRunning && total != null && this._cineLeft != null && this._cineLeft <= total / 2;
+    if (halfGone && !this._cineHalfShown && (!c0 || c0.shot === 'over')) {
+      this._cineHalfShown = true;
+      this._cine = { shot: 'chase-both', until: now + 6000, az: Math.random() * Math.PI * 2, dir: 1, why: 'half' };
+    } else if (!c0 || (c0.shot !== 'over' && now > c0.until)) {
+      this._cine = { shot: 'over', until: Infinity, az: VIEWS.over.az, dir: 1 };
     }
     const c = this._cine;
     const el = this.renderer.domElement;
@@ -1663,8 +1638,9 @@ class Renderer3D {
 
     // the wide shots: the same geometry the standing views use, drifting.
     // A third of the old speed — the camera should drift, not sweep.
-    c.az += 0.0009 * (c.dir || 1);
-    const cfgS = c.shot === 'top' ? { pol: 0.12, rad: 22, fov: 40 }
+    if (c.shot !== 'over') c.az += 0.0009 * (c.dir || 1);   // home does not drift
+    const cfgS = c.shot === 'over' ? { pol: VIEWS.over.pol, rad: VIEWS.over.rad * (this._fitSpan || 1), fov: VIEWS.over.fov }
+      : c.shot === 'top' ? { pol: 0.12, rad: 22, fov: 40 }
       : c.shot === '2.5d' ? { pol: 0.60, rad: 32, fov: 22 }
         : { pol: 0.62, rad: 24, fov: 34 };
     this.camera.fov = cfgS.fov;
