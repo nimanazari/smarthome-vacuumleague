@@ -53,12 +53,12 @@ def svg_of(m):
     S = 60.0                                   # px per metre
     pad = 24
     def X(x): return pad + x * S
-    def Y(y): return pad + (H - y) * S         # the game's y goes UP; SVG's goes down
+    def Y(y): return pad + y * S               # same as the Map Maker / the game: y grows DOWN the screen
     out = []
     out.append('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="100%%" style="max-width:900px;background:#f6f7f9;border-radius:12px;direction:ltr">'
                % (W * S + pad * 2, H * S + pad * 2))
     # floor + grid
-    out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#ffffff" stroke="#2b2f36" stroke-width="6"/>' % (X(0), Y(H), W * S, H * S))
+    out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#ffffff" stroke="#2b2f36" stroke-width="6"/>' % (X(0), Y(0), W * S, H * S))
     for i in range(m['cols'] + 1):
         out.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="1"/>' % (X(i * t), Y(0), X(i * t), Y(H), '#c9ced6' if i % 4 else '#9aa3b0'))
     for j in range(m['rows'] + 1):
@@ -67,20 +67,20 @@ def svg_of(m):
     for r in m.get('rooms') or []:
         x1, y1, x2, y2 = r['x1'], r['y1'], r['x2'], r['y2']
         out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#4d8bff" fill-opacity="0.05" stroke="#4d8bff" stroke-opacity="0.35" stroke-dasharray="6 4"/>'
-                   % (X(x1), Y(y2), (x2 - x1) * S, (y2 - y1) * S))
+                   % (X(x1), Y(y1), (x2 - x1) * S, (y2 - y1) * S))
         name = str(r.get('name') or '')
         fa = ROOM_FA.get(name.split(' ')[0], 'خواب' if 'bedroom' in name else name)
         out.append('<text x="%g" y="%g" font-size="15" fill="#4d8bff" font-family="Vazirmatn,Tahoma,sans-serif" font-weight="700">room %s · %s%s</text>'
-                   % (X(x1) + 8, Y(y2) + 20, r['id'], fa, ' (در)' if 'door' in name else ''))
+                   % (X(x1) + 8, Y(y1) + 20, r['id'], fa, ' (در)' if 'door' in name else ''))
     # rugs
     for g in m.get('rugs') or []:
         col = (RUGS.get(g.get('kind'), ('', '#2f7d4a'))[1]) if not g.get('color') else g['color']
         out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s" fill-opacity="0.75" rx="3"/>'
-                   % (X(g['x'] - g['w'] / 2), Y(g['y'] + g['d'] / 2), g['w'] * S, g['d'] * S, col))
+                   % (X(g['x'] - g['w'] / 2), Y(g['y'] - g['d'] / 2), g['w'] * S, g['d'] * S, col))
     # walls
     for w in m.get('walls') or []:
         out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#2b2f36"/>'
-                   % (X(w['x'] - w['w'] / 2), Y(w['y'] + w['d'] / 2), w['w'] * S, w['d'] * S))
+                   % (X(w['x'] - w['w'] / 2), Y(w['y'] - w['d'] / 2), w['w'] * S, w['d'] * S))
     # furniture
     doors_open = bool(m.get('doorsOpen'))
     for o in m.get('objects') or []:
@@ -94,7 +94,7 @@ def svg_of(m):
         col = o.get('color') or col
         dash = ' stroke-dasharray="4 3"' if k in ('dock', 'dump', 'sconce') else ''
         out.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s" fill-opacity="0.9" stroke="#1d2026" stroke-width="1.2" rx="3"%s/>'
-                   % (X(o['x'] - w / 2), Y(o['y'] + d / 2), w * S, d * S, col, dash))
+                   % (X(o['x'] - w / 2), Y(o['y'] - d / 2), w * S, d * S, col, dash))
         if w * S > 34 and d * S > 16:
             light = col.lower() in ('#c9ced6', '#dfe3e8', '#eef1f3', '#f0f2f4', '#f4f7fb', '#caa25a', '#2fd08a', '#b9a58e')
             out.append('<text x="%g" y="%g" font-size="11" text-anchor="middle" fill="%s" font-family="Vazirmatn,Tahoma,sans-serif">%s</text>'
