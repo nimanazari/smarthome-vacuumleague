@@ -33,10 +33,9 @@ TEAM_README = """# 🤖 Smart Home League — Team Kit · بسته‌ی تیم
 سلام تیم! همه‌چیز برای تمرین، کدنویسی و مسابقه همین‌جاست — بدون نصب، بدون اینترنت.
 
 ## اجرا · Run it
-1. روی **`serve.bat`** دوبار کلیک کن — **هیچ نصبی لازم نیست**
-   (پایتون داشته باشی با پایتون، نداشته باشی خودِ ویندوز سرور می‌شود).
-2. مرورگر: **http://localhost:8801/**
-> حتماً از راه serve.bat — دوبار کلیک روی index.html کار نمی‌کند.
+1. روی **`index.html`** دوبار کلیک کن — همین. (یا `serve.bat` که مرورگر را با
+   سرور محلی باز می‌کند؛ هر دو کار می‌کنند، هیچ نصبی لازم نیست.)
+2. اگر از serve.bat رفتی: **http://localhost:8801/**
 
 ## هر رده سه چیز دارد · Every league gives you three things
 | چی | کجا |
@@ -108,6 +107,26 @@ def report(dst):
     size = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dst) for f in fs)
     print('  %s — %d files, %.1f MB' % (os.path.basename(dst), n, size / 1e6))
 
+OFFLINE_HEAD = '''/* offline-files.js — built by tools/make-kits.py. Every text the game fetches at
+   runtime, inlined, so index.html works from a DOUBLE-CLICK (file://) with no
+   server at all. Regenerated on every build; do not edit. */
+'''
+def build_offline(dst):
+    """Inline every runtime-fetched text file of the kit at `dst` into dst/offline-files.js."""
+    import json
+    files = {}
+    for r, _, fs in os.walk(os.path.join(dst, 'leagues')):
+        for f in fs:
+            if f.endswith('.py'):
+                p = os.path.join(r, f)
+                files[os.path.relpath(p, dst).replace(os.sep, '/')] = io.open(p, encoding='utf-8').read()
+    for f in os.listdir(dst):                       # a dropped-in map next to index.html
+        if f.startswith('map') and f.endswith('.json'):
+            files[f] = io.open(os.path.join(dst, f), encoding='utf-8').read()
+    body = OFFLINE_HEAD + 'window.SHL_FILES = Object.assign(window.SHL_FILES || {}, ' + json.dumps(files, ensure_ascii=False) + ');\n'
+    io.open(os.path.join(dst, 'offline-files.js'), 'w', encoding='utf-8').write(body)
+    print('  offline-files.js: %d files inlined' % len(files))
+
 def build_admin():
     dst = os.path.join(ROOT, 'AdminKit')
     clean(dst)
@@ -120,6 +139,7 @@ def build_admin():
         else:
             shutil.copy2(src, os.path.join(dst, name))
     io.open(os.path.join(dst, 'ADMIN-README.md'), 'w', encoding='utf-8').write(ADMIN_README)
+    build_offline(dst)
     report(dst)
 
 def build_team():
@@ -159,6 +179,7 @@ def build_team():
     io.open(idx, 'w', encoding='utf-8').write(h)
 
     io.open(os.path.join(dst, 'README.md'), 'w', encoding='utf-8').write(TEAM_README)
+    build_offline(dst)
     report(dst)
 
 if __name__ == '__main__':

@@ -1,3 +1,13 @@
+## 2026-09-09 (b) — index.html opens from a double-click
+
+- `offline-files.js` (ساخته‌ی make-kits.py در هر دو کیت): همه‌ی متن‌هایی که بازی
+  حین اجرا fetch می‌کند (برنامه‌های نمونه، program.py هر رده، مپ کنار بازی)
+  داخلش است؛ وقتی صفحه از `file://` باز شود، یک شیم کوچک fetch را از همان
+  جواب می‌دهد. یعنی **دابل‌کلیک روی index.html کافی است**؛ serve.bat هم مثل قبل.
+  بسته‌ی هر مپ (`SmartHomeLeague-MapN.zip`) مپ را داخل همین فایل هم دارد.
+- EN: index.html works from file:// — runtime-fetched texts are inlined into
+  offline-files.js and a fetch shim serves them when there is no server.
+
 ## 2026-09-09 — one file per map, and a match that plays itself forever
 
 - **بسته‌ی کامل هر مپ:** `tools/make-map-kit.py` برای هر مپ

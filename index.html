@@ -2531,6 +2531,28 @@ else:                          # turn AND drive toward them
     </div>
   </div>
 
+  <!-- DOUBLE-CLICK support: offline-files.js (built by tools/make-kits.py) carries every
+       text the game fetches at runtime; when the page is opened from file:// — no
+       serve.bat, no server — fetch() answers from it. On http it is never used. -->
+  <script src="offline-files.js"></script>
+  <script>
+    (function () {
+      if (location.protocol !== 'file:') return;
+      const F = window.SHL_FILES || {};
+      const real = window.fetch ? window.fetch.bind(window) : null;
+      window.fetch = function (u, o) {
+        if (typeof u === 'string' && !/^[a-z]+:/i.test(u)) {
+          const k = u.replace(/^\.\//, '').split('?')[0].split('#')[0];
+          if (Object.prototype.hasOwnProperty.call(F, k)) {
+            const type = /\.json$/i.test(k) ? 'application/json' : /\.html?$/i.test(k) ? 'text/html' : 'text/plain';
+            return Promise.resolve(new Response(F[k], { status: 200, headers: { 'Content-Type': type + '; charset=utf-8' } }));
+          }
+          return Promise.resolve(new Response('', { status: 404 }));
+        }
+        return real ? real(u, o) : Promise.reject(new Error('no fetch'));
+      };
+    })();
+  </script>
   <script src="vendor/three.min.js"></script>
   <script src="homeobjects.js"></script>
   <script src="sensors.js"></script>

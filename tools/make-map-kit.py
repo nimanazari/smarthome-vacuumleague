@@ -24,8 +24,8 @@ README = u"""# Smart Home League — بازی + مپ %(n)d
 
 این پوشه بازی کامل است و **مپ %(n)d (%(name)s)** از قبل داخلش است.
 
-1. روی **serve.bat** دوبار کلیک کن (هیچ نصبی لازم نیست).
-2. مرورگر خودش http://localhost:8801/ را باز می‌کند؛ رده‌ات را انتخاب کن.
+1. روی **index.html** دوبار کلیک کن (هیچ نصبی لازم نیست؛ `serve.bat` هم کار می‌کند).
+2. رده‌ات را انتخاب کن.
 3. مپ %(n)d خودش در منوی نقشه با 📁 انتخاب شده است. بازی کن.
 
 اگر ویندوز نداری: روی مک «Smart Home League (Mac).command» را باز کن؛ روی
@@ -47,7 +47,14 @@ def build(n):
         for r, _, fs in os.walk(KIT):
             for f in fs:
                 p = os.path.join(r, f)
-                z.write(p, top + os.path.relpath(p, KIT).replace(os.sep, '/'))
+                rel = os.path.relpath(p, KIT).replace(os.sep, '/')
+                if rel == 'offline-files.js':
+                    # the double-click bundle: the map rides inside it too
+                    txt = io.open(p, encoding='utf-8').read()
+                    txt += 'window.SHL_FILES[%s] = %s;\n' % (json.dumps('map%d.json' % n), json.dumps(json.dumps(m, ensure_ascii=False)))
+                    z.writestr(top + rel, txt)
+                    continue
+                z.write(p, top + rel)
         z.writestr(top + 'map%d.json' % n, json.dumps(m, ensure_ascii=False, indent=1))
         z.writestr(top + 'README-MAP.md', README % {'n': n, 'name': m.get('name', '')})
     print('  SmartHomeLeague-Map%d.zip  %.1f MB  (%s)' % (n, os.path.getsize(out) / 1e6, m.get('name', '')))
