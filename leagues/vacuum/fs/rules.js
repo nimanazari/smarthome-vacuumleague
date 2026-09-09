@@ -42,7 +42,7 @@
     bullets: [
       { en: 'No cat and no dog in the house', fa: 'بدون گربه و سگ در خانه' },
       { en: 'No wet floor to punish you', fa: 'بدون کف خیس و جریمه‌اش' },
-      { en: 'Gentle 2-tile penalty if the referee moves you', fa: 'جریمه‌ی ملایم ۲ کاشی برای جابه‌جایی داور' },
+      { en: 'Relocation costs 5, then 10, then 12 tiles', fa: 'جابه‌جایی: بار اول −۵، دوم −۱۰، از سوم −۱۲ کاشی' },
       { en: '2-minute matches', fa: 'مسابقه‌های ۲ دقیقه‌ای' },
     ],
     // the in-game rulebook: the 📖 button on the setup page renders whatever
@@ -54,7 +54,7 @@
         { h: '⏱ زمان', b: 'مسابقه‌ی FS «۲ دقیقه» است. اگر مساوی شد، بازی تمام نمی‌شود: اول +۱۰ ثانیه، بعد هر بار +۵ ثانیه — تا مجموع ۳۵ ثانیه وقت اضافه. باز هم مساوی؟ نتیجه تساوی ثبت می‌شود.' },
         { h: '🤖 ربات FS', b: 'همه با <b>یک ربات یکسان</b> بازی می‌کنند: سه چشمِ جلو، حلقه‌ی سپر (دو نیمه) و سنسور رنگ — نه بیشتر. تنها انتخاب تو، رنگ تیم است. برنامه را هم می‌توانی بدون تایپ در صفحه‌ی «🤖 AI» بسازی.' },
         { h: '🧹 خانه‌ی آرام', b: 'در FS خبری از گربه، سگ و کفِ خیس نیست — فقط تو، مبل‌ها و کف. دو فرش (سبز بزرگ و بنفش کوچک) امتیاز نمی‌دهند؛ فرش سبز سرعتت را هم نصف می‌کند.' },
-        { h: '⚖️ جریمه‌ها', b: 'رباتی که <b>۱۰ ثانیه</b> در یک دایره‌ی کوچک گیر کند، داور جابه‌جایش می‌کند و <b>۲ کاشی</b> از او کم می‌شود (در FS فقط ۲ تا — بقیه‌ی رده‌ها ۵ تا!). داور با دکمه‌ی منو هم می‌تواند جابه‌جا کند، با همان جریمه.' },
+        { h: '⚖️ جریمه‌ها', b: 'رباتی که <b>۱۰ ثانیه</b> در یک دایره‌ی کوچک گیر کند، داور جابه‌جایش می‌کند (چند کاشی آن‌طرف‌تر) و جریمه می‌شود: <b>بار اول −۵، بار دوم −۱۰، از بار سوم به بعد −۱۲ کاشی</b> — هر چه بیشتر جابه‌جا شوی، گران‌تر. داور با دکمه‌ی منو هم می‌تواند جابه‌جا کند، با همان جریمه.' },
         { h: '🎓 از کجا شروع کنم؟', b: 'مسیر پیشنهادی: <b>۱)</b> دکمه‌ی «🎓 آموزش» — شش درس کوتاه با اجرای زنده. <b>۲)</b> «🏆 چالش فنی» — پله‌پله قبول شو. <b>۳)</b> کد کامل «🏆 قهرمان FS» را از منوی ربات‌ها باز کن و بخوان. <b>۴)</b> مسابقه بده و بعدش «📊 گزارش مسابقه» را ببین تا بفهمی کجا وقت تلف شد.' },
         { h: '🧭 حس‌های ربات · The senses', b: 'ربات FS دقیقاً شش چیز حس می‌کند — سه سنسور فاصله رو به جلو، حلقه‌ی سپر و سنسور رنگ — به‌علاوه‌ی آنچه خانه می‌گوید (room و clean). قطب‌نما و GPS مال رده‌های بالاترند.<br><small>EN: exactly six senses — three forward ultrasonic sensors, the bumper ring and the colour sensor — plus what the HOUSE reports (room, clean). Compass and GPS start at U14/U19.</small>' + "<table><tr><th>python</th><th>چیست · what</th></tr><tr><td><code>front / frontleft / frontright</code></td><td>سنسور فاصله (اولتراسونیک)، سانتی\u200cمتر؛ عدد کوچک\u200cتر = نزدیک\u200cتر؛ بیشینه ۲۰۰ · ultrasonic distance, cm; smaller = closer; max 200</td></tr><tr><td><code>bumperfront / bumperback / bumper</code></td><td>دو نیمه\u200cی حلقه\u200cی سپر و «هر کدام» · the ring's two halves, and either</td></tr><tr><td><code>color</code></td><td>رنگ کفِ جلوی ربات · the floor just ahead: <code>white</code> تمیزنشده، <code>red/blue</code> مال ربات\u200cها، <code>green</code> فرش بزرگ (نصف سرعت)، <code>purple/orange/cyan</code> فرش\u200cهای نشانه\u200cی درها، <code>black</code> دیوار/مبل</td></tr><tr><td><code>room</code>, <code>clean1..clean5</code></td><td>شماره\u200cی اتاق و درصد تمیزیِ هر اتاق برای من · which room I am in, and each room's clean-% for me (0 هال · 1 آشپزخانه · 2/3/4 خواب\u200cها · 5 سرویس)</td></tr><tr><td><code>timer</code>, <code>movetime</code>, <code>state</code>, <code>nextmove</code></td><td>حافظه\u200cی بین قدم\u200cها؛ movetime چرخ\u200cها را نگه می\u200cدارد · step-to-step memory; movetime holds the wheels</td></tr><tr><td><code>mytiles / rivaltiles / timeleft</code></td><td>کاشی\u200cهای من/حریف و ثانیه\u200cهای مانده · tiles owned and seconds left</td></tr><tr><td><code>wheelleft / wheelright</code></td><td>فرمان چرخ\u200cها، −۲۵..۲۵ · the wheel commands, −25..25</td></tr><tr><td><code>forward(s) backward(s) turnleft(s) turnright(s) stop(s)</code></td><td>حرکت\u200cهای آسان؛ عدد = ثانیه\u200cی واقعی · easy moves; the number is real seconds</td></tr>" },
         { h: '⚖️ Rules at a glance (EN)', b: 'Every floor tile you drive over turns your colour and scores one point; LAST TOUCH owns the tile. Stuck for 15 s in one small circle → the referee relocates you at a penalty. Wet floor (U14/U19): −2 tiles per entry. Green rug: half speed, no points. Purple / orange / cyan rugs: doorway markers — no points, full speed. Draw → +10 s then +5 s steps up to 35 s of overtime. The full referee book with every number is <b>RULES.md</b> beside the game.' },
@@ -66,7 +66,7 @@
     // The chosen colour paints the shell AND the tiles it cleans.
     builder: false,
     defaults: { matchSeconds: 120 },
-    rules: { pets: false, wet: false, penalty: 2, battery: false },
+    rules: { pets: false, wet: false, penalty: [5, 10, 12], battery: false },
 
     // ---- what an FS robot can feel ----
     // The bottom rung of the ladder senses what is right in front of it and

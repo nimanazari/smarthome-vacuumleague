@@ -34,7 +34,7 @@
   // this file is loaded before the language is decided.
   const TR = (fa, en) => (root.LANG === 'fa' ? fa : en);
 
-  const PENALTY_TILES = 5;    // tiles lost on a relocate (manual or automatic)
+  const PENALTY_TILES = [5, 10, 12];    // tiles lost on a robot's 1st, 2nd, 3rd+ relocation (manual or automatic)
   const WET_PENALTY = 2;      // tiles lost each time a robot drives onto a wet tile
   // On a draw the match keeps going: +10s first, then +5s each time
   const OVERTIME_STEPS = [10, 5, 5, 5, 5, 5];
@@ -257,8 +257,19 @@
     // Move a robot to a random free spot and take the penalty off its score.
     // `free` skips the tile penalty — the referee untangling a pile-up that
     // was nobody's fault should not have to fine somebody to do it.
+    // THE PENALTY CLIMBS: the first relocation of a robot costs 5 tiles, the
+    // second 10, the third and every one after it 12 — `rules.penalty` may be
+    // that list, or one number for a flat fine. Penalty-free moves do not count.
+    nextPenalty(color) {
+      const p = this.rules.penalty;
+      const sched = Array.isArray(p) ? p : [p == null ? 5 : p];
+      const n = (this.relocCount && this.relocCount[color]) || 0;
+      return sched[Math.min(n, sched.length - 1)];
+    }
     relocate(color, reason, free) {
-      const lost = free ? 0 : this._burn(color, this.rules.penalty);
+      this.relocCount = this.relocCount || { red: 0, blue: 0 };
+      const lost = free ? 0 : this._burn(color, this.nextPenalty(color));
+      if (!free) this.relocCount[color] = (this.relocCount[color] || 0) + 1;
       this.world.teleport(this.world.robots[color]);
       if (this.onRelocate) this.onRelocate(color, reason || 'manual', lost);
     }

@@ -72,7 +72,29 @@
       if (typeof refresh === 'function') refresh();
     });
   }());
-  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:');
+  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:') + (MAP_NO ? '\n# MAP: ' + MAP_NO : '');
+  /* ---- which competition map this program is for ----
+     Picked next to the team name; written into the file as "# MAP: N" and
+     into the file NAME as rN_team.py — the game shows the robot as RN_team. */
+  const MAP_KEY = 'shl_mapno_' + LEAGUE;
+  let MAP_NO = '';
+  try { MAP_NO = localStorage.getItem(MAP_KEY) || ''; } catch (e) { /* private mode */ }
+  (function wireMapNo() {
+    const sel = document.getElementById('mapNoIn');
+    if (!sel) return;
+    sel.value = MAP_NO;
+    sel.addEventListener('change', () => {
+      MAP_NO = sel.value;
+      try { localStorage.setItem(MAP_KEY, MAP_NO); } catch (e) { /* private mode */ }
+      const box = document.getElementById('teamNameIn');
+      if (box) box.dispatchEvent(new Event('input'));     // the preview redraws the way a name edit does
+    });
+  }());
+  const pyFileName = (fallback) => {
+    const nm = (TEAM_NAME || '').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, ' ');
+    if (!nm) return fallback;
+    return (MAP_NO ? 'r' + MAP_NO + '_' : '') + nm + '.py';
+  };
 
   const HANDOFF_KEY = 'shl_helper_code';                // how the game receives the file
   const GAME_URL = '../../../index.html';   // back to the game, three folders up
@@ -2041,7 +2063,7 @@
     const blob = new Blob([toPython()], { type: 'text/x-python' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'my-robot.py';
+    a.download = pyFileName('my-robot.py');
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   };

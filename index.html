@@ -3077,11 +3077,13 @@ else:                            # 7) nothing in the way -> full speed ahead
       let landed = false;
       if (pendingRed != null) {
         $('codeRed').value = pendingRed;
+        { const nm = teamNameInCode(pendingRed); if (nm) { $('inRed').value = nm; $('inRed').dispatchEvent(new Event('input')); } }
         $('statusRed').textContent = T('ساخته‌شده در هلپر', 'built in the helper');
         pendingRed = null; landed = true;
       }
       if (pendingBlue != null) {
         $('codeBlue').value = pendingBlue;
+        { const nm = teamNameInCode(pendingBlue); if (nm) { $('inBlue').value = nm; $('inBlue').dispatchEvent(new Event('input')); } }
         $('statusBlue').textContent = T('ساخته‌شده در هلپر', 'built in the helper');
         pendingBlue = null;
       }
@@ -3146,8 +3148,24 @@ else:                            # 7) nothing in the way -> full speed ahead
       updateCornerInfo();
     }
 
+    // the referee's relocate rows say WHO — the team's name in the team's
+    // colour — so after a coin flip nobody moves the wrong robot
+    function refreshRelocLabels() {
+      try {
+      const live = engine && engine.cfg && engine.running;
+      const n1 = live ? engine.cfg.redName : ($('inRed').value || 'Team 1');
+      const n2 = live ? engine.cfg.blueName : ($('inBlue').value || 'Team 2');
+      const c1 = TEAM_COLORS[selCol.red].css, c2 = TEAM_COLORS[selCol.blue].css;
+      const put = (id, col, nm) => {
+        const el = $(id) && $(id).querySelector('.mi-t'); if (!el) return;
+        el.innerHTML = '<span style="color:' + col + '">&#9679;</span> ' + T('جابه‌جایی ', 'Relocate ') + escH(nm);
+      };
+      if (!(leagueDef() && leagueDef().group === 'sumo')) { put('relocRed', c1, n1); put('relocBlue', c2, n2); }
+      } catch (e) { /* called before the match objects exist — the next call catches up */ }
+    }
     // always visible under the coin: which team is in which corner, in team colours
     function updateCornerInfo() {
+      refreshRelocLabels();
       const el = $('cornerInfo');
       if (!el) return;
       const c1 = TEAM_COLORS[selCol.red].css, c2 = TEAM_COLORS[selCol.blue].css;
@@ -3205,11 +3223,20 @@ else:                            # 7) nothing in the way -> full speed ahead
     // ---------- coin flip for the corners ----------
     // Team 1 always starts bottom-left, Team 2 top-right; the coin decides WHO
     // is Team 1. On a swap, everything switches sides: names, colours, loaded code.
+    const teamOn = { red: true, blue: true };          // ⏻ per side (the switches are wired further down)
     function swapSides() {
+      if (engine && engine.running) return;              // never mid-match
       let t = $('inRed').value; $('inRed').value = $('inBlue').value; $('inBlue').value = t;
       t = selCol.red; selCol.red = selCol.blue; selCol.blue = t;
       t = $('codeRed').value; $('codeRed').value = $('codeBlue').value; $('codeBlue').value = t;
       t = $('statusRed').textContent; $('statusRed').textContent = $('statusBlue').textContent; $('statusBlue').textContent = t;
+      // the sample/bot pickers, the ON/OFF switches and any code still on its
+      // way from the helper go with their team too — otherwise a swapped side
+      // can be silently overwritten with the other team's program
+      if ($('selRed') && $('selBlue')) { t = $('selRed').value; $('selRed').value = $('selBlue').value; $('selBlue').value = t; }
+      t = teamOn.red; teamOn.red = teamOn.blue; teamOn.blue = t;
+      for (const [id, k] of [['onRed', 'red'], ['onBlue', 'blue']]) { if ($(id)) { $(id).classList.toggle('on', teamOn[k]); $(id).innerHTML = teamOn[k] ? '&#9211; ON' : '&#9211; OFF'; } }
+      t = pendingRed; pendingRed = pendingBlue; pendingBlue = t;
       applyTeamColors();
       fitText($('heroRed'), $('inRed').value || 'Team 1');
       fitText($('heroBlue'), $('inBlue').value || 'Team 2');
@@ -3358,6 +3385,20 @@ else:                            # 7) nothing in the way -> full speed ahead
         ? '\n⚠ این فایل از چیزهایی استفاده می‌کند که رده‌ی ' + d.code + ' ندارد: ' + bad.join(', ') + ' — در مسابقه مقدارشان -1 خواهد بود.'
         : '';
     }
+    /* The team's name, as a helper (or a hand) wrote it into the program:
+         # TEAM: name        (what every helper writes)
+         teamname = "name"   (a plain assignment also counts)
+       plus an optional "# MAP: 3" — the file the helper made for map 3 — which
+       makes the robot's name R3_name, the way the file is named r3_name.py. */
+    function teamNameInCode(text) {
+      const t = String(text || '');
+      let m = /^[ \t]*#[ \t]*TEAM[ \t]*:[ \t]*(.+)$/m.exec(t) || /^[ \t]*teamname[ \t]*=[ \t]*["']([^"'\n]+)["']/mi.exec(t);
+      let nm = m ? m[1].trim().slice(0, 40) : '';
+      if (!nm) return '';
+      const mp = /^[ \t]*#[ \t]*MAP[ \t]*:[ \t]*(\d+)/m.exec(t) || /^[ \t]*mapnumber[ \t]*=[ \t]*(\d+)/mi.exec(t);
+      if (mp && !/^R\d+_/i.test(nm)) nm = 'R' + mp[1] + '_' + nm;
+      return nm.slice(0, 40);
+    }
     const loadFile = (inputId, areaId, statusId) => {
       const f = $(inputId).files[0]; if (!f) return;
       const r = new FileReader();
@@ -3371,15 +3412,16 @@ else:                            # 7) nothing in the way -> full speed ahead
         // "# TEAM: ..." line. Put it straight into this robot's name box, so
         // the referee sees whose file just went in without having to ask.
         try {
-          const tm = /^[ \t]*#[ \t]*TEAM[ \t]*:[ \t]*(.+)$/m.exec(text);
-          if (tm) {
-            const nm = tm[1].trim().slice(0, 40);
-            const box = $(inputId === 'fileRed' ? 'inRed' : 'inBlue');
-            if (nm && box) {
-              box.value = nm;
-              box.dispatchEvent(new Event('input'));
-            }
+          const found = teamNameInCode(text);
+          const box = $(inputId === 'fileRed' ? 'inRed' : 'inBlue');
+          let nm = found;
+          if (!nm) {
+            // no name in the file: ask once, and write it into the code so the
+            // next load (and the referee) know whose program this is
+            nm = (prompt(T('این فایل اسم تیم ندارد — اسم تیم؟', 'This file carries no team name — team name?'), box.value || '') || '').trim().slice(0, 40);
+            if (nm) $(areaId).value = '# TEAM: ' + nm + '\n' + text;
           }
+          if (nm && box) { box.value = nm; box.dispatchEvent(new Event('input')); }
         } catch (e) { /* a file without one is perfectly normal */ }
 
         // A file written by a helper carries its model as one comment line.
@@ -3437,7 +3479,6 @@ else:                            # 7) nothing in the way -> full speed ahead
     };
     // ⏻ a team can sit a match out: its robot spawns but never moves —
     // perfect for testing YOUR robot alone on the real floor
-    const teamOn = { red: true, blue: true };
     const wireOn = (id, k) => {
       $(id).onclick = () => {
         teamOn[k] = !teamOn[k];
@@ -4191,7 +4232,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       // sumo dresses its own corners: start-pose controls on the team cards,
       // and the referee button becomes the gyoji's neutral restart
       document.body.classList.toggle('sumo-setup', d.group === 'sumo');
-      $('relocRed').querySelector('.mi-t').textContent = d.group === 'sumo' ? '🔄 Referee — restart bout (random)' : 'Relocate Team 1';
+      if (d.group === 'sumo') $('relocRed').querySelector('.mi-t').textContent = '🔄 Referee — restart bout (random)'; else refreshRelocLabels();
       $('relocBlue').style.display = d.group === 'sumo' ? 'none' : '';
       // EVERY league wears its own lobby: its own name over the door, its own
       // start call, its own palette (the lg-* classes below). "SMART HOME
@@ -4968,6 +5009,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       $('houseBtn').style.display = 'none';
 
       wireRelocate();
+      refreshRelocLabels();
       resetMatchLog();
       paused = false; $('stopBtn').querySelector('.mi-t').textContent = T('توقف', 'Stop');
       // EVERY match is filmed, not only the official ones -- a referee should
@@ -6289,8 +6331,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         };
         label('speedLbl', T('سرعت بازی', 'Speed') + ': ' + simSpeed + 'x');
         label('sensLbl', T('سنسورها', 'Sensors') + ': ' + (sensOn ? T('روشن', 'on') : T('خاموش', 'off')));
-        label('relocRed', T('جابه‌جایی تیم ۱', 'Relocate Team 1'), 'inner');
-        label('relocBlue', T('جابه‌جایی تیم ۲', 'Relocate Team 2'), 'inner');
+        refreshRelocLabels();
         label('endBtn', T('پایان بازی', 'End Game'), 'inner');
         label('restartBtn', T('شروع دوباره', 'Restart match'), 'inner');
         label('helpBtn', T('راهنما', 'Guide'), 'last');
@@ -6464,8 +6505,9 @@ else:                            # 7) nothing in the way -> full speed ahead
       if (leagueDef() && leagueDef().arena) { engine.relocate(color, 'manual'); return; }
       refWho = color;
       $('rmTitle').textContent = 'جابه‌جایی ' + (color === 'red' ? engine.cfg.redName : engine.cfg.blueName);
-      const pen = (engine.mode && engine.mode.rules && engine.mode.rules.penalty) || 5;
-      $('rmPen').textContent = 'با جریمه (−' + pen + ' کاشی — قانون)';
+      const pen = (engine.mode && engine.mode.nextPenalty) ? engine.mode.nextPenalty(color) : 5;
+      const nth = (engine.mode && engine.mode.relocCount && engine.mode.relocCount[color]) || 0;
+      $('rmPen').textContent = 'با جریمه (−' + pen + ' کاشی — ' + (nth === 0 ? 'بار اول' : nth === 1 ? 'بار دوم' : 'بار ' + (nth + 1) + '، سقف') + ')';
       $('refMenu').style.display = 'flex';
     }
     $('relocRed').onclick = () => openRefMenu('red');
@@ -7143,7 +7185,8 @@ else:                            # 7) nothing in the way -> full speed ahead
       const r = await fetch('/api/arena/setup?id=' + arenaId, { cache: 'no-store' });
       if (!r.ok) { showToast(T('این مسابقه آماده نیست یا لاگین ادمین نداری (پنل → Live arena)', 'fixture not armed, or no admin session (admin → Live arena)')); return; }
       arenaMeta = await r.json();
-      $('inRed').value = arenaMeta.homeName || 'Team 1'; $('inBlue').value = arenaMeta.awayName || 'Team 2';
+      $('inRed').value = teamNameInCode(arenaMeta.redPy) || arenaMeta.homeName || 'Team 1';
+      $('inBlue').value = teamNameInCode(arenaMeta.bluePy) || arenaMeta.awayName || 'Team 2';
       $('codeRed').value = arenaMeta.redPy || ''; $('codeBlue').value = arenaMeta.bluePy || '';
       if (arenaMeta.seconds) $('inTime').value = arenaMeta.seconds;
       populateMaps(); showMatchPanel();

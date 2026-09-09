@@ -51,7 +51,29 @@
   const TEAM_KEY = 'shl_teamname_' + LEAGUE;
   let TEAM_NAME = '';
   try { TEAM_NAME = localStorage.getItem(TEAM_KEY) || ''; } catch (e) { /* private mode */ }
-  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:');
+  const teamLine = () => (TEAM_NAME ? '# TEAM: ' + TEAM_NAME : '# TEAM:') + (MAP_NO ? '\n# MAP: ' + MAP_NO : '');
+  /* ---- which competition map this program is for ----
+     Picked next to the team name; written into the file as "# MAP: N" and
+     into the file NAME as rN_team.py — the game shows the robot as RN_team. */
+  const MAP_KEY = 'shl_mapno_' + LEAGUE;
+  let MAP_NO = '';
+  try { MAP_NO = localStorage.getItem(MAP_KEY) || ''; } catch (e) { /* private mode */ }
+  (function wireMapNo() {
+    const sel = document.getElementById('mapNoIn');
+    if (!sel) return;
+    sel.value = MAP_NO;
+    sel.addEventListener('change', () => {
+      MAP_NO = sel.value;
+      try { localStorage.setItem(MAP_KEY, MAP_NO); } catch (e) { /* private mode */ }
+      const box = document.getElementById('teamNameIn');
+      if (box) box.dispatchEvent(new Event('input'));     // the preview redraws the way a name edit does
+    });
+  }());
+  const pyFileName = (fallback) => {
+    const nm = (TEAM_NAME || '').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, ' ');
+    if (!nm) return fallback;
+    return (MAP_NO ? 'r' + MAP_NO + '_' : '') + nm + '.py';
+  };
 
   /* ================================================================
      THE VOCABULARY
@@ -986,7 +1008,7 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   };
-  $('dlPyBtn').onclick = () => download(toPython(), 'my-robot.py', 'text/x-python');
+  $('dlPyBtn').onclick = () => download(toPython(), pyFileName('my-robot.py'), 'text/x-python');
   $('playBtn').onclick = () => {
     try { localStorage.setItem(HANDOFF_KEY, toPython()); }
     catch (e) { toast(T('مرورگر اجازه‌ی ذخیره نداد', 'The browser blocked saving')); return; }

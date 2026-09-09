@@ -997,8 +997,27 @@
     }
 
     // Move a body to a random free spot (the league adds whatever penalty it likes)
+    // A relocation is a NUDGE, not a teleport across the house: a random fully
+    // open tile 3..6 tiles from where the robot got stuck (any free tile if
+    // none is there) — far enough to be free, near enough to stay in the game.
+    nearbyFreePos(body, minTiles, maxTiles) {
+      const t = this.cfg.tile;
+      const lo = (minTiles || 3) * t, hi = (maxTiles || 6) * t;
+      for (let k = 0; k < 300; k++) {
+        const i = Math.floor(this.rand() * this.cols), j = Math.floor(this.rand() * this.rows);
+        if (this.owner[i][j] === 'blocked' || this.free[i][j] !== null) continue;
+        const x = (i + 0.5) * t, y = (j + 0.5) * t;
+        const d = Math.hypot(x - body.x, y - body.y);
+        if (d < lo || d > hi) continue;
+        let ok = true;
+        for (const c of this.teams) { const o = this.robots[c]; if (o !== body && Math.hypot(o.x - x, o.y - y) < 0.75) { ok = false; break; } }
+        if (ok) return { x, y };
+      }
+      return this.randomFreePos();
+    }
+
     teleport(body) {
-      const p = this.randomFreePos();
+      const p = this.nearbyFreePos(body, 3, 6);
       body.x = p.x; body.y = p.y; body.heading = this.rand() * Math.PI * 2;
       body.left = 0; body.right = 0;
       // ...and if the landing still grazes something, nudge straight out of
