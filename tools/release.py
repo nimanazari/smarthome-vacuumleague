@@ -85,6 +85,20 @@ rc, out = run([sys.executable, os.path.join(ROOT, 'tools', 'make-kits.py')], ROO
 print(out.splitlines()[-1] if out else '')
 if rc: sys.exit('make-kits failed')
 sync_site_game()          # AFTER the kits: the site gets the TeamKit just built
+# one complete game+map bundle per slot (organizer-only/maps/handout/SmartHomeLeague-MapN.zip);
+# they all go to the site's downloads/kits/ — server.js hands each one out only once its map is released
+run([sys.executable, os.path.join(ROOT, 'tools', 'make-map-kit.py')], ROOT)
+def sync_site_kits():
+    import shutil, glob
+    site = os.path.normpath(os.path.join(ROOT, '..', 'schedule', 'schedule', 'public', 'downloads', 'kits'))
+    if not os.path.isdir(os.path.dirname(site)):
+        return
+    os.makedirs(site, exist_ok=True)
+    n = 0
+    for z in glob.glob(os.path.join(ROOT, 'organizer-only', 'maps', 'handout', 'SmartHomeLeague-Map*.zip')):
+        shutil.copy2(z, os.path.join(site, os.path.basename(z))); n += 1
+    print('  site downloads/kits: %d map bundles' % n)
+sync_site_kits()
 
 # 2 — the full game repo
 print('pushing the full game ...')

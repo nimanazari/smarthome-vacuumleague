@@ -1,3 +1,17 @@
+## 2026-09-09 — one file per map, and a match that plays itself forever
+
+- **بسته‌ی کامل هر مپ:** `tools/make-map-kit.py` برای هر مپ
+  `organizer-only/maps/handout/SmartHomeLeague-MapN.zip` می‌سازد: بازی کامل +
+  `mapN.json`. تیم باز می‌کند، `serve.bat` را می‌زند، مپ خودش انتخاب شده. روی سایت
+  `/downloads/kits/SmartHomeLeague-MapN.zip` با همان قفل زمان انتشار مپ.
+- **ریپلی:** `tools/replay-match.js` یک مسابقه‌ی کامل را بدون مرورگر با موتور
+  خود بازی اجرا می‌کند و اسنپ‌شات‌ها را (۵ در ثانیه) در یک JSON ذخیره می‌کند؛
+  بازی با `?watch=1&replay=<url>` آن را بی‌پایان تکرار می‌کند و سایت در
+  `/replay` نمایشش می‌دهد (`public/replays/demo.json`: قهرمان U14 در برابر
+  دیوارگرد روی مپ ۱).
+- EN: per-map game bundles (release-locked on the site); headless match
+  recorder + looping replay at /replay.
+
 ## 2026-09-08 (e) — the ARENA: a Swiss-league fixture played live on the site
 
 - **پخش زنده روی سایت:** داور در پنل (`/admin` → تب Live arena) یک بازیِ

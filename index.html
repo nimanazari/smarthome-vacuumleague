@@ -7144,6 +7144,25 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     function watchBoot() {
       document.body.classList.add('watching');
+      // ---- a REPLAY: a recorded match (tools/replay-match.js), looped forever ----
+      const replayUrl = arenaQ.get('replay');
+      if (replayUrl) {
+        fetch(replayUrl, { cache: 'no-store' }).then((r) => r.json()).then((rp) => {
+          if (!rp || !rp.frames || !rp.frames.length) { showToast(T('فایل ریپلی خراب است', 'bad replay file')); return; }
+          const meta = { matchId: 'replay', seconds: rp.seconds, homeName: rp.homeName, awayName: rp.awayName, map: rp.map, mapName: rp.mapName };
+          let i = 0;
+          const loop = () => {
+            if (i === 0) watchStart(meta);              // a fresh floor every time round
+            watchApply(rp.frames[i]);
+            i++;
+            if (i >= rp.frames.length) { i = 0; setTimeout(loop, 4000); }   // hold the final score, then again
+            else setTimeout(loop, (rp.interval || 0.2) * 1000);
+          };
+          loop();
+          showToast(T('🔁 ریپلی: ' + rp.homeName + ' vs ' + rp.awayName + ' — تکرار بی‌پایان', '🔁 replay: ' + rp.homeName + ' vs ' + rp.awayName + ' — on a loop'));
+        }).catch(() => showToast(T('ریپلی پیدا نشد', 'replay not found')));
+        return;
+      }
       const connect = () => {
         const es = new EventSource('/api/arena/stream');
         es.onmessage = (e) => {
