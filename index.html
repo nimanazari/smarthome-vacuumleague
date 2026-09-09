@@ -2427,6 +2427,7 @@ else:                          # turn AND drive toward them
           <div class="cstatus" id="statusRed">sample code</div>
           <select class="codesel" id="selRed" title="Pick a ready-made robot brain"></select>
           <button class="smallbtn" id="loadRed">Load robot .py</button>
+          <button class="smallbtn" id="upRed" style="display:none" title="این فایل را در کتابخانه‌ی برنامه‌های سایت هم ذخیره کن">&#11014; آپلود به سایت</button>
           <button class="smallbtn ton on" id="onRed" title="این ربات بازی کند یا خاموش بماند">&#9211; ON</button>
           <input type="file" id="fileRed" accept=".py,.txt" style="display:none">
         </div>
@@ -2448,6 +2449,7 @@ else:                          # turn AND drive toward them
           <div class="cstatus" id="statusBlue">sample code</div>
           <select class="codesel" id="selBlue" title="Pick a ready-made robot brain"></select>
           <button class="smallbtn" id="loadBlue">Load robot .py</button>
+          <button class="smallbtn" id="upBlue" style="display:none" title="این فایل را در کتابخانه‌ی برنامه‌های سایت هم ذخیره کن">&#11014; آپلود به سایت</button>
           <button class="smallbtn ton on" id="onBlue" title="این ربات بازی کند یا خاموش بماند">&#9211; ON</button>
           <input type="file" id="fileBlue" accept=".py,.txt" style="display:none">
         </div>
@@ -4575,15 +4577,56 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('playersSel').onchange = applyPlayers;
 
     /* ---------- ready-made robot brains, per league ---------- */
+    /* ---- THE PROGRAM LIBRARY (the league site, admin session) ----
+       Every team's .py uploaded once to the site shows up here, in order,
+       in both robot menus — pick it and the code AND the team name land on
+       that side. Elsewhere (a team's own kit) the site answers 401/404 and
+       nothing is listed. */
+    let serverPrograms = [];
+    async function loadServerPrograms() {
+      try {
+        const r = await fetch('/api/programs', { cache: 'no-store' });
+        if (!r.ok) { serverPrograms = []; return; }
+        const j = await r.json();
+        serverPrograms = Array.isArray(j.programs) ? j.programs : [];
+        for (const id of ['upRed', 'upBlue']) if ($(id)) $(id).style.display = '';
+        if (leagueDef()) populateBots(leagueDef());
+      } catch (e) { serverPrograms = []; }
+    }
+    async function uploadToLibrary(team) {
+      const src = $(team === 'red' ? 'codeRed' : 'codeBlue').value;
+      if (!src || !src.trim()) { showToast(T('اول یک فایل بارگذاری کن', 'load a program first')); return; }
+      const st = $(team === 'red' ? 'statusRed' : 'statusBlue').textContent || '';
+      const fm = /:\s*(\S+\.py)/.exec(st);
+      const name = fm ? fm[1] : (($(team === 'red' ? 'inRed' : 'inBlue').value || team) + '.py');
+      try {
+        const r = await fetch('/api/programs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, text: src }) });
+        if (r.status === 401) { showToast(T('آپلود فقط با لاگین ادمین سایت', 'upload needs the site admin session')); return; }
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { showToast(T('آپلود نشد: ', 'upload failed: ') + (j.error || r.status)); return; }
+        await loadServerPrograms();
+        const sel = $(team === 'red' ? 'selRed' : 'selBlue');
+        if (sel && j.program) sel.value = 'lib:' + j.program.id;
+        showToast(T('⬆ در کتابخانه‌ی سایت ذخیره شد: ', '⬆ saved to the site library: ') + (j.program ? (j.program.team || j.program.name) : name));
+      } catch (e) { showToast(T('خطا در ارتباط با سایت', 'could not reach the site')); }
+    }
     function populateBots(d) {
       const list = botsOf(d);
       for (const sel of ['selRed', 'selBlue']) {
         const el = $(sel);
+        const keep = el.value;
         el.innerHTML = '';
-        const opt = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; el.appendChild(o); };
+        const opt = (v, t, parent) => { const o = document.createElement('option'); o.value = v; o.textContent = t; (parent || el).appendChild(o); };
         opt('::sample', 'League sample');
         opt('::random', '\uD83C\uDFB2 Random bot');
         for (const b of list) opt(b.file, b.label);
+        if (serverPrograms.length) {
+          const g = document.createElement('optgroup');
+          g.label = T('⬆ برنامه‌های آپلودشده (سایت)', '⬆ uploaded programs (site)');
+          serverPrograms.forEach((p, i) => opt('lib:' + p.id, (i + 1) + '. ' + (p.team || p.name) + (p.map ? ' · ' + T('مپ ', 'map ') + p.map : ''), g));
+          el.appendChild(g);
+        }
+        if (keep) { for (const o of el.options) if (o.value === keep) { el.value = keep; break; } }
       }
     }
     async function fetchBot(file) {
@@ -4596,6 +4639,21 @@ else:                            # 7) nothing in the way -> full speed ahead
       const d = leagueDef();
       const area = team === 'red' ? 'codeRed' : 'codeBlue';
       const status = team === 'red' ? 'statusRed' : 'statusBlue';
+      if (val.indexOf('lib:') === 0) {
+        // a program from the site's library: code + the team's name
+        try {
+          const r = await fetch('/api/programs/get?id=' + encodeURIComponent(val.slice(4)), { cache: 'no-store' });
+          if (!r.ok) { $(status).textContent = T('برنامه پیدا نشد', 'program not found'); return; }
+          const p = await r.json();
+          $(area).value = p.text || '';
+          $(status).textContent = T('از کتابخانه‌ی سایت: ', 'from the site library: ') + p.name + ' · #' + (p.sha || '');
+          const nm = teamNameInCode(p.text) || p.team;
+          const box = $(team === 'red' ? 'inRed' : 'inBlue');
+          if (nm && box) { box.value = nm; box.dispatchEvent(new Event('input')); }
+          cheer(team);
+        } catch (e) { $(status).textContent = T('خطا در خواندن برنامه', 'could not read the program'); }
+        return;
+      }
       if (val === '::sample') {
         // each side's own sample: in sumo, blue's sample is the basic charger
         const f = (team === 'blue' && programBlueOf(d)) || programOf(d);
@@ -4622,6 +4680,10 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     $('selRed').onchange = () => setBot('red', $('selRed').value);
     $('selBlue').onchange = () => setBot('blue', $('selBlue').value);
+    $('upRed').onclick = () => uploadToLibrary('red');
+    $('upBlue').onclick = () => uploadToLibrary('blue');
+    loadServerPrograms();
+    window.addEventListener('focus', loadServerPrograms);
 
     /* ---------- sumo: the shikiri start pose ----------
        WHERE on your line and WHICH WAY you face is the team's call — before
