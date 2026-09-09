@@ -21,10 +21,11 @@ const VIEWS = {
   // straight down on the whole house — a TOP view, not a high one. `pol` is
   // the angle off vertical, so a small number is what puts the camera overhead.
   top:    { az: Math.PI * 0.70, pol: 0.12, rad: 22, fov: 40, get label() { return TR_VIEW('نمای بالا', 'Top view'); } },
-  // THE MATCH VIEW, and the default: nearly overhead with the house square in
-  // the frame and just enough tilt that walls and furniture keep their height
-  // -- the whole floor, both robots, every tile, in one still picture.
-  over:   { az: Math.PI * 0.49, pol: 0.22, rad: 20, fov: 40, get label() { return TR_VIEW('نمای مسابقه — از بالا', 'Match view — overhead'); } },
+  // THE MATCH VIEW, and the default: STRAIGHT down, the house square to the
+  // screen (az = pi/2 keeps its edges parallel to the frame; pol is a hair
+  // above zero only so the camera's up-vector never degenerates) -- the whole
+  // floor, both robots, every tile, in one still picture.
+  over:   { az: Math.PI * 0.5, pol: 0.03, rad: 19, fov: 40, get label() { return TR_VIEW('نمای مسابقه — از بالا', 'Match view — overhead'); } },
   // the establishing shot. It used to sit 16 units out at 53 degrees, close
   // enough that the near wall cut across the frame and the far rooms fell off
   // the edge. Further back and higher: the whole house, with depth.
