@@ -3395,6 +3395,7 @@ else:                            # 7) nothing in the way -> full speed ahead
             const m = hj && hj.model;
             const shapeOk = !m ? false
               : (hj.app === 'helper' || hj.app === 'blocks') ? Array.isArray(m.rules)
+                : hj.app === 'fsapp' ? Array.isArray(m.blocks)      // the old 🧩 block app: the Blocks helper reopens it
                 : hj.app === 'route' ? Array.isArray(m.wps) : false;
             const sameDivision = !hj.league || !here || hj.league === here;
             if (shapeOk && sameDivision) {
@@ -3402,8 +3403,11 @@ else:                            # 7) nothing in the way -> full speed ahead
               showToast(hj.app === 'route'
                 ? T('این فایل با هلپر مسیر ساخته شده — دکمه‌ی Route از همین‌جا ادامه می‌دهد',
                   'Built in the Route helper — the Route button continues from here')
-                : T('این فایل با هلپر ساخته شده — دکمه‌ی هلپر از همین‌جا ادامه می‌دهد',
-                  'Built in the helper — the helper button continues from here'));
+                : (hj.app === 'blocks' || hj.app === 'fsapp')
+                  ? T('این فایل با بلوک‌ها ساخته شده — دکمه‌ی «هلپر بلاکی» از همین‌جا ادامه می‌دهد',
+                    'Built from blocks — the Blocks helper button continues from here')
+                  : T('این فایل با هلپر ساخته شده — دکمه‌ی هلپر (و هلپر بلاکی) از همین‌جا ادامه می‌دهد',
+                    'Built in the helper — the helper (and the Blocks helper) continue from here'));
             } else if (shapeOk) {
               localStorage.removeItem('shl_helper_import_' + here);
               showToast(T('این فایل برای رده‌ی دیگری ساخته شده — کد اجرا می‌شود، ولی هلپر ادامه‌اش نمی‌دهد',
@@ -3412,7 +3416,14 @@ else:                            # 7) nothing in the way -> full speed ahead
           } else {
             // a plain .py replaces whatever was loaded before, so a pending
             // import from an earlier file must not outlive it
-            localStorage.removeItem('shl_helper_import_' + ((leagueDef() || {}).id || ''));
+            const here = (leagueDef() || {}).id || '';
+            localStorage.removeItem('shl_helper_import_' + here);
+            // ...but the Blocks helper can READ helper-style Python even without
+            // a state line (old helper files, hand-typed rules): park the text,
+            // the blocks page turns it into blocks if it understands it
+            if ((leagueDef() || {}).helper2 && text.length < 200000 && /wheelleft|movetime|state ==|forward\(|backward\(/.test(text)) {
+              localStorage.setItem('shl_helper_pytext_' + here, text);
+            } else localStorage.removeItem('shl_helper_pytext_' + here);
           }
         } catch (e) { /* an edited or foreign file — never block the load */ }
         const code = text.split('\n').filter(l => !l.trim().startsWith('#')).join('\n');

@@ -44,8 +44,9 @@ It **must** be served over HTTP. Opening `index.html` straight off the disk
         robot.js        this league's 3D model
         README.md       the full league write-up
         helper/         the AI HELPER MODULE (?league=fs / ?league=u14)
-        helper2/        the BLOCKS HELPER MODULE (Scratch-style, FS) —
-                        same rules file as helper/, so they interconvert
+        helper2/        the BLOCKS HELPER MODULE (Scratch-style drag & drop, FS + U14) —
+                        same rules file as helper/, so they interconvert; reopens
+                        any helper-written .py (old block app included)
         helper3/        the ROUTE HELPER MODULE (U19): waypoints on the real
                         map, A* doorway planning, the battery guard
         CURRICULUM.md   the 3x10-lesson plan, bilingual, with the code base
@@ -81,8 +82,8 @@ A division has the 🤖 AI button exactly when its `rules.js` declares a
 
 | division · رده | helper? | page · صفحه | what it offers · چه می‌دهد |
 |---|---|---|---|
-| Vacuum **FS** | ✅ ×2 | `helper/helper.html?league=fs` **and** `helper2/blocks.html?league=fs` | 🤖 AI: sensors → rules → Python · 🧩 Blocks: Scratch-style stacks, SAME rules file, exports .py + .blocks.json · دو هلپر با یک فایل قانون مشترک |
-| Vacuum **U14** | ✅ | `leagues/vacuum/helper/helper.html?league=u14` | everything FS has **+ compass (`heading`), room number (`room`), clean-% (`clean1..3`), Turn-to-° and 3-move exit plans** · همه‌ی FS + قطب‌نما، شماره‌ی اتاق، درصد تمیزی و پلان سه‌حرکتی خروج از اتاق |
+| Vacuum **FS** | ✅ ×2 | `helper/helper.html?league=fs` **and** `helper2/blocks.html?league=fs` | 🤖 AI: sensors → rules → Python · 🧩 Blocks: a Scratch-style editor (drag puzzle blocks, a hat-block plan, if…then C-blocks with hexagon conditions), SAME rules file, exports .py and reopens any helper .py · دو هلپر با یک فایل قانون مشترک |
+| Vacuum **U14** | ✅ ×2 | `helper/helper.html?league=u14` **and** `helper2/blocks.html?league=u14` | everything FS has **+ compass (`heading`), room number (`room`), clean-% (`clean1..3`), Turn-to-° and 3-move exit plans** · همه‌ی FS + قطب‌نما، شماره‌ی اتاق، درصد تمیزی و پلان سه‌حرکتی خروج از اتاق |
 | Vacuum **U19** | ✅ | `helper3/route.html?league=u19` | 📍 Route: tap the map, drop waypoints — A*-planned doorway via-points, goto() chains, and a battery guard with pre-planned safe paths to the charging pad · نقشه را لمس کن، نقطه بگذار؛ عبور از درها و مسیر شارژ را خودش plan می‌کند |
 
 The helper is **its own module** — `leagues/vacuum/helper/` (html + js + css),

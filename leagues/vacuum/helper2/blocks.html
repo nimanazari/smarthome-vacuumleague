@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Blocks helper · Simulation League</title>
+<title>Blocks helper · Smart Home League</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="../../../favicon.png">
-<!-- THE LEAGUE'S SECOND HELPER MODULE — the BLOCKS page (FS).
-     Scratch-style stacks that read and write THE SAME rules file the AI
-     helper saves (one storage key per division, two views), so
-     blocks ⇆ AI-helper rules ⇆ Python convert freely. The only thing it
-     ever hands the game is a real Python file.
-     ماژول هلپر دوم لیگ — صفحه‌ی بلاکی: بلاک‌ها را مثل اسکرچ بچین،
+<!-- THE LEAGUE'S SECOND HELPER MODULE — the BLOCKS page (FS and U14).
+     A real Scratch-style editor: drag puzzle blocks out of the palette,
+     snap them under a hat block or inside an "if … then" block, and the
+     Python of exactly those blocks is written live underneath. It reads
+     and writes THE SAME rules file the AI helper saves (one storage key
+     per division, two views), so blocks ⇆ AI-helper rules ⇆ Python
+     convert freely. The only thing it ever hands the game is real Python.
+     ماژول هلپر دوم لیگ — صفحه‌ی بلاکی: بلوک‌ها را مثل اسکرچ بکش و بچین؛
      همان فایل قانون‌های هلپر ۱ ساخته می‌شود و خروجی، پایتونِ واقعی است. -->
 <link rel="stylesheet" href="blocks.css">
 <link rel="stylesheet" href="../../../assets/ui-icons.css">
@@ -30,7 +32,7 @@
   <div class="topbtns">
     <button class="btn ghost" id="themeBtn" type="button" title="روشن / تاریک">&#9728;&#65039;</button>
     <input id="teamNameIn" class="teamname" type="text" maxlength="40" placeholder="نام تیم · team name" title="نام تیم شما — داخل فایل پایتون نوشته می‌شود تا داور بداند این کد مال کیست">
-    <button class="btn ghost" id="openPyBtn" type="button" title="فایل پایتونی که همین صفحه ساخته را باز کنید و ادامه بدهید">📥 باز کردن فایل پایتون</button>
+    <button class="btn ghost" id="openPyBtn" type="button">📥 باز کردن فایل پایتون</button>
     <input id="openPyFile" type="file" accept=".py,text/x-python,text/plain" hidden>
     <button class="btn ghost" id="resetBtn" type="button">از نو</button>
     <a class="btn ghost" id="backLink" href="../../../index.html">&#8594; برگرد به بازی</a>
@@ -38,21 +40,33 @@
 </header>
 
 <main class="wrap">
-  <!-- the palette: tap a block, it lands in the selected stack -->
-  <section class="card palcard">
+  <!-- the palette: drag a block out, or tap it and it snaps into the selected script -->
+  <section class="card palcard" id="palcard">
     <h2 id="h2Pal"><span class="step">1</span> Blocks</h2>
     <p class="hint" id="palHint"></p>
-    <div class="palhead" id="palHeadSens"></div>
-    <div id="palSens" class="pal"></div>
-    <div class="palhead" id="palHeadActs"></div>
-    <div id="palActs" class="pal"></div>
+    <div class="palgroup">
+      <h3 class="pg ctrl" id="palHeadCtrl"></h3>
+      <div id="palCtrl" class="pal"></div>
+    </div>
+    <div class="palgroup">
+      <h3 class="pg sens" id="palHeadSens"></h3>
+      <div id="palSens" class="pal"></div>
+    </div>
+    <div class="palgroup">
+      <h3 class="pg motion" id="palHeadActs"></h3>
+      <div id="palActs" class="pal"></div>
+    </div>
+    <p class="hint small" id="trashHint"></p>
   </section>
 
-  <!-- the workspace: the rule stacks, in order = the if / elif chain -->
+  <!-- the workspace: the scripts. Rules first (top = asked first), the plan last -->
   <section class="card workcard">
     <h2 id="h2Work"></h2>
-    <button class="addbtn" id="addRule" type="button">+ قانون جدید</button>
-    <div id="stacks"></div>
+    <div class="worktools">
+      <button class="btn small" id="addRule" type="button">+ قانون جدید</button>
+      <span class="hint" id="workHint"></span>
+    </div>
+    <div id="ws" class="ws"></div>
   </section>
 </main>
 
@@ -66,8 +80,8 @@
 
 <footer class="bar">
   <span class="barhint" id="barHint"></span>
+  <button class="btn ghost" id="copyBtn" type="button">کپی پایتون</button>
   <button class="btn ghost" id="dlPyBtn" type="button">&#11015; فایل پایتون</button>
-  <input type="file" id="pyFile" accept=".py,text/x-python" style="display:none">
   <button class="btn go" id="playBtn" type="button">&#9654; بازی با این کد</button>
 </footer>
 

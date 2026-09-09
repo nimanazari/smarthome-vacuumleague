@@ -18,6 +18,10 @@
     // U14 may write Python by hand OR open the AI page (the FS rule builder,
     // shared for now) — the button on the setup page follows this line
     helper: 'leagues/vacuum/helper/helper.html',
+    // ...and the BLOCKS page too: the same Scratch-style editor FS has, with
+    // U14's extra hexagons (compass, room number, clean-%). One rules file,
+    // shared with the AI helper above.
+    helper2: 'leagues/vacuum/helper2/blocks.html',
     // U14's rig lives in kit.js NEXT DOOR (one file, one truth): FS's rig
     // plus the compass. The helper page reads the same object.
     kit: root.VacuumU14Kit,
