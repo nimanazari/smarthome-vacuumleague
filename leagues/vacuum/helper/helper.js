@@ -80,14 +80,36 @@
   let MAP_NO = '';
   try { MAP_NO = localStorage.getItem(MAP_KEY) || ''; } catch (e) { /* private mode */ }
   (function wireMapNo() {
-    const sel = document.getElementById('mapNoIn');
-    if (!sel) return;
-    sel.value = MAP_NO;
-    sel.addEventListener('change', () => {
-      MAP_NO = sel.value;
-      try { localStorage.setItem(MAP_KEY, MAP_NO); } catch (e) { /* private mode */ }
-      const box = document.getElementById('teamNameIn');
-      if (box) box.dispatchEvent(new Event('input'));     // the preview redraws the way a name edit does
+    // The number is read from the team's OWN map file — the map1.json (or
+    // map.html) the organiser released to them — never picked from a list:
+    // the competition maps are handed out one at a time, on a schedule.
+    const btn = document.getElementById('mapFileBtn'), fin = document.getElementById('mapFileIn'), lbl = document.getElementById('mapNoLbl');
+    if (!btn || !fin) return;
+    const show = () => { if (lbl) lbl.textContent = MAP_NO ? ('مپ ' + MAP_NO + ' ✓') : ''; };
+    show();
+    btn.addEventListener('click', () => fin.click());
+    fin.addEventListener('change', () => {
+      const f = fin.files[0]; fin.value = '';
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        let txt = String(r.result), m = null;
+        const emb = txt.match(/<script[^>]*id="map"[^>]*>([\s\S]*?)<\/script>/i);
+        if (emb) txt = emb[1].replace(/<\\\//g, '</');
+        try { m = JSON.parse(txt); } catch (e) { m = null; }
+        if (!m || !m.cols) { alert('این فایل نقشه نیست'); return; }
+        // the slot: written into the file by the organiser; else the "مپ ۳" in its name; else the file name
+        let n = m.slot || m.compSlot || 0;
+        if (!n) { const t = /مپ\s*([۰-۹0-9]+)/.exec(String(m.name || '')); if (t) n = +t[1].replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); }
+        if (!n) { const t = /map\s*(\d+)/i.exec(f.name); if (t) n = +t[1]; }
+        if (!(n >= 1)) { alert('شماره‌ی مپ در این فایل پیدا نشد'); return; }
+        MAP_NO = String(n);
+        try { localStorage.setItem(MAP_KEY, MAP_NO); } catch (e) { /* private mode */ }
+        show();
+        const box = document.getElementById('teamNameIn');
+        if (box) box.dispatchEvent(new Event('input'));     // the preview redraws the way a name edit does
+      };
+      r.readAsText(f);
     });
   }());
   const pyFileName = (fallback) => {

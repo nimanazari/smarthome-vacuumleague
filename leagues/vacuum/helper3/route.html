@@ -29,7 +29,9 @@
   <div class="topbtns">
     <button class="btn ghost" id="themeBtn" type="button" title="روشن / تاریک">&#9728;&#65039;</button>
     <input id="teamNameIn" class="teamname" type="text" maxlength="40" placeholder="نام تیم · team name" title="نام تیم شما — داخل فایل پایتون نوشته می‌شود تا داور بداند این کد مال کیست">
-    <select id="mapNoIn" class="teamname" title="این برنامه برای کدام مپ مسابقه است؟ اسم فایل rN_تیم.py می‌شود" style="width:auto;min-width:5.5em"><option value="">مپ؟</option><option value="1">مپ ۱</option><option value="2">مپ ۲</option><option value="3">مپ ۳</option><option value="4">مپ ۴</option><option value="5">مپ ۵</option></select>
+    <button class="btn ghost" id="mapFileBtn" type="button" title="فایل مپ مسابقه‌ات (map1.json یا map.html) را بده تا برنامه برای همان مپ نام‌گذاری شود">📂 مپ مسابقه</button>
+    <span id="mapNoLbl" class="teamname" style="width:auto;min-width:4em;display:inline-block;padding:0 8px;line-height:2.2em"></span>
+    <input id="mapFileIn" type="file" accept=".json,.html,application/json,text/html" hidden>
     <button class="btn ghost" id="openPyBtn" type="button" title="فایل پایتونی که همین صفحه ساخته را باز کنید و ادامه بدهید">📥 باز کردن فایل پایتون</button>
     <input id="openPyFile" type="file" accept=".py,text/x-python,text/plain" hidden>
     <button class="btn ghost" id="resetBtn" type="button">از نو</button>

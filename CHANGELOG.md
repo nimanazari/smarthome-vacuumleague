@@ -1,3 +1,15 @@
+## 2026-09-09 (d) — no penalty-free relocation; the helper reads the map file
+
+- **جابه‌جایی بدون جریمه حذف شد:** منوی داور فقط «با جریمه (قانون)» دارد؛ هر
+  جابه‌جایی، دستی یا خودکار، جریمه‌ی پله‌ای ۵/۱۰/۱۲ را می‌گیرد. RULES.md بند ۵ و
+  بند ۷ داوری به‌روز شد.
+- **هلپرها:** به‌جای انتخاب «مپ ۱ تا ۵»، دکمه‌ی «📂 مپ مسابقه»: تیم فایل مپ
+  خودش (`map1.json` یا `map.html`) را می‌دهد و شماره از داخل فایل خوانده
+  می‌شود (`slot`، یا «مپ N» در اسم، یا اسم فایل) — هیچ‌کس لیست همه‌ی مپ‌ها را
+  نمی‌بیند. هر `map.json`/handout حالا فیلد `slot` دارد.
+- EN: the penalty-free relocate is gone (rules updated); helpers learn the
+  map number from the team's own map file, not a list; map files carry `slot`.
+
 ## 2026-09-09 (c) — team names travel with the code; relocation nearby, fine climbing
 
 - **نمای پیش‌فرض دقیقاً از بالا:** دوربین مسابقه عمود و هم‌راستا با لبه‌های خانه (`over`: az = π/2, pol ≈ 0)؛ دیگر کج نیست.

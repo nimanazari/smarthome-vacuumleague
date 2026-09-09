@@ -1753,7 +1753,6 @@
     <div class="rm-card fa">
       <b id="rmTitle">جابه‌جایی ربات</b>
       <button class="btn" id="rmPen">با جریمه (قانون)</button>
-      <button class="btn ghost" id="rmFree">بدون جریمه</button>
       <button class="smallbtn" id="rmCancel">انصراف</button>
     </div>
   </div>
@@ -6495,10 +6494,11 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('sensBtn').onclick = () => { sensOn = !sensOn; $('sensLbl').textContent = T(sensOn ? 'سنسورها: روشن' : 'سنسورها: خاموش', 'Sensors: ' + (sensOn ? 'on' : 'off')); applySens(); };
 
     /* ---------- the referee's relocate menu ----------
-       One misclick used to cost 5 irreversible tiles. Now the button opens a
-       choice: the RULE relocation (with its penalty), a penalty-free move
-       (untangling a pile-up that was nobody's fault), or cancel. Sumo keeps
-       its own one-tap restart — an arena has no tiles to fine. */
+       One misclick used to cost irreversible tiles, so the button opens a
+       confirmation: the RULE relocation (with its climbing penalty) or cancel.
+       There is NO penalty-free move any more — every relocation is fined, so
+       teams have every reason to write code that does not need one. Sumo
+       keeps its own one-tap restart — an arena has no tiles to fine. */
     let refWho = null;
     function openRefMenu(color) {
       if (!engine.running) return;
@@ -6513,7 +6513,6 @@ else:                            # 7) nothing in the way -> full speed ahead
     $('relocRed').onclick = () => openRefMenu('red');
     $('relocBlue').onclick = () => { if (engine.robots.blue) openRefMenu('blue'); };
     $('rmPen').onclick = () => { $('refMenu').style.display = 'none'; if (refWho && engine.running) engine.relocate(refWho, 'manual'); };
-    $('rmFree').onclick = () => { $('refMenu').style.display = 'none'; if (refWho && engine.running) engine.relocate(refWho, 'free', true); };
     $('rmCancel').onclick = () => { $('refMenu').style.display = 'none'; };
     $('refMenu').onclick = (ev) => { if (ev.target === $('refMenu')) $('refMenu').style.display = 'none'; };
 
