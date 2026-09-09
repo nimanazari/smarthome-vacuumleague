@@ -1368,8 +1368,10 @@
   #camPick .cp-d { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
 
   /* ---------- referee tools ---------- */
-  #refMenu { position: fixed; inset: 0; z-index: 31; display: none; align-items: center; justify-content: center; background: rgba(7,9,13,.62); backdrop-filter: blur(4px); }
-  #refMenu .rm-card { display: flex; flex-direction: column; gap: 9px; width: 270px; padding: 17px 18px; direction: rtl; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+  /* a SMALL card in the corner — the match stays fully visible, and the
+     ring on the floor shows where the robot will land */
+  #refMenu { position: fixed; top: 14px; inset-inline-end: 14px; z-index: 31; display: none; pointer-events: none; }
+  #refMenu .rm-card { pointer-events: auto; display: flex; flex-direction: column; gap: 8px; width: 250px; padding: 14px 15px; direction: rtl; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014) 40%), #0e1219; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
   #refMenu .rm-card b { font-size: 14.5px; margin-bottom: 3px; }
   #pausedBanner { position: fixed; inset: 0; z-index: 8; display: none; align-items: flex-start; justify-content: center; pointer-events: none; }
   #pausedBanner .pb { margin-top: 16vh; font-size: 29px; font-weight: 800; padding: 13px 36px; border-radius: 18px; background: rgba(10,13,19,.9); border: 1px solid rgba(255,200,87,.55); color: #ffc857; box-shadow: 0 20px 50px rgba(0,0,0,.55); text-align: center; animation: pbpulse 2s ease-in-out infinite; }
@@ -1752,7 +1754,9 @@
   <div id="refMenu">
     <div class="rm-card fa">
       <b id="rmTitle">جابه‌جایی ربات</b>
+      <small id="rmHint" style="color:var(--muted)">حلقه‌ی رنگی روی زمین = جایی که ربات می‌افتد</small>
       <button class="btn" id="rmPen">با جریمه (قانون)</button>
+      <button class="smallbtn" id="rmAgain">🎲 جای دیگر</button>
       <button class="smallbtn" id="rmCancel">انصراف</button>
     </div>
   </div>
@@ -6499,11 +6503,20 @@ else:                            # 7) nothing in the way -> full speed ahead
        There is NO penalty-free move any more — every relocation is fined, so
        teams have every reason to write code that does not need one. Sumo
        keeps its own one-tap restart — an arena has no tiles to fine. */
-    let refWho = null;
+    let refWho = null, refSpot = null;
+    // pick (or re-pick) where this robot would land, and show it on the floor
+    function previewRelocSpot(color) {
+      const rb = engine.robots && engine.robots[color];
+      if (!rb || !engine.world || !engine.world.nearbyFreePos) { refSpot = null; return; }
+      refSpot = engine.world.nearbyFreePos(rb, 3, 6);
+      renderer.showRelocMarker(refSpot.x, refSpot.y, TEAM_COLORS[selCol[color]].css);
+    }
+    function closeRefMenu() { $('refMenu').style.display = 'none'; renderer.hideRelocMarker(); refSpot = null; }
     function openRefMenu(color) {
       if (!engine.running) return;
       if (leagueDef() && leagueDef().arena) { engine.relocate(color, 'manual'); return; }
       refWho = color;
+      previewRelocSpot(color);
       $('rmTitle').textContent = 'جابه‌جایی ' + (color === 'red' ? engine.cfg.redName : engine.cfg.blueName);
       const pen = (engine.mode && engine.mode.nextPenalty) ? engine.mode.nextPenalty(color) : 5;
       const nth = (engine.mode && engine.mode.relocCount && engine.mode.relocCount[color]) || 0;
@@ -6512,9 +6525,9 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     $('relocRed').onclick = () => openRefMenu('red');
     $('relocBlue').onclick = () => { if (engine.robots.blue) openRefMenu('blue'); };
-    $('rmPen').onclick = () => { $('refMenu').style.display = 'none'; if (refWho && engine.running) engine.relocate(refWho, 'manual'); };
-    $('rmCancel').onclick = () => { $('refMenu').style.display = 'none'; };
-    $('refMenu').onclick = (ev) => { if (ev.target === $('refMenu')) $('refMenu').style.display = 'none'; };
+    $('rmPen').onclick = () => { const spot = refSpot; closeRefMenu(); if (refWho && engine.running) engine.relocate(refWho, 'manual', false, spot); };
+    $('rmAgain').onclick = () => { if (refWho && engine.running) previewRelocSpot(refWho); };
+    $('rmCancel').onclick = closeRefMenu;
 
     /* ---------- restart (false start) ----------
        The 3-2-1 can now be aborted: Restart cancels whatever is in flight and

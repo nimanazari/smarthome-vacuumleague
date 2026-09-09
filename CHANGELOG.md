@@ -1,3 +1,12 @@
+## 2026-09-09 (e) — the referee sees where the robot will land
+
+- **جابه‌جایی داور:** به‌جای پنجره‌ی تمام‌صفحه، یک کارت کوچک گوشه‌ی بالا باز
+  می‌شود و بازی دیده می‌ماند. قبل از تأیید، **حلقه‌ای به رنگ تیم روی زمین** جای
+  فرود ربات را نشان می‌دهد (۳ تا ۶ کاشی آن‌طرف‌تر)؛ «🎲 جای دیگر» نقطه‌ی تازه
+  می‌دهد؛ «با جریمه» ربات را دقیقاً همان‌جا می‌برد.
+- EN: the relocate dialog is a small corner card; a ring on the floor previews
+  the landing spot before the referee confirms; 🎲 re-rolls it.
+
 ## 2026-09-09 (d) — no penalty-free relocation; the helper reads the map file
 
 - **جابه‌جایی بدون جریمه حذف شد:** منوی داور فقط «با جریمه (قانون)» دارد؛ هر

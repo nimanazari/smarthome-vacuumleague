@@ -416,6 +416,8 @@ class Renderer3D {
     // them, so the next sync() builds them fresh instead of believing they exist
     this._lineMesh = null; this._lineStamp = -1; this._jets = {}; this._fx = {};
     const c = engine.cfg, t = c.tile, ox = -c.W / 2, oz = -c.H / 2;
+    this._ox = ox; this._oz = oz;                 // world -> scene offsets, for markers
+    this.hideRelocMarker();
 
     // the hall floor — and around it, whatever ground the map asked for:
     // dark (the classic void), GRASS, or STONE paving. Flat meshes: free.
@@ -1652,7 +1654,31 @@ class Renderer3D {
     this.renderer.render(this.scene, this.camera);
   }
 
+  /* ---- the relocate PREVIEW: a ring on the floor where the robot will land ---- */
+  showRelocMarker(x, y, cssColor) {
+    this.hideRelocMarker();
+    const col = new THREE.Color(cssColor || '#ffc857');
+    const g = new THREE.Group();
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.26, 0.40, 40), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03;
+    const halo = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.60, 48), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false }));
+    halo.rotation.x = -Math.PI / 2; halo.position.y = 0.025;
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85 }));
+    pin.position.y = 0.45;
+    g.add(ring, halo, pin);
+    g.position.set((this._ox || 0) + x, 0, (this._oz || 0) + y);
+    this.scene.add(g);
+    this._reloc = { g, t0: performance.now() };
+  }
+  hideRelocMarker() {
+    if (this._reloc) { this.scene.remove(this._reloc.g); this._reloc = null; }
+  }
+
   render() {
+    if (this._reloc) {                                   // the marker breathes
+      const k = 1 + 0.10 * Math.sin((performance.now() - this._reloc.t0) / 220);
+      this._reloc.g.scale.set(k, 1, k);
+    }
     this._endgameTint();          // the room answers the scoreboard
     // ---- 🎬 CINEMATIC: the auto-director takes the wheel ----
     if (this.viewMode === 'cine') { this._renderCine(); return; }

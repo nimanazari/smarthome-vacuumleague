@@ -1016,8 +1016,8 @@
       return this.randomFreePos();
     }
 
-    teleport(body) {
-      const p = this.nearbyFreePos(body, 3, 6);
+    teleport(body, spot) {
+      const p = spot || this.nearbyFreePos(body, 3, 6);   // the referee may have previewed the spot
       body.x = p.x; body.y = p.y; body.heading = this.rand() * Math.PI * 2;
       body.left = 0; body.right = 0;
       // ...and if the landing still grazes something, nudge straight out of

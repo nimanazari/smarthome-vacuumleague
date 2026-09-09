@@ -266,11 +266,11 @@
       const n = (this.relocCount && this.relocCount[color]) || 0;
       return sched[Math.min(n, sched.length - 1)];
     }
-    relocate(color, reason, free) {
+    relocate(color, reason, free, spot) {
       this.relocCount = this.relocCount || { red: 0, blue: 0 };
       const lost = free ? 0 : this._burn(color, this.nextPenalty(color));
       if (!free) this.relocCount[color] = (this.relocCount[color] || 0) + 1;
-      this.world.teleport(this.world.robots[color]);
+      this.world.teleport(this.world.robots[color], spot);
       if (this.onRelocate) this.onRelocate(color, reason || 'manual', lost);
     }
 
