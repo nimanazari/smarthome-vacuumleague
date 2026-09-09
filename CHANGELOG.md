@@ -1,3 +1,19 @@
+## 2026-09-08 (e) — the ARENA: a Swiss-league fixture played live on the site
+
+- **پخش زنده روی سایت:** داور در پنل (`/admin` → تب Live arena) یک بازیِ
+  قرعه‌کشی‌شده را انتخاب می‌کند، دو برنامه‌ی `.py` تیم‌ها را آپلود می‌کند، مپ و
+  طول بازی را می‌گذارد و «▶ Play live» می‌زند: همین بازی با `?arena=<id>` باز
+  می‌شود، اسم‌ها/برنامه‌ها/مپ را از سایت می‌گیرد، مسابقه را اجرا و ضبط می‌کند و
+  ۵ بار در ثانیه یک اسنپ‌شات (ربات‌ها، حیوانات، درها، مالکیت کاشی‌ها، امتیاز،
+  ساعت) به `/api/arena/tick` می‌فرستد. سایت با SSE (`/api/arena/stream`) به
+  همه پخش می‌کند؛ صفحه‌ی عمومی **`/live-match`** همان بازی را با `?watch=1`
+  باز می‌کند که هیچ شبیه‌سازی نمی‌کند و فقط اسنپ‌شات‌ها را رندر می‌کند.
+  سوت پایان → `/api/arena/finish` → امتیاز مستقیم در جدول لیگ سوییسی.
+  برنامه‌های تیم‌ها فقط برای سشن ادمین قابل خواندن‌اند.
+- EN: the referee's browser plays and streams the fixture; the site
+  rebroadcasts it to /live-match (the game in watch mode renders the
+  snapshots); the whistle writes the score into the Swiss table.
+
 ## 2026-09-08 (d) — installing a map = copying one file
 
 - **نصب نقشه‌ی مسابقه برای تیم‌ها:** فایل `map1.json` (یا `map1.html`) را کنار

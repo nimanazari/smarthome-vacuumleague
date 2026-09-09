@@ -1376,6 +1376,8 @@
   @keyframes pbpulse { 0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,.55); } 50% { box-shadow: 0 20px 62px rgba(0,0,0,.7); } }
   #pausedBanner .pb small { display: block; font-size: 10.5px; letter-spacing: 5px; color: var(--muted); margin-top: 3px; }
   .shl-locked #mapmakerLink { pointer-events: none; opacity: .4; }
+  /* the ARENA viewer (?watch=1): the match and the scoreboard, no controls */
+  .watching #panel, .watching #lobbyBar, .watching #burgerBtn, .watching #burgerMenu, .watching #countdown { display: none !important; }
   .shl-locked #loadRed, .shl-locked #loadBlue, .shl-locked #selRed, .shl-locked #selBlue, .shl-locked #fsBlockBtn, .shl-locked #mapEdit { opacity: .4; }
 
   /* ---------- the league book ---------- */
@@ -3601,6 +3603,18 @@ else:                            # 7) nothing in the way -> full speed ahead
     function mapStore(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
     let serverMaps = {};                      // maps admins uploaded to the site — visible to everyone
     let siteEditorLocked = false;             // the site said: no Map Maker for this visitor
+    /* ---- THE ARENA (the league site's live match) ----
+       ?arena=<fixture>  the REFEREE: the site hands over both programs, the
+                         names, the map and the length; this page plays the
+                         match and streams a snapshot 5x a second to
+                         /api/arena/tick; the whistle posts the score, which
+                         the site writes into the Swiss table.
+       ?watch=1          a VIEWER: the same page, but it never simulates — it
+                         renders whatever /api/arena/stream says. */
+    const arenaQ = new URLSearchParams(location.search);   // (urlQ is declared further down)
+    const arenaId = arenaQ.get('arena') ? Number(arenaQ.get('arena')) : null;
+    const watchMode = arenaQ.get('watch') === '1';
+    let arenaMeta = null;                     // the referee's fixture (or the viewer's stream meta)
     /* ---- DROPPED-IN maps: the simplest install there is ----
        The organiser hands a team `map1.json` (or the handout `map1.html`);
        the team COPIES IT NEXT TO THE GAME (beside index.html / the .exe, or
@@ -3710,6 +3724,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     }
     function selectedMap() { return withDoors(selectedMapRaw()); }
     function selectedMapRaw() {
+      if (arenaMeta && arenaMeta.map) return arenaMeta.map;   // the fixture's map, as armed on the site
       const v = $('mapSel') ? $('mapSel').value : '';
       if (!v) {
         // the official slot: only a doors override needs the division's own house
@@ -5067,6 +5082,7 @@ else:                            # 7) nothing in the way -> full speed ahead
 
     function showResults() {
       matchRec.stop();               // the whistle finishes the film too
+      arenaFinish();                 // ...and the site's Swiss table gets the score
       $('vignette').style.boxShadow = 'inset 0 0 26vh 8vh rgba(255,40,40,0)';
       $('timer').classList.remove('huge', 'tick');
       // ---- a MISSION run ends on its own card: pass / fail, not win / lose ----
@@ -7052,6 +7068,99 @@ else:                            # 7) nothing in the way -> full speed ahead
       buildTutorialEngine(fn);
     };
 
+    /* ================= THE ARENA ================= */
+    const arenaPost = (path, body) => fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true });
+    function arenaSnap() {
+      const rows = [];
+      for (let i = 0; i < engine.cols; i++) {
+        let r = '';
+        for (let j = 0; j < engine.rows; j++) { const o = engine.owner[i][j]; r += o === 'red' ? 'r' : o === 'blue' ? 'b' : o === 'blocked' ? 'x' : '.'; }
+        rows.push(r);
+      }
+      const rb = (k) => { const r = engine.robots[k]; return r ? { x: +r.x.toFixed(3), y: +r.y.toFixed(3), h: +r.heading.toFixed(3) } : null; };
+      const pet = (p) => (p && p.enabled !== false) ? { x: +p.x.toFixed(3), y: +p.y.toFixed(3), h: +(p.heading || 0).toFixed(3) } : null;
+      return {
+        left: Math.max(0, engine.cfg.matchSeconds - engine.elapsed),
+        scores: { red: engine.scores.red, blue: engine.scores.blue },
+        robots: { red: rb('red'), blue: rb('blue') }, cat: pet(engine.cat), dog: pet(engine.dog),
+        doors: (engine.doors || []).map((d) => +d.anim.toFixed(2)),
+        owner: rows.join('|'), finished: !!engine.finished, running: !!engine.running,
+      };
+    }
+    let arenaTickAt = 0, arenaSentMap = false, arenaFinished = false;
+    function arenaTick(now) {
+      if (!arenaId || watchMode || !arenaMeta || !engine.running) return;
+      if (now - arenaTickAt < 200) return;
+      arenaTickAt = now;
+      const body = { id: arenaId, snap: arenaSnap() };
+      if (!arenaSentMap) { body.map = selectedMap(); arenaSentMap = true; }
+      arenaPost('/api/arena/tick', body).then((r) => {
+        if (r.status === 401) showToast(T('⛔ سشن ادمین نیست — پخش زنده قطع است', '⛔ no admin session — the live stream is off'));
+      }).catch(() => { /* the site is down; the match goes on */ });
+    }
+    function arenaFinish() {
+      if (!arenaId || watchMode || !arenaMeta || arenaFinished) return;
+      arenaFinished = true;
+      arenaPost('/api/arena/tick', { id: arenaId, snap: arenaSnap() }).catch(() => {});
+      arenaPost('/api/arena/finish', { id: arenaId, home: engine.scores.red, away: engine.scores.blue })
+        .then((r) => showToast(r.ok ? T('🏆 نتیجه در جدول لیگ سایت ثبت شد', '🏆 result written into the league table') : T('⚠️ ثبت نتیجه در سایت نشد — دستی وارد کن', '⚠️ could not write the result — enter it by hand')))
+        .catch(() => showToast(T('⚠️ ثبت نتیجه در سایت نشد — دستی وارد کن', '⚠️ could not write the result — enter it by hand')));
+    }
+    async function arenaBoot() {
+      const r = await fetch('/api/arena/setup?id=' + arenaId, { cache: 'no-store' });
+      if (!r.ok) { showToast(T('این مسابقه آماده نیست یا لاگین ادمین نداری (پنل → Live arena)', 'fixture not armed, or no admin session (admin → Live arena)')); return; }
+      arenaMeta = await r.json();
+      $('inRed').value = arenaMeta.homeName || 'Team 1'; $('inBlue').value = arenaMeta.awayName || 'Team 2';
+      $('codeRed').value = arenaMeta.redPy || ''; $('codeBlue').value = arenaMeta.bluePy || '';
+      if (arenaMeta.seconds) $('inTime').value = arenaMeta.seconds;
+      populateMaps(); showMatchPanel();
+      showToast(T('🏟 داور: ' + arenaMeta.homeName + ' vs ' + arenaMeta.awayName + ' — «شروع مسابقه» را بزن؛ زنده روی سایت می‌رود', '🏟 referee: ' + arenaMeta.homeName + ' vs ' + arenaMeta.awayName + ' — press Start; it goes live on the site'));
+    }
+    // ---- the viewer ----
+    function watchStart(meta) {
+      arenaMeta = meta;
+      engine = new Engine({ matchSeconds: meta.seconds || 180, redName: meta.homeName, blueName: meta.awayName, map: meta.map || null, league: leagueId, kits: kits, pets: true, players: 2 });
+      engine.running = true;                  // the HUD shows a live match; the loop never steps it
+      renderer.buildScene(engine);
+      $('panel').style.display = 'none'; $('lobbyBar').style.display = 'none';
+      wasFinished = false;
+      fitText($('redName'), meta.homeName || 'Team 1'); fitText($('blueName'), meta.awayName || 'Team 2');
+    }
+    function watchApply(sn) {
+      if (!arenaMeta || !engine || !engine.robots) return;
+      for (const k of ['red', 'blue']) { const r = engine.robots[k], p = sn.robots && sn.robots[k]; if (r && p) { r.x = p.x; r.y = p.y; r.heading = p.h; } }
+      for (const k of ['cat', 'dog']) { const p = sn[k], o = engine[k]; if (p && o) { o.x = p.x; o.y = p.y; o.heading = p.h; } }
+      if (sn.doors && engine.doors) sn.doors.forEach((a, i) => { if (engine.doors[i]) engine.doors[i].anim = a; });
+      if (sn.owner) {
+        const rows = sn.owner.split('|');
+        for (let i = 0; i < rows.length && i < engine.cols; i++) for (let j = 0; j < rows[i].length && j < engine.rows; j++) {
+          const c = rows[i][j]; if (c === 'x') continue;
+          engine.owner[i][j] = c === 'r' ? 'red' : c === 'b' ? 'blue' : null;
+        }
+      }
+      if (sn.scores) { engine.scores.red = sn.scores.red; engine.scores.blue = sn.scores.blue; }
+      if (sn.left != null) engine.elapsed = engine.cfg.matchSeconds - sn.left;
+      if (sn.finished && !engine.finished) { engine.finished = true; engine.winner = sn.scores.red > sn.scores.blue ? 'red' : sn.scores.blue > sn.scores.red ? 'blue' : 'draw'; }
+    }
+    function watchBoot() {
+      document.body.classList.add('watching');
+      const connect = () => {
+        const es = new EventSource('/api/arena/stream');
+        es.onmessage = (e) => {
+          let d; try { d = JSON.parse(e.data); } catch (err) { return; }
+          if (d.type === 'meta') { if (!arenaMeta || arenaMeta.matchId !== d.meta.matchId) watchStart(d.meta); }
+          else if (d.type === 'snap') watchApply(d.snap);
+          else if (d.type === 'done') { if (d.meta && (!arenaMeta || arenaMeta.matchId !== d.meta.matchId)) watchStart(d.meta); watchApply({ scores: d.result ? { red: d.result.home, blue: d.result.away } : null, left: 0, finished: true, robots: {} }); }
+          else if (d.type === 'off') { arenaMeta = null; showToast(T('مسابقه‌ای روی آنتن نیست', 'nothing on air')); }
+        };
+        es.onerror = () => { es.close(); setTimeout(connect, 3000); };
+      };
+      connect();
+      showToast(T('👀 تماشای زنده — منتظر شروع داور…', '👀 watching live — waiting for the referee…'));
+    }
+    if (watchMode) setTimeout(watchBoot, 600);
+    else if (arenaId) setTimeout(arenaBoot, 600);
+
     let last = performance.now(), wasFinished = false;
     // FIXED TIMESTEP: physics always advances in exact 1/60 s slices, however
     // fast or slow the display is. Wall-clock time only decides HOW MANY
@@ -7063,7 +7172,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     function loop(now) {
       requestAnimationFrame(loop);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      if (engine.running && !paused) {
+      if (engine.running && !paused && !watchMode) {
         simAcc += dt * simSpeed;
         let slices = 0;
         while (simAcc >= SIM_DT && slices < 8 && !engine.finished) {
@@ -7074,6 +7183,7 @@ else:                            # 7) nothing in the way -> full speed ahead
       } else simAcc = 0;
       if (toastUntil && now > toastUntil) { $('toast').style.display = 'none'; toastUntil = 0; }
       renderer.sync(engine);
+      arenaTick(now);
       $('redScore').textContent = engine.scores.red;
       $('blueScore').textContent = engine.scores.blue;
       if (engine.robots.blue) {
