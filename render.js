@@ -1659,13 +1659,19 @@ class Renderer3D {
     this.hideRelocMarker();
     const col = new THREE.Color(cssColor || '#ffc857');
     const g = new THREE.Group();
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.26, 0.40, 40), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03;
-    const halo = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.60, 48), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false }));
-    halo.rotation.x = -Math.PI / 2; halo.position.y = 0.025;
-    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85 }));
-    pin.position.y = 0.45;
-    g.add(ring, halo, pin);
+    /* ABOVE the floor: the painted tiles sit at y = 0.03, so a marker drawn at
+       that height is swallowed by them — this is why the ring was invisible. */
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.44, 44), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.075;
+    const halo = new THREE.Mesh(new THREE.RingGeometry(0.52, 0.72, 52), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false }));
+    halo.rotation.x = -Math.PI / 2; halo.position.y = 0.07;
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(0.27, 40), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthWrite: false }));
+    disc.rotation.x = -Math.PI / 2; disc.position.y = 0.068;
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.4, 10), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 }));
+    pin.position.y = 0.78;
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.10, 16, 12), new THREE.MeshBasicMaterial({ color: col }));
+    knob.position.y = 1.52;
+    g.add(ring, halo, disc, pin, knob);
     g.position.set((this._ox || 0) + x, 0, (this._oz || 0) + y);
     this.scene.add(g);
     this._reloc = { g, t0: performance.now() };

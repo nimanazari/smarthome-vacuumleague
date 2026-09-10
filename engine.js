@@ -147,7 +147,9 @@ class Engine {
 
   /* ---------------- delegating helpers (unchanged API) ---------------- */
 
-  relocate(color, reason, free) { this.mode.relocate(color, reason, free); }
+  // `spot` is the referee's previewed landing tile — forwarding it is what
+  // makes the ring on the floor tell the truth
+  relocate(color, reason, free, spot) { this.mode.relocate(color, reason, free, spot); }
   readSensors(robot, other) { return this.world.readSensors(robot, other); }
   readKit(robot, other) { return this.world.readKit(robot, other); }
   kitOf(color) { return this.world.robots[color].kit; }

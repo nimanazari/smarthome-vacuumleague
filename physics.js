@@ -996,27 +996,35 @@
     }
 
     // Move a body to a random free spot (the league adds whatever penalty it likes)
-    // A relocation is a NUDGE, not a teleport across the house: a random fully
-    // open tile 3..6 tiles from where the robot got stuck (any free tile if
-    // none is there) — far enough to be free, near enough to stay in the game.
-    nearbyFreePos(body, minTiles, maxTiles) {
+    /* Where a relocated robot lands: a RANDOM fully open tile anywhere in the
+       house, with one rule — never near where it just got stuck. The minimum
+       distance is tried at 6 tiles, then relaxed to 4 and 2 for a small or
+       crowded floor, so the search always answers. Random and far is the
+       point: a relocation must never feel like a free lift to a good spot. */
+    relocateSpot(body, minTiles) {
       const t = this.cfg.tile;
-      const lo = (minTiles || 3) * t, hi = (maxTiles || 6) * t;
-      for (let k = 0; k < 300; k++) {
-        const i = Math.floor(this.rand() * this.cols), j = Math.floor(this.rand() * this.rows);
-        if (this.owner[i][j] === 'blocked' || this.free[i][j] !== null) continue;
-        const x = (i + 0.5) * t, y = (j + 0.5) * t;
-        const d = Math.hypot(x - body.x, y - body.y);
-        if (d < lo || d > hi) continue;
-        let ok = true;
-        for (const c of this.teams) { const o = this.robots[c]; if (o !== body && Math.hypot(o.x - x, o.y - y) < 0.75) { ok = false; break; } }
-        if (ok) return { x, y };
+      for (const min of [minTiles || 6, 4, 2, 0]) {
+        const lo = min * t;
+        const hits = [];
+        for (let i = 0; i < this.cols; i++) {
+          for (let j = 0; j < this.rows; j++) {
+            if (this.owner[i][j] === 'blocked' || this.free[i][j] !== null) continue;
+            const x = (i + 0.5) * t, y = (j + 0.5) * t;
+            if (Math.hypot(x - body.x, y - body.y) < lo) continue;
+            let ok = true;
+            for (const c of this.teams) { const o = this.robots[c]; if (o !== body && Math.hypot(o.x - x, o.y - y) < 0.75) { ok = false; break; } }
+            if (ok) hits.push({ x, y });
+          }
+        }
+        if (hits.length) return hits[Math.floor(this.rand() * hits.length)];
       }
       return this.randomFreePos();
     }
+    // the old name, kept for anything that still calls it
+    nearbyFreePos(body) { return this.relocateSpot(body, 6); }
 
     teleport(body, spot) {
-      const p = spot || this.nearbyFreePos(body, 3, 6);   // the referee may have previewed the spot
+      const p = spot || this.relocateSpot(body, 6);   // the referee may have previewed the spot
       body.x = p.x; body.y = p.y; body.heading = this.rand() * Math.PI * 2;
       body.left = 0; body.right = 0;
       // ...and if the landing still grazes something, nudge straight out of

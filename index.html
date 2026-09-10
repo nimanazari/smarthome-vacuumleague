@@ -286,6 +286,8 @@
   #burgerMenu::-webkit-scrollbar-thumb { background: #2c3340; border-radius: 4px; }
   .mitem { display: flex; align-items: center; gap: 7px; padding: 7px 9px; font-family: inherit; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; border: none; border-radius: 8px; background: none; color: var(--text); }
   .mitem:hover { background: #1c2230; }
+  /* the two relocate rows are tinted by refreshRelocLabels() with the team's
+     OWN colour — these are only the fallback before a division is picked */
   .mitem.r { color: #ff9a9a; } .mitem.b { color: #9ec0ff; }
   .mitem.s { color: #ffd77a; } .mitem.e { color: #ffb08a; }
   .msep { height: 1px; background: var(--line); margin: 4px 2px; }
@@ -3162,7 +3164,9 @@ else:                            # 7) nothing in the way -> full speed ahead
       const n2 = live ? engine.cfg.blueName : ($('inBlue').value || 'Team 2');
       const c1 = TEAM_COLORS[selCol.red].css, c2 = TEAM_COLORS[selCol.blue].css;
       const put = (id, col, nm) => {
-        const el = $(id) && $(id).querySelector('.mi-t'); if (!el) return;
+        const row = $(id); if (!row) return;
+        const el = row.querySelector('.mi-t'); if (!el) return;
+        row.style.color = col;                     // the whole row, in the team's colour
         el.innerHTML = '<span style="color:' + col + '">&#9679;</span> ' + T('جابه‌جایی ', 'Relocate ') + escH(nm);
       };
       if (!(leagueDef() && leagueDef().group === 'sumo')) { put('relocRed', c1, n1); put('relocBlue', c2, n2); }
@@ -6586,9 +6590,14 @@ else:                            # 7) nothing in the way -> full speed ahead
     // pick (or re-pick) where this robot would land, and show it on the floor
     function previewRelocSpot(color) {
       const rb = engine.robots && engine.robots[color];
-      if (!rb || !engine.world || !engine.world.nearbyFreePos) { refSpot = null; return; }
-      refSpot = engine.world.nearbyFreePos(rb, 3, 6);
+      if (!rb || !engine.world || !engine.world.relocateSpot) { refSpot = null; return; }
+      refSpot = engine.world.relocateSpot(rb, 6);
       renderer.showRelocMarker(refSpot.x, refSpot.y, TEAM_COLORS[selCol[color]].css);
+      // say how far it is, in tiles — a relocation is a real cost, not a lift
+      const tiles = Math.round(Math.hypot(refSpot.x - rb.x, refSpot.y - rb.y) / (engine.cfg.tile || 0.625));
+      const hint = $('rmHint');
+      if (hint) hint.textContent = T('حلقه‌ی رنگی روی زمین = جای فرود · ' + tiles + ' کاشی آن‌طرف‌تر',
+        'the ring on the floor is where it lands · ' + tiles + ' tiles away');
     }
     function closeRefMenu() { $('refMenu').style.display = 'none'; renderer.hideRelocMarker(); refSpot = null; }
     function openRefMenu(color) {
