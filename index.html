@@ -2030,7 +2030,7 @@ else:
             <tr><td><code>color == red</code></td><td><b style="color:#ff4646">red</b> — floor ahead was cleaned by the red robot</td></tr>
             <tr><td><code>color == blue</code></td><td><b style="color:#3b7dff">blue</b> — floor ahead was cleaned by the blue robot</td></tr>
             <tr><td><code>color == green</code></td><td><b style="color:#3fae6a">green</b> — the BIG rug is ahead: half speed and no points</td></tr>
-            <tr><td><code>color == purple</code></td><td><b style="color:#b07ae8">purple</b> — the SMALL corner rug is ahead (the sample code backs away from it)</td></tr>
+            <tr><td><code>color == purple</code></td><td><b style="color:#b07ae8">purple</b> — a DOORWAY MARKER rug is ahead (so are orange and cyan): no points on it, but drive straight over it — turning back here means never entering the room</td></tr>
             <tr><td><code>color == black</code></td><td><b style="color:#9aa3af">black</b> — a wall or furniture is right ahead</td></tr>
           </table>
           <div class="gp" style="margin-top:8px">Turn on <b>Sensors</b> in the <b>☰ menu</b> and a panel appears at the bottom of the screen showing both robots live: every distance sensor, the bumper, the colour name, <b>wheel speeds</b>, <code>timer</code> and <code>state</code> — so you can watch exactly what your code is reacting to.</div>
@@ -3524,7 +3524,9 @@ else:                            # 7) nothing in the way -> full speed ahead
        back at every doorway marker. Exactly that block -- the sample's own
        wording -- is switched off here; a colour rule a child wrote in their
        own words is untouched. */
-    const LEGACY_RUG_RULE = /^([ \t]*)elif[ \t]+color[ \t]*==[ \t]*purple[ \t]*:[ \t]*#[^\n]*PURPLE rug[^\n]*\n((?:\1[ \t]+(?:state|timer|wheelleft|wheelright)[ \t]*=[ \t]*-?\d+[^\n]*\n){4})/m;
+    // (the champions shipped the very same four lines under their own comment,
+    //  so the match is on the BODY: state = 2 / timer = 5 / both wheels -25)
+    const LEGACY_RUG_RULE = /^([ \t]*)elif[ \t]+color[ \t]*==[ \t]*purple[ \t]*:[^\n]*\n(\1[ \t]+state[ \t]*=[ \t]*2[^\n]*\n\1[ \t]+timer[ \t]*=[ \t]*5[^\n]*\n\1[ \t]+wheelleft[ \t]*=[ \t]*-25[^\n]*\n\1[ \t]+wheelright[ \t]*=[ \t]*-25[^\n]*\n)/m;
     function stripLegacyRugRule(src) {
       const t = String(src == null ? '' : src);
       if (!LEGACY_RUG_RULE.test(t)) return { src: t, stripped: false };

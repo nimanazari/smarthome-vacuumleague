@@ -328,7 +328,7 @@ if bumperfront == 1:
     backward(0.8)
 elif front < 35:
     turnright(0.5)
-elif color == green or color == purple:
+elif color == green:                          # (purple / orange / cyan mark the doors - drive over them)
     forward(0.6)              # فرش امتیاز ندارد، ردش کن
 elif color == red or color == blue:
     if timer > 20:            # ۲ ثانیه است روی کف تمیز می‌گردم

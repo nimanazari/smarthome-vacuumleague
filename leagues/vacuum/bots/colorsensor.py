@@ -45,10 +45,8 @@ elif front < 75 or frontleft < 45 or frontright < 45:
     wheelleft = -10
     wheelright = -10
 
-elif color == purple:        # the small purple rug is ahead -> reverse away
-    timer = 5
-    wheelleft = -25
-    wheelright = -8
+# purple / orange / cyan rugs mark the DOORWAYS: never turn back at one,
+# or you will never get into the room. Drive over them.
 
 elif color == green:         # the big green rug is ahead -> turn away from it
     timer = 4

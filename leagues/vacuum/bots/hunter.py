@@ -57,7 +57,7 @@ elif frontright < 40:            # blocked on the right -> turn LEFT
     wheelleft = -10
     wheelright = -10
 
-elif color == green or color == purple:      # rugs give no points - get out
+elif color == green:                         # the big rug slows us - get out (marker rugs at the doors: drive over)
     state = 2
     timer = 6
     wheelleft = -25

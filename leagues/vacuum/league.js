@@ -481,15 +481,19 @@
         check: (e) => ({ value: e.scores.red, target: 20 }),
       },
       {
-        id: 'no-purple', icon: '🟪', league: 'u14', seconds: 120,
-        title: { fa: 'پله‌ی ۳ — فرش بنفش ممنوع', en: 'Step 3 — Skip the purple rug' },
-        goal: { fa: '۳۰ کاشی تمیز کن بدون این‌که روی فرش بنفش بروی', en: 'clean 30 tiles, never touch the purple rug' },
-        teach: { fa: 'سنسور رنگ: elif color == purple', en: 'the colour sensor' },
+        // (this step used to forbid the PURPLE rug - but purple, orange and cyan
+        //  rugs mark the DOORWAYS on the competition maps, and a robot taught to
+        //  turn back at them never enters a room. The green rug is the one that
+        //  really costs: half speed and no points.)
+        id: 'no-green', icon: '🟩', league: 'u14', seconds: 120,
+        title: { fa: 'پله‌ی ۳ — فرش سبز ممنوع', en: 'Step 3 — Skip the green rug' },
+        goal: { fa: '۳۰ کاشی تمیز کن بدون این‌که روی فرش سبز بروی (فرش‌های بنفش/نارنجی/فیروزه‌ای نشانه‌ی درند — از رویشان رد شو)', en: 'clean 30 tiles, never touch the green rug (purple / orange / cyan rugs mark the doors - drive over them)' },
+        teach: { fa: 'سنسور رنگ: elif color == green', en: 'the colour sensor' },
         onTick: (e, st) => {
           const rb = e.robots.red;
           const i = Math.floor(rb.x / e.cfg.tile), j = Math.floor(rb.y / e.cfg.tile);
-          if (i >= 0 && i < e.cols && j >= 0 && j < e.rows && e.terrain[i][j] === 3) {
-            st.fail = { fa: 'روی فرش بنفش رفتی', en: 'touched the purple rug' };
+          if (i >= 0 && i < e.cols && j >= 0 && j < e.rows && e.terrain[i][j] === 1) {
+            st.fail = { fa: 'روی فرش سبز رفتی', en: 'touched the green rug' };
           }
         },
         check: (e) => ({ value: e.scores.red, target: 30 }),

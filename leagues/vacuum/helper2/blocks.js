@@ -124,12 +124,12 @@
 
   const COLORS = [
     ['white', 'سفید (تمیز نشده)', 'white (not cleaned yet)'],
-    ['green', 'سبز (فرش بزرگ)', 'green (the big rug)'],
-    ['purple', 'بنفش (فرش کوچک)', 'purple (the small rug)'],
+    ['green', 'سبز (فرش بزرگ — نصف سرعت)', 'green (the big rug — half speed)'],
+    ['purple', 'بنفش (نشانه‌ی در — رد شو)', 'purple (doorway marker — drive over)'],
     ['black', 'سیاه (دیوار/مبل)', 'black (a wall / furniture)'],
     ['red', 'قرمز', 'red'], ['blue', 'آبی', 'blue'],
-    ['orange', 'نارنجی (فرش نشانه)', 'orange (a marker rug)'],
-    ['cyan', 'فیروزه‌ای (فرش نشانه)', 'cyan (a marker rug)'],
+    ['orange', 'نارنجی (نشانه‌ی در — رد شو)', 'orange (doorway marker — drive over)'],
+    ['cyan', 'فیروزه‌ای (نشانه‌ی در — رد شو)', 'cyan (doorway marker — drive over)'],
   ];
   const COLOR_IDS = COLORS.map((c) => c[0]);
   const ROOMS = [[0, 'هال', 'hall'], [1, 'آشپزخانه', 'kitchen'], [2, 'خواب ۱', 'bedroom 1'], [3, 'خواب ۲', 'bedroom 2'], [4, 'خواب ۳', 'bedroom 3'], [5, 'سرویس', 'bathroom']];
@@ -172,7 +172,7 @@
   }
   function newRule(members) {
     return {
-      members: members || [], cm: 60, colorPick: 'purple', dir: 90, roomPick: 2, cleanRoom: 2, cleanPct: 80,
+      members: members || [], cm: 60, colorPick: 'green', dir: 90, roomPick: 2, cleanRoom: 2, cleanPct: 80,
       on: true, moves: [mkMove('backright', 0.5, 25)],
     };
   }
@@ -245,6 +245,8 @@
       else if (b.cond === 'bump') r.members = ['bumpfront'];
       else if (b.cond === 'color') { r.members = ['color']; if (COLOR_IDS.indexOf(b.color) >= 0) r.colorPick = b.color; }
       else return;
+      // the old app taught "back away from purple"; purple marks the doors now -> that rule comes in switched OFF
+      if (b.cond === 'color' && (b.color === 'purple' || b.color === 'orange' || b.color === 'cyan')) r.on = false;
       r.moves = [mv];
       f.rules.push(r);
     });
@@ -632,7 +634,7 @@
     } else if (s.kind === 'color') {
       h.appendChild(piece(T(s.fa, s.en)));
       h.appendChild(piece('='));
-      h.appendChild(live ? selIn(COLORS, r.colorPick, (v) => { r.colorPick = v; }) : piece(T('بنفش', 'purple'), 'num'));
+      h.appendChild(live ? selIn(COLORS, r.colorPick, (v) => { r.colorPick = v; }) : piece(T('سبز', 'green'), 'num'));
     } else if (s.kind === 'compass') {
       h.appendChild(piece(T(s.fa, s.en)));
       h.appendChild(live ? selIn(DIRS, r.dir, (v) => { r.dir = +v; }) : piece(T('↑ بالا', 'up ↑'), 'num'));

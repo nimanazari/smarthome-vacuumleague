@@ -95,13 +95,9 @@ elif frontright < 45:
     wheelleft = -10
     wheelright = -10
 
-# 7) the small purple rug: no points there -> reverse away
-#    فرش بنفش: امتیاز ندارد — عقب بکش
-elif color == purple:
-    state = 2
-    timer = 5
-    wheelleft = -25
-    wheelright = -25
+# 7) purple / orange / cyan rugs are DOORWAY MARKERS: drive straight over them
+#    (they score nothing, but turning back at one means never entering the room)
+#    فرش بنفش/نارنجی/فیروزه‌ای نشانه‌ی در است — از رویش رد شو، برنگرد
 
 # 8) the big green rug: half speed AND no points -> reverse longer
 #    فرش سبز: نصف سرعت و بی‌امتیاز — عقبِ بلندتر

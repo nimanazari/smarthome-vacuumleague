@@ -20,11 +20,8 @@ wheelleft = 0; wheelright = 0
 wheelleft = 25                  # default: straight ahead, full speed
 wheelright = 25
 
-if color == purple:             # small rug ahead - it gives no points
-    backward(1)
-
-elif color == green:            # big rug ahead - it slows us down
-    backward(2)
+if color == green:              # big rug ahead - it slows us down
+    backward(2)                 # (purple / orange / cyan rugs mark the doors: drive over them)
 
 elif bumper == 1:               # hit something - back away for a second
     backward(1)

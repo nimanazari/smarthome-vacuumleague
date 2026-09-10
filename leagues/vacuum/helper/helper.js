@@ -190,12 +190,12 @@
   const COLORS = [
     { id: 'white', label: 'white', hex: '#f8fafc', note: L('floor nobody has cleaned yet', 'کفِ تمیز‌نشده') },
     { id: 'green', label: 'green', hex: '#22c55e', note: L('the big rug - half speed, no points', 'فرش بزرگ — نصف سرعت، بی‌امتیاز') },
-    { id: 'purple', label: 'purple', hex: '#a855f7', note: L('the small rug - no points', 'فرش کوچک — بی‌امتیاز') },
+    { id: 'purple', label: 'purple', hex: '#a855f7', note: L('a doorway marker rug - no points; drive over it, never turn back', 'فرش نشانه‌ی در — بی‌امتیاز؛ از رویش رد شو، برنگرد') },
     { id: 'black', label: 'black', hex: '#111827', note: L('a wall or furniture right ahead', 'دیوار یا مبلمانِ درست جلوی رو') },
     { id: 'red', label: 'red', hex: '#ef4444', note: L('already cleaned by the red robot', 'قبلاً ربات قرمز تمیزش کرده') },
     { id: 'blue', label: 'blue', hex: '#3b82f6', note: L('already cleaned by the blue robot', 'قبلاً ربات آبی تمیزش کرده') },
-    { id: 'orange', label: 'orange', hex: '#f59e0b', note: L('an orange marker rug - no points', 'فرش نشانه‌ی نارنجی — بی‌امتیاز') },
-    { id: 'cyan', label: 'cyan', hex: '#22d3ee', note: L('a cyan marker rug - no points', 'فرش نشانه‌ی فیروزه‌ای — بی‌امتیاز') },
+    { id: 'orange', label: 'orange', hex: '#f59e0b', note: L('an orange doorway marker - no points; drive over it', 'فرش نشانه‌ی در، نارنجی — بی‌امتیاز؛ از رویش رد شو') },
+    { id: 'cyan', label: 'cyan', hex: '#22d3ee', note: L('a cyan doorway marker - no points; drive over it', 'فرش نشانه‌ی در، فیروزه‌ای — بی‌امتیاز؛ از رویش رد شو') },
   ];
   const colorOf = (id) => COLORS.filter((c) => c.id === id)[0] || COLORS[0];
   // what a first robot should usually do about each colour. white is the whole
@@ -326,7 +326,7 @@
   function newRule(members) {
     const r = {
       id: 'r' + (ruleUid++), members: (members || []).slice(),
-      cm: 60, colorPick: 'purple', secs: 0.5, on: true,
+      cm: 60, colorPick: 'green', secs: 0.5, on: true,
       act2: null, secs2: 0.5, speed2: 18,      // the optional SECOND move
       act3: null, secs3: 0.5, speed3: 18,      // U14: an optional THIRD move
       dir: 90,                                 // compass condition: facing which way
