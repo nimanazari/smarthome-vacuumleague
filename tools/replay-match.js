@@ -48,8 +48,10 @@ load('engine.js'); load('pyreader.js');
 
 // ---- the game's own controller factory, lifted verbatim from index.html ----
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').split(/\r?\n/);
-const a = html.findIndex((l) => l.startsWith('    function makeController(source, tag) {'));
-let b = a + 1; while (b < html.length && html[b] !== '    }') b++;
+// lift from the legacy-rug-rule stripper (the factory calls it) through the end of makeController
+let a = html.findIndex((l) => l.includes('const LEGACY_RUG_RULE = '));
+if (a < 0) a = html.findIndex((l) => l.startsWith('    function makeController(source, tag) {'));
+let b = html.findIndex((l, i) => i > a && l.startsWith('    function makeController(source, tag) {')); b = b < 0 ? a + 1 : b + 1; while (b < html.length && html[b] !== '    }') b++;
 // the page's names the factory touches: the match (`engine`), its log
 // (`matchLog`, off here), the division (`leagueDef`) and a few UI helpers
 const factorySrc = 'const sensVars = {}, sensSrc = {}; const matchLog = null; const leagueDef = () => win.Leagues.get(LEAGUE); '
