@@ -3411,6 +3411,7 @@ else:                            # 7) nothing in the way -> full speed ahead
         const text = r.result;
         $(areaId).value = text;
         $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name;
+        if (stripLegacyRugRule(text).stripped) showToast(T('این فایل قانون فرشِ کدِ نمونه‌ی قدیمی را دارد — در مسابقه غیرفعال است؛ ربات از روی فرش رد می‌شود', 'this file carries the old sample rug rule — it is switched off; the robot drives over rugs'));
         sha12(text).then((h) => { if (h) $(statusId).textContent = T('بارگذاری شد: ', 'loaded: ') + f.name + ' · #' + h; });
         cheer(statusId === 'statusRed' ? 'red' : 'blue');   // robot hops when its code arrives
         // A helper writes the team's own name into the file as a plain
@@ -3516,7 +3517,21 @@ else:                            # 7) nothing in the way -> full speed ahead
     let redErr = '', blueErr = '';
     const sensVars = { red: null, blue: null };   // controllers' memory, for the live panel
     const sensSrc = { red: null, blue: null };    // the source lines, for the live code trace
+    /* The OLD sample code (before 2026-09-10) taught a rug reaction:
+           elif color == purple:   # 7) the small PURPLE rug is right ahead
+               state = 2 / timer = 5 / wheelleft = -25 / wheelright = -25
+       Kids built on it without ever asking for it, and their robots turned
+       back at every doorway marker. Exactly that block -- the sample's own
+       wording -- is switched off here; a colour rule a child wrote in their
+       own words is untouched. */
+    const LEGACY_RUG_RULE = /^([ \t]*)elif[ \t]+color[ \t]*==[ \t]*purple[ \t]*:[ \t]*#[^\n]*PURPLE rug[^\n]*\n((?:\1[ \t]+(?:state|timer|wheelleft|wheelright)[ \t]*=[ \t]*-?\d+[^\n]*\n){4})/m;
+    function stripLegacyRugRule(src) {
+      const t = String(src == null ? '' : src);
+      if (!LEGACY_RUG_RULE.test(t)) return { src: t, stripped: false };
+      return { src: t.replace(LEGACY_RUG_RULE, (blk) => blk.split('\n').map((l) => (l.trim() ? '# ' + l : l)).join('\n')), stripped: true };
+    }
     function makeController(source, tag) {
+      source = stripLegacyRugRule(source).src;
       const prog = PyReader.compile(source);
       // nextmove / err are the helper's plan bookkeeping (see leagues/vacuum/helper/helper.js):
       // the EDITOR SETUP block that would define them is stripped by the
