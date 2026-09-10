@@ -138,6 +138,9 @@ class Engine {
   set onRelocate(fn) { this.mode.onRelocate = fn; }
   get onWet() { return this.mode.onWet; }
   set onWet(fn) { this.mode.onWet = fn; }
+  // U19's water: the battery, not the tiles
+  get onWater() { return this.mode.onWater; }
+  set onWater(fn) { this.mode.onWater = fn; }
   get onDump() { return this.mode.onDump; }
   set onDump(fn) { this.mode.onDump = fn; }
   get onDumpFull() { return this.mode.onDumpFull; }

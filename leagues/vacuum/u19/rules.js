@@ -10,14 +10,24 @@
   const L = root.Leagues;
   const { mk, GROWN_ROOMS } = root.VacuumLeague;
 
-  // THE STANDARD, applied: U19 navigates by POSITION (GPS / goto), so the
-  // one-colour marker rugs that guide FS and U14 through the doorways are
-  // stripped from its floor. The wet floor is gone league-wide — U19's is the
-  // battery, not puddles — so only the slowing green rug stays. The map itself
-  // is untouched for the other divisions.
+  /* THE STANDARD, applied: U19 navigates by POSITION (GPS / goto), so the
+     one-colour marker rugs that guide FS and U14 through the doorways are
+     stripped from its floor — the Persian carpet stays, and so does WATER.
+
+     THE WATER: four puddles on tile lines, drawn from the first second and
+     printed on the map. Driving into one costs 10% of the battery, so the
+     only way past them is to KNOW where they are and steer around by
+     position — exactly the skill this division is about. The map itself is
+     untouched for the other divisions. */
+  const WATER = [
+    { x: 6.875, y: 10.3125, w: 1.25, d: 0.625, kind: 'wet' },
+    { x: 6.875, y: 3.4375, w: 1.25, d: 0.625, kind: 'wet' },
+    { x: 11.5625, y: 6.5625, w: 0.625, d: 1.25, kind: 'wet' },
+    { x: 2.8125, y: 7.1875, w: 1.25, d: 0.625, kind: 'wet' },
+  ];
   const NO_MARKERS = Object.assign({}, GROWN_ROOMS, {
     name: GROWN_ROOMS.name + '-u19',
-    rugs: GROWN_ROOMS.rugs.filter((r) => r.kind === 'green'),
+    rugs: GROWN_ROOMS.rugs.filter((r) => r.kind === 'green').concat(WATER),
   });
 
   L.register({
@@ -49,6 +59,7 @@
       { en: 'Park on the pad to refill at 25% per second', fa: 'روی پد پارک کن تا ۲۵٪ در ثانیه شارژ شود' },
       { en: 'At 0% the robot only CRAWLS (15% speed) — it can still drag itself to the pad', fa: 'باتری صفر یعنی خزیدن با ۱۵٪ سرعت — هنوز می‌تواند خودش را تا شارژر بکشاند' },
       { en: 'SINGLE PLAYER: the bin holds 30 tiles — full means you clean nothing until you empty it', fa: 'تک‌نفره: مخزن فقط ۳۰ کاشی جا دارد — پر که شد تا خالی‌اش نکنی هیچ کاشی‌ای تمیز نمی‌شود' },
+      { en: 'WATER on the floor: driving in costs 10% of the battery — steer around it by position', fa: 'آب روی زمین: هر بار وارد شوی −۱۰٪ باتری — با مختصات دورش بزن' },
     ],
     // No robot building in this league either — the rig is READY-MADE in
     // kit.js; teams only pick a colour and write the brain.
@@ -60,6 +71,7 @@
       sections: [
         { h: '🎯 هدف بازی', b: 'همان مسابقه‌ی U14 — کاشی بگیر، کاشی بدزد، ۳ دقیقه — به‌علاوه‌ی یک واقعیت جدید: <b>انرژی تمام می‌شود</b>.<br><small>EN: U14 plus a real battery.</small>' },
         { h: '🔋 باتری', b: '<b>battery</b> از ۱۰۰ شروع می‌شود؛ رانندگی با تمام سرعت حدود <b>۱٫۷٪ در ثانیه</b> می‌سوزاند (۱۰۰٪ ≈ ۶۰ ثانیه). در <b>صفر</b>، ربات همان‌جا برای همیشه خاموش می‌ماند — داور هم نجاتش نمی‌دهد، چون قانونِ خودِ بازی است.' },
+        { h: '💦 آب روی زمین', b: 'در خانه‌ی U19 چند لکه‌ی آب هست و <b>از ثانیه‌ی اول روی زمین دیده می‌شود</b> — غافلگیری ندارد. هر بار که ربات وارد آب شود <b>۱۰٪ از باتری</b> می‌پرد (کاشی از دست نمی‌دهی) و پیام «وارد آب شد» روی صفحه می‌آید. ایستادن داخلش هزینه‌ی دوباره ندارد؛ هر <b>ورود تازه</b> ۱۰٪ است. راه درست، دور زدن با <b>مختصات</b> است: مرکز لکه‌ها روی این نقشه <code>(6.88, 10.31)</code>، <code>(6.88, 3.44)</code>، <code>(11.56, 6.56)</code> و <code>(2.81, 7.19)</code> است — هر کدام حدود یک کاشی شعاع دارند، پس اگر مسیرت از این نقطه‌ها بیش از ۰٫۸ متر فاصله بگیرد، خشک می‌مانی.<br><small>EN: the water is drawn from the first second; each entry costs 10% battery, never tiles. Route around it by position.</small>' },
         { h: '⚡ ایستگاه شارژ', b: 'جای ایستگاه ثابت است و مختصاتش (<b>dockx</b>، <b>docky</b>) به هر دو ربات داده می‌شود. روی پد پارک کن: <b>+۲۵٪ در ثانیه</b>. تا در حال شارژی، داورِ گیرکردن کاری به تو ندارد — ولی پر که شدی برمی‌گردد؛ روی پد چادر نزن. قانون سرانگشتی برگشتن: <b>distto(dockx, docky) / 25 + حاشیه‌ی چاق</b>.' },
         { h: '🗑 مخزن خاک — تک‌نفره', b: 'در مسابقه‌ی تک‌نفره مخزن هر <b>۳۰ کاشی</b> پر می‌شود و رباتِ پُر هیچ کاشی‌ای نمی‌گیرد تا خودش را به <b>ایستگاه تخلیه</b> برساند (dumpx و dumpy — دستگاهی جدا از پد شارژ). دو مأموریت، دو سفر. در بازی دو نفره مخزن پر نمی‌شود و رسیدن به ایستگاه یک بار <b>+۵</b> دارد.' },
         { h: '🐈 مثل U14', b: 'گربه و سگ، فرش‌ها، FINAL mode و جریمه‌ی پله‌ای جابه‌جایی <b>−۵ / −۱۰ / −۱۲ کاشی</b> — همه مثل U14 برقرارند.' },
@@ -74,8 +86,9 @@
     // the bin never fills and reaching it once is worth +5, exactly as before
     // the dump stays OFF until the route helper can plan emptying trips;
     // battery (and its charger pad) is the one resource U19 manages for now
-    // U19 has the battery to manage; no division has a wet floor any more
-    rules: { pets: true, wet: false, penalty: [5, 10, 12], battery: true, dump: false },
+    // U19 manages a battery AND a wet floor: water costs 10% of the charge,
+    // never a tile — the puddles are on the map, so a good route avoids them
+    rules: { pets: true, wet: true, waterBattery: 10, penalty: [5, 10, 12], battery: true, dump: false },
     create: mk,
   });
 })(typeof self !== 'undefined' ? self : this);

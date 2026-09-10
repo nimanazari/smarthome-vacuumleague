@@ -5028,6 +5028,13 @@ else:                            # 7) nothing in the way -> full speed ahead
         engine.mode.onRearm = () => showToast(T('🔄 داور دور را از نو شروع کرد — جهت‌ها تصادفی است',
           '🔄 the referee reset the bout — random headings'));
       }
+      // U19: the water bites the BATTERY, and the referee hears about it
+      engine.onWater = (color, lost, left) => {
+        const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
+        if (matchLog && matchLog[color]) { matchLog[color].wet++; logEvent('water', color, '−' + lost + '% battery'); }
+        showToast('💦 ' + who + T(' وارد آب شد!  ·  −' + lost + '٪ باتری  (مانده: ' + left + '٪)',
+          ' drove into the water!  ·  −' + lost + '% battery  (left: ' + left + '%)'));
+      };
       engine.onWet = (color, lost) => {
         const who = color === 'red' ? engine.cfg.redName : engine.cfg.blueName;
         if (lost > 0 && matchLog && matchLog[color]) { matchLog[color].wet++; matchLog[color].wetLost += lost; logEvent('wet', color, '−' + lost); }

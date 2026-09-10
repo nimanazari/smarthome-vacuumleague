@@ -151,6 +151,7 @@
 
       this.onRelocate = null;   // (color, reason, tilesLost) -> void
       this.onWet = null;        // (color, tilesLost) -> void
+      this.onWater = null;      // U19: (color, batteryLost, batteryLeft) -> void
     }
 
     /* ---------------- the charging station ---------------- */
@@ -233,8 +234,25 @@
       return removed;
     }
 
-    // driving onto a wet tile costs the team WET_PENALTY tiles (once per tile)
+    /* WATER (U19): the floor is wet in a few marked places, drawn from the
+       first second, and driving in COSTS BATTERY — `rules.waterBattery`
+       percent, once per tile entered. Every other division keeps the old
+       rule (a few painted tiles), and a league with neither is unaffected. */
     _checkWet(rb) {
+      if (this.rules.waterBattery && rb.battery != null) {
+        const cell = this.world.tileEntry(rb);
+        if (!cell || this.world.terrain[cell.i][cell.j] !== 2) return;
+        const cost = this.rules.waterBattery;
+        const before = rb.battery;
+        rb.battery = Math.max(0, rb.battery - cost);
+        if (this.onWater) this.onWater(rb.color, Math.round(before - rb.battery), Math.round(rb.battery));
+        return;
+      }
+      this._checkWetTiles(rb);
+    }
+
+    // driving onto a wet tile costs the team WET_PENALTY tiles (once per tile)
+    _checkWetTiles(rb) {
       const cell = this.world.tileEntry(rb);
       if (!cell || this.world.terrain[cell.i][cell.j] !== 2) return;
       const lost = this._burn(rb.color, WET_PENALTY);

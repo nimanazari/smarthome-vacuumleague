@@ -11,6 +11,24 @@ const COL = {
   wall: 0x8891a3, wallCap: 0xb4bdcb, base: 0x141820, skirt: 0x2b303a,
 };
 
+/* ---------- a DIVISION's own room ----------
+   U19 is the oldest division and its floor says so: stone slabs instead of
+   the bright game grid, dark walls, deep serious colours (nothing pastel),
+   and PERSIAN carpets instead of flat coloured rectangles. Any division with
+   no theme here keeps exactly the look it always had. */
+const THEMES = {
+  u19: {
+    dirty: 0x767d87,        // unpainted floor: dark stone, nothing pastel
+    blocked: 0x101318,
+    base: 0x090c10,         // the slab under the house
+    skirt: 0x11151b,
+    wall: 0x171c24,         // near-black walls, so the rooms read as rooms
+    wallCap: 0x2b3340,
+    tileGap: 0.965,         // slabs nearly touching — a real floor, not a grid
+    persianRugs: true,      // carpets drawn with a Persian pattern
+  },
+};
+
 // how high the uphill end of a sloped ramp stands (the energy maze wedges)
 const RAMP_H = 0.30;
 
@@ -422,10 +440,13 @@ class Renderer3D {
     // the hall floor — and around it, whatever ground the map asked for:
     // dark (the classic void), GRASS, or STONE paving. Flat meshes: free.
     const surround = (c.map && c.map.surround) || 'dark';
+    // the division's own look (U19), or the house palette everyone else uses
+    const TH = THEMES[(engine.cfg && engine.cfg.league) || ''] || null;
+    this._theme = TH;
     const groundCol = engine.arena ? 0x11151b
       : surround === 'grass' ? 0x2e6b34
       : surround === 'stone' ? 0x757c88
-      : COL.base;
+      : (TH ? TH.base : COL.base);
     // TWO layers: the surround (grass / stone / dark) stays OUTSIDE —
     // the house floor keeps its own colour so the tiles never tint
     const base = new THREE.Mesh(new THREE.BoxGeometry(c.W + 7, 0.4, c.H + 7),
@@ -433,7 +454,7 @@ class Renderer3D {
     base.position.y = -0.24; base.receiveShadow = true; this.dyn.add(base);
     if (!engine.arena) {
       const floor = new THREE.Mesh(new THREE.BoxGeometry(c.W + 0.3, 0.4, c.H + 0.3),
-        this._mat(COL.base, 1));
+        this._mat(TH ? TH.base : COL.base, 1));
       floor.position.y = -0.2; floor.receiveShadow = true; this.dyn.add(floor);
     }
 
@@ -447,16 +468,16 @@ class Renderer3D {
       return;
     }
 
-    const skirtMat = this._mat(COL.skirt, 0.9);
+    const skirtMat = this._mat(TH ? TH.skirt : COL.skirt, 0.9);
     const skirt = (w, d, x, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, d), skirtMat); m.position.set(x, 0.0, z); m.receiveShadow = true; this.dyn.add(m); };
     skirt(c.W + 0.6, 0.3, 0, oz - 0.15); skirt(c.W + 0.6, 0.3, 0, -oz + 0.15);
     skirt(0.3, c.H + 0.6, ox - 0.15, 0); skirt(0.3, c.H + 0.6, -ox + 0.15, 0);
 
-    const tileGeo = new THREE.BoxGeometry(t * 0.9, 0.05, t * 0.9);
+    const tileGeo = new THREE.BoxGeometry(t * (TH ? TH.tileGap : 0.9), 0.05, t * (TH ? TH.tileGap : 0.9));
     for (let i = 0; i < engine.cols; i++) {
       this.tileMeshes[i] = [];
       for (let j = 0; j < engine.rows; j++) {
-        const mat = new THREE.MeshStandardMaterial({ color: COL.dirty, roughness: 0.95, emissive: 0x000000 });
+        const mat = new THREE.MeshStandardMaterial({ color: TH ? TH.dirty : COL.dirty, roughness: TH ? 0.72 : 0.95, metalness: TH ? 0.08 : 0, emissive: 0x000000 });
         const m = new THREE.Mesh(tileGeo, mat);
         m.position.set(ox + (i + 0.5) * t, 0.03, oz + (j + 0.5) * t);
         m.receiveShadow = true; this.dyn.add(m); this.tileMeshes[i][j] = m;
@@ -465,11 +486,11 @@ class Renderer3D {
 
     // wall colour: dark by default so walls READ as walls from above; the
     // settings panel can pick any colour, saved and applied live
-    let wallHex = 0x1f242e;
+    let wallHex = TH ? TH.wall : 0x1f242e;
     try { const wc = localStorage.getItem('shl_wallcolor'); if (wc) wallHex = parseInt(wc.slice(1), 16); } catch (e) { /* private mode */ }
     const wallMat = this._mat(wallHex, 0.85);
     this._wallMat = wallMat;
-    const capMat = this._mat(COL.wallCap, 0.6);
+    const capMat = this._mat(TH ? TH.wallCap : COL.wallCap, 0.6);
     const wall = (w, d, x, z) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.7, d), wallMat); m.position.set(x, 0.35, z); m.castShadow = true; m.receiveShadow = true; this.dyn.add(m);
       const cap = new THREE.Mesh(new THREE.BoxGeometry(w + 0.02, 0.035, d + 0.02), capMat); cap.position.set(x, 0.7175, z); this.dyn.add(cap);
@@ -787,8 +808,116 @@ class Renderer3D {
   }
 
   _rugMesh(r, ox, oz, defColor) {
-    const g = HomeObjects.buildRug({ w: r.x2 - r.x1, d: r.y2 - r.y1, round: r.round || 0, color: r.color != null ? r.color : defColor });
+    const w = r.x2 - r.x1, d = r.y2 - r.y1;
+    const col = r.color != null ? r.color : defColor;
+    const g = (this._theme && this._theme.persianRugs)
+      ? this._persianRug(w, d, col)
+      : HomeObjects.buildRug({ w, d, round: r.round || 0, color: col });
     g.position.set(ox + (r.x1 + r.x2) / 2, 0, oz + (r.y1 + r.y2) / 2);
+    return g;
+  }
+
+  /* ---------- a PERSIAN carpet ----------
+     Drawn to a canvas and laid on the floor: the field in the rug's own
+     colour (so a green rug still reads green to a child and to the rule
+     book), a woven border of hooks, a lobed medallion with pendants,
+     corner spandrels and rows of boteh. Deep madder / indigo / saffron on
+     cream — the colours of a Salari or Tabriz piece, nothing pastel. */
+  _persianRug(w, d, color) {
+    const px = 256, py = Math.max(96, Math.round(px * d / Math.max(0.3, w)));
+    const cv = document.createElement('canvas');
+    cv.width = px; cv.height = py;
+    const x = cv.getContext('2d');
+    const C = new THREE.Color(color);
+    const hsl = { h: 0, s: 0, l: 0 };
+    C.getHSL(hsl);
+    // the field: the rug's hue, taken deep and rich
+    const field = 'hsl(' + Math.round(hsl.h * 360) + ',' + Math.round(Math.max(0.42, hsl.s) * 100) + '%,' + Math.round(Math.min(0.30, Math.max(0.16, hsl.l * 0.7)) * 100) + '%)';
+    const border = 'hsl(' + Math.round(((hsl.h * 360) + 18) % 360) + ',' + Math.round(Math.max(0.5, hsl.s) * 100) + '%,20%)';
+    const CREAM = '#e9dcbe', SAFFRON = '#d8a33a', MADDER = '#8d2f27', INDIGO = '#1d3461';
+    x.fillStyle = field; x.fillRect(0, 0, px, py);
+    // ---- the borders: a wide woven band between two thin guards ----
+    const b = Math.round(Math.min(px, py) * 0.13);
+    x.strokeStyle = CREAM; x.lineWidth = Math.max(2, b * 0.16);
+    x.strokeRect(b * 0.42, b * 0.42, px - b * 0.84, py - b * 0.84);
+    x.fillStyle = border;
+    x.fillRect(b * 0.62, b * 0.62, px - b * 1.24, py - b * 1.24);
+    x.fillStyle = field;
+    x.fillRect(b, b, px - b * 2, py - b * 2);
+    x.strokeStyle = SAFFRON; x.lineWidth = Math.max(1.5, b * 0.1);
+    x.strokeRect(b, b, px - b * 2, py - b * 2);
+    // hooks marching along the wide band
+    x.fillStyle = CREAM;
+    const step = Math.max(10, Math.round(b * 1.15));
+    for (let s = step / 2; s < px; s += step) {
+      for (const yy of [b * 0.8, py - b * 0.8]) { x.beginPath(); x.moveTo(s - b * 0.16, yy); x.lineTo(s, yy - b * 0.2); x.lineTo(s + b * 0.16, yy); x.lineTo(s, yy + b * 0.2); x.closePath(); x.fill(); }
+    }
+    for (let s = step / 2; s < py; s += step) {
+      for (const xx of [b * 0.8, px - b * 0.8]) { x.beginPath(); x.moveTo(xx, s - b * 0.16); x.lineTo(xx - b * 0.2, s); x.lineTo(xx, s + b * 0.16); x.lineTo(xx + b * 0.2, s); x.closePath(); x.fill(); }
+    }
+    // ---- the field: boteh rows ----
+    x.fillStyle = 'rgba(233,220,190,.30)';
+    for (let gy = b * 1.7; gy < py - b * 1.4; gy += Math.max(14, py * 0.16)) {
+      for (let gx = b * 1.7; gx < px - b * 1.4; gx += Math.max(14, px * 0.11)) {
+        x.beginPath(); x.ellipse(gx, gy, px * 0.014, py * 0.030, 0.5, 0, Math.PI * 2); x.fill();
+      }
+    }
+    // ---- the medallion: a lobed diamond with pendants ----
+    const cx = px / 2, cy = py / 2, rx = px * 0.24, ry = py * 0.30;
+    const lobed = (sx, sy, fill, stroke) => {
+      x.beginPath();
+      for (let k = 0; k <= 64; k++) {
+        const a = (k / 64) * Math.PI * 2;
+        const rr = 1 + 0.13 * Math.sin(a * 8);
+        const ptx = cx + Math.cos(a) * sx * rr, pty = cy + Math.sin(a) * sy * rr;
+        if (k === 0) x.moveTo(ptx, pty); else x.lineTo(ptx, pty);
+      }
+      x.closePath();
+      if (fill) { x.fillStyle = fill; x.fill(); }
+      if (stroke) { x.strokeStyle = stroke; x.lineWidth = 2; x.stroke(); }
+    };
+    lobed(rx, ry, INDIGO, CREAM);
+    lobed(rx * 0.62, ry * 0.62, MADDER, SAFFRON);
+    lobed(rx * 0.26, ry * 0.26, SAFFRON, null);
+    // pendants above and below the medallion
+    x.fillStyle = CREAM;
+    for (const s of [-1, 1]) {
+      x.beginPath();
+      x.moveTo(cx, cy + s * ry * 1.02);
+      x.lineTo(cx - px * 0.035, cy + s * ry * 1.22);
+      x.lineTo(cx, cy + s * ry * 1.42);
+      x.lineTo(cx + px * 0.035, cy + s * ry * 1.22);
+      x.closePath(); x.fill();
+    }
+    // corner spandrels
+    x.fillStyle = 'rgba(29,52,97,.85)';
+    const sp = Math.min(px, py) * 0.30;
+    for (const [qx, qy] of [[b, b], [px - b, b], [b, py - b], [px - b, py - b]]) {
+      x.beginPath(); x.moveTo(qx, qy);
+      x.lineTo(qx + (qx < px / 2 ? sp : -sp), qy);
+      x.quadraticCurveTo(qx + (qx < px / 2 ? sp * 0.35 : -sp * 0.35), qy + (qy < py / 2 ? sp * 0.35 : -sp * 0.35), qx, qy + (qy < py / 2 ? sp : -sp));
+      x.closePath(); x.fill();
+    }
+    const tex = new THREE.CanvasTexture(cv);
+    if (THREE.SRGBColorSpace && 'colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    const g = new THREE.Group();
+    const pile = new THREE.Mesh(new THREE.BoxGeometry(w, 0.022, d),
+      new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
+    pile.position.y = 0.067; pile.receiveShadow = true;
+    g.add(pile);
+    // the fringe, on the two short ends
+    const fm = new THREE.MeshStandardMaterial({ color: 0xe4d9bd, roughness: 0.95 });
+    const alongX = w >= d, edge = alongX ? d : w;
+    const n = Math.max(4, Math.floor(edge / 0.16));
+    for (let k = 0; k < n; k++) {
+      const tpos = -edge / 2 + (k + 0.5) * (edge / n);
+      for (const s of [-1, 1]) {
+        const f = new THREE.Mesh(new THREE.BoxGeometry(alongX ? 0.07 : 0.045, 0.012, alongX ? 0.045 : 0.07), fm);
+        f.position.set(alongX ? s * (w / 2 + 0.035) : tpos, 0.062, alongX ? tpos : s * (d / 2 + 0.035));
+        g.add(f);
+      }
+    }
     return g;
   }
 
@@ -963,12 +1092,14 @@ class Renderer3D {
       // A rug lies ON the tiles and hides them completely (it snaps to whole
       // tiles), so the floor underneath is left alone — no tinting needed.
       // A puddle is see-through water, so that one does get a tint.
-      if (o === 'blocked') { mat.color.setHex(COL.blocked); mat.emissive.setHex(0x000000); }
+      const TH = this._theme;
+      const DIRTY = TH ? TH.dirty : COL.dirty, BLOCKED = TH ? TH.blocked : COL.blocked;
+      if (o === 'blocked') { mat.color.setHex(BLOCKED); mat.emissive.setHex(0x000000); }
       else if (ter === 2) { mat.color.setHex(0x1d3a52); mat.emissive.setHex(0x000000); }
-      else if (ter === 1 || ter === 3) { mat.color.setHex(COL.dirty); mat.emissive.setHex(0x000000); }
+      else if (ter === 1 || ter === 3) { mat.color.setHex(DIRTY); mat.emissive.setHex(0x000000); }
       else if (o === 'red') { mat.color.setHex(redInk); mat.emissive.setHex(redInk); mat.emissiveIntensity = redGlow; }
       else if (o === 'blue') { mat.color.setHex(blueInk); mat.emissive.setHex(blueInk); mat.emissiveIntensity = blueGlow; }
-      else { mat.color.setHex(COL.dirty); mat.emissive.setHex(0x000000); }
+      else { mat.color.setHex(DIRTY); mat.emissive.setHex(0x000000); }
     }
     this._syncActors(engine, ox, oz, c);
   }
