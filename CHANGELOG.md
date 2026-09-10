@@ -1,3 +1,18 @@
+## 2026-09-10 — the robot drives over rugs and through doors unless told otherwise
+
+- **کد نمونه (بیس‌کد) FS و U14:** قانون پیش‌فرض «فرش بنفش جلو → نیم ثانیه عقب»
+  حذف شد و به یک مثال کامنت‌شده تبدیل شد. به‌صورت پیش‌فرض ربات از روی فرش‌ها
+  رد می‌شود و به رنگ کاری ندارد؛ فقط اگر تیم خودش قانون رنگ بنویسد.
+- **در اتاق دیگر دیوار نیست:** سنسورهای فاصله از در رد می‌شوند (ربات اتاق پشت
+  در را می‌بیند) و به محض رسیدن ربات، در خودش باز می‌شود — نه هل، نه برخورد.
+  باگ: قطعه‌های حس‌گری در از حالت اولیه ساخته می‌شد و در بسته مثل دیوار دیده
+  می‌شد، پس قانون ساده‌ی «جلو نزدیک → بپیچ» ربات را از در برمی‌گرداند.
+  اثبات بی‌مرورگر: مپ ۳ با در بسته، اتاق دردار ۲۹ کاشی رنگ شد (قبلاً ۰).
+  RULES.md بخش «در اتاق» و MAP-STANDARD به‌روز شد.
+- EN: the sample programs no longer react to rugs by default; doors are
+  invisible to the distance sensors and swing open on approach (they used to
+  be sensed as walls because the sensor segments were built with the door).
+
 ## 2026-09-09 (f) — the program library on the site
 
 - **کتابخانه‌ی برنامه‌ها:** همه‌ی فایل‌های `.py` تیم‌ها یک بار روی سایت آپلود

@@ -11,7 +11,7 @@ Every official map follows this checklist and passes the validator.
 2. **ترکیب اتاق‌ها**: ۳ اتاق خواب + آشپزخانه + پذیرایی + سرویس بهداشتی.
    پذیرایی حتماً **تلویزیون + مبل روبه‌رویش**. *3 bedrooms + kitchen +
    living room (TV **with** a sofa facing it) + bathroom.*
-3. **فقط یک اتاق در دارد** (آبجکت `door` — هل بدهی باز می‌شود) و
+3. **فقط یک اتاق در دارد** (آبجکت `door` — تا ربات به آن برسد خودش باز می‌شود؛ سنسورهای فاصله آن را نمی‌بینند، پس قانون ساده‌ی «جلو نزدیک است → بپیچ» ربات را برنمی‌گرداند) و
    room-number آن اتاق باید در راهنما/اسم اتاق معلوم باشد تا برنامه‌ی
    ربات هدف بگیرد. بقیه‌ی اتاق‌ها **بی‌در، با ورودی بزرگ** (≥ ۳ کاشی).
    *Exactly ONE room has the push-open door; every other doorway is wide

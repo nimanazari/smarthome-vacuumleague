@@ -265,12 +265,13 @@ elif frontright < 45:            # 5) something closer than 45 cm on my RIGHT
     wheelleft = -10              #    Turning the same way every time is steadier!
     wheelright = -10
 
-# ۶) فرش بنفشِ کوچک درست جلوی من است — نیم ثانیه ازش دور شو.
-elif color == purple:            # 6) the small PURPLE rug is right ahead
-    state = 2                    #    -> reverse away from it for half a second
-    timer = 5
-    wheelleft = -25
-    wheelright = -25
+# 6) فرش‌ها: به‌صورت پیش‌فرض ربات از روی هر فرشی رد می‌شود و به رنگ کاری ندارد.
+#    اگر خواستی واکنش نشان بدهد، این چند خط را از کامنت دربیاور (مثلاً برای فرش بنفش):
+# elif color == purple:            # 6) the small PURPLE rug is right ahead
+#     state = 2                    #    -> reverse away from it for half a second
+#     timer = 5
+#     wheelleft = -25
+#     wheelright = -25
 
 # YOUR TURN: the big GREEN rug slows you down and gives no points,
 # but this code does nothing about it! Add your own elif here, e.g.:

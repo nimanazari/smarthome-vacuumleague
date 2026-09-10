@@ -239,17 +239,15 @@
 
     // closed (or still-swinging) doors join the solid + sensor worlds;
     // fully open ones leave them — called whenever a door changes state
+    // A DOOR IS NOT A WALL. The distance sensors never see it (a robot driving
+    // at a doorway reads the room beyond, so a plain wall-avoid rule does not
+    // turn away from it), and the moment a robot reaches it, it swings out
+    // of the way — no shove, no bump. Only a door that is shut AND untouched
+    // is solid at all; a swinging one is already out of the robot's path.
     _refreshDoorSolids() {
-      const closed = (this.doors || []).filter((d) => d.anim < 0.7);
-      this._solids = (this._solidsStatic || []).concat(closed.map((d) => ({ x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, type: 'door' })));
-      if (this._segsStatic) {
-        this.segments = this._segsStatic.concat(closed.map((d) => [
-          { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y1 },
-          { x1: d.x2, y1: d.y1, x2: d.x2, y2: d.y2 },
-          { x1: d.x2, y1: d.y2, x2: d.x1, y2: d.y2 },
-          { x1: d.x1, y1: d.y2, x2: d.x1, y2: d.y1 },
-        ]).flat());
-      }
+      const shut = (this.doors || []).filter((d) => !d.open && d.anim < 0.7);
+      this._solids = (this._solidsStatic || []).concat(shut.map((d) => ({ x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, type: 'door' })));
+      if (this._segsStatic) this.segments = this._segsStatic;   // rays pass through doors
     }
 
     // the door clock: touching a closed door for a moment pushes it open
@@ -260,10 +258,10 @@
           let touching = false;
           for (const b of bodies) {
             const nx = clamp(b.x, d.x1, d.x2), ny = clamp(b.y, d.y1, d.y2);
-            if (Math.hypot(b.x - nx, b.y - ny) < b.r + 0.06) { touching = true; break; }
+            if (Math.hypot(b.x - nx, b.y - ny) < b.r + 0.22) { touching = true; break; }   // reaching it is enough
           }
           d.touch = touching ? d.touch + dt : 0;
-          if (d.touch > 0.25) { d.open = true; d.openT = 0; changed = true; }
+          if (touching) { d.open = true; d.openT = 0; changed = true; }              // swings open at once
           if (d.anim > 0) { d.anim = Math.max(0, d.anim - dt * 2); }
         } else {
           const was = d.anim;
@@ -291,7 +289,8 @@
       // there sees nothing but the rival, which is exactly right for a dohyo.
       if (this.arena) return segs;
       add(0, 0, c.W, 0); add(c.W, 0, c.W, c.H); add(c.W, c.H, 0, c.H); add(0, c.H, 0, 0);
-      for (const o of this._solids) {
+      // furniture and walls only — a door is never a wall to the sensors
+      for (const o of (this._solidsStatic || this._solids)) {
         add(o.x1, o.y1, o.x2, o.y1); add(o.x2, o.y1, o.x2, o.y2);
         add(o.x2, o.y2, o.x1, o.y2); add(o.x1, o.y2, o.x1, o.y1);
       }
