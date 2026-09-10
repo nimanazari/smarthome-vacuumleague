@@ -3587,6 +3587,8 @@ else:                            # 7) nothing in the way -> full speed ahead
         vars.clean3 = info.clean3 != null ? info.clean3 : 0;
         vars.clean4 = info.clean4 != null ? info.clean4 : 0;
         vars.clean5 = info.clean5 != null ? info.clean5 : 0;
+        // map 6 declares a SIXTH room (four bedrooms), so the engine reports clean6 too
+        vars.clean6 = info.clean6 != null ? info.clean6 : 0;
         vars.white = 0; vars.red = 1; vars.blue = 2; vars.green = 3; vars.black = 4; vars.purple = 5;
         vars.orange = 6; vars.cyan = 7;
         // ---- Assistive Technology: the person you are guiding + the destination ----
@@ -3725,7 +3727,7 @@ else:                            # 7) nothing in the way -> full speed ahead
     async function loadDroppedMaps() {
       const found = {};
       const jobs = [];
-      for (let n = 1; n <= 5; n++) {
+      for (let n = 1; n <= 6; n++) {
         for (const p of ['map' + n + '.json', 'map' + n + '.html', 'maps/map' + n + '.json', 'maps/map' + n + '.html']) {
           jobs.push(fetch(p, { cache: 'no-store' }).then(async (r) => {
             if (!r.ok) return;

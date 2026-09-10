@@ -12,7 +12,7 @@ Maker's «🏁 نقشه‌های مسابقه» panel works identically in both 
     GET  /api/maps           -> { maps: [the ON slots, each map carrying compSlot],
                                  slots: [{slot, name, on}], writable: true, admin: true }
     GET  /api/maps?all=1     -> ...plus all: [{slot, name, on, map}] (OFF ones too)
-    POST /api/maps/slot      -> { slot: 1..5, map?: {...}, on?: true|false }
+    POST /api/maps/slot      -> { slot: 1..6, map?: {...}, on?: true|false }
                                 writes organizer-only/maps/mapN/map.json and/or
                                 flips the ON/OFF switch (an empty file named OFF)
 
@@ -20,7 +20,7 @@ The teams' kit has neither tools/ nor organizer-only/, so for them /api/maps
 404s and the game lists only its built-in houses.
 
 فارسی: سرور محلی برگزارکننده — بازی را سرو می‌کند و نقشه‌های مسابقه
-(organizer-only/maps/map1..5/map.json) را برای مپ‌ساز می‌خواند و ذخیره می‌کند.
+(organizer-only/maps/map1..6/map.json) را برای مپ‌ساز می‌خواند و ذخیره می‌کند.
 """
 import io, json, os, sys, webbrowser, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -28,7 +28,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MAPS = os.path.join(ROOT, 'organizer-only', 'maps')
 PORT = int(os.environ.get('SHL_PORT') or 8801)
-SLOTS = 5
+SLOTS = 6
 
 def slot_dir(n):
     return os.path.join(MAPS, 'map%d' % n)

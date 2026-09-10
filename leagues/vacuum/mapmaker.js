@@ -1709,7 +1709,7 @@ function afterMapSwap() {
 let compSlot = null;            // which slot the open map came from (1..3), if any
 let compSlots = [];             // [{slot, name, on}] as the server last told us
 let compWritable = false;
-const COMP_N = 5;
+const COMP_N = 6;
 function compState(msg) {
   const el = $('compState'); if (!el) return;
   if (msg != null) { el.textContent = msg; return; }

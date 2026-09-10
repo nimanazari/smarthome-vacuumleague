@@ -46,3 +46,11 @@ doored room is `room == 2` in all of them.* این نقشه‌ها فقط در �
 | خانه‌ی حیاط‌مرکزی · Courtyard | `organizer-only/maps/map3/map.json` | پذیرایی مربعی وسط، اتاق‌ها دورش، فویه‌ی جنوب‌شرقی |
 | خانه‌ی باغی · Garden (ورودی ۴ کاشی) | `organizer-only/maps/map4/map.json` | پذیرایی بزرگ شمال‌شرق، دو خواب در غرب، سرویس/فویه/آشپزخانه/خواب در جنوب |
 | خانه‌ی پهن · Wide (ورودی ۴–۵ کاشی) | `organizer-only/maps/map5/map.json` | نوار پذیرایی وسط، سرویس/خواب/آشپزخانه در شمال، دو خواب در گوشه‌های جنوب |
+
+## استثناء ثبت‌شده · a recorded exception
+
+**مپ ۶** (`organizer-only/maps/map6/map.json`) به درخواست برگزارکننده از این
+استاندارد بیرون است: ۲۶×۲۶، **۴ اتاق‌خواب**، بدون در و **بدون فرش نشانه**، با
+ورودی‌های ۴ کاشی — یک خانه‌ی باز و پرامتیاز برای تمرین و مسابقه‌های دوستانه.
+*Map 6 is a deliberate exception: bigger, four bedrooms, no door and no
+marker rugs, wide openings — the open high-scoring house.*

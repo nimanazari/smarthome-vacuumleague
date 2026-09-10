@@ -13,7 +13,7 @@ Run AFTER make-kits.py (it zips the TeamKit that is on disk).
 فارسی: برای هر مپ یک فایل کامل — بازی + همان مپ. تیم باز می‌کند، serve.bat
 را می‌زند، مپ خودش انتخاب شده است. هیچ نصبی، هیچ کپی‌ای.
 """
-import io, json, os, sys, zipfile
+import glob, io, json, os, sys, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KIT = os.path.join(ROOT, 'TeamKit')
@@ -67,6 +67,8 @@ if __name__ == '__main__':
         pass
     if not os.path.isdir(KIT):
         raise SystemExit('no TeamKit/ — run tools/make-kits.py first')
-    slots = [int(a) for a in sys.argv[1:]] or range(1, 6)
+    slots = [int(a) for a in sys.argv[1:]] or sorted(
+        int(os.path.basename(d)[3:]) for d in glob.glob(os.path.join(MAPS, 'map*'))
+        if os.path.basename(d)[3:].isdigit() and os.path.isfile(os.path.join(d, 'map.json')))
     for n in slots:
         build(n)
