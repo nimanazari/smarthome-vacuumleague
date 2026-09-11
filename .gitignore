@@ -7,6 +7,9 @@ CLAUDE.md
 local-notes/
 build/
 dist/
+# PyInstaller rewrites this every time the exe is built, from the command
+# in tools/app.py's docstring — it is derived, never edited by hand
+*.spec
 tools/__pycache__/
 shots.html
 shots.html

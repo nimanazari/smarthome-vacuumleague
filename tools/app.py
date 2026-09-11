@@ -37,7 +37,7 @@ import zipfile
 
 # The build this app was made from. tools/release stamps it; the site
 # publishes the current one at /downloads/version.json.
-BUILD = '2935fe3'
+BUILD = '47e3a37'
 UPDATE_URL = 'https://smarthomeleague.ir/downloads/version.json'
 DOWNLOAD_PAGE = 'https://smarthomeleague.ir/getting-started'
 LOG = os.path.join(tempfile.gettempdir(), 'shl-log.txt')
