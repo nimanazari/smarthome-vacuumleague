@@ -43,20 +43,32 @@ def build(n):
     os.makedirs(OUT, exist_ok=True)
     out = os.path.join(OUT, 'SmartHomeLeague-Map%d.zip' % n)
     top = 'SmartHomeLeague-Map%d/' % n
+    # These zips are TRACKED in git, so they must be byte-identical when the game
+    # and the map are. A plain z.write() stores each file's mtime, which made all
+    # six rebuild "changed" on every release and manufactured an empty commit each
+    # time. Fixed timestamp, fixed mode, sorted walk: same input, same bytes.
+    FIXED_DATE = (1980, 1, 1, 0, 0, 0)
+    def entry(name):
+        zi = zipfile.ZipInfo(name, date_time=FIXED_DATE)
+        zi.compress_type = zipfile.ZIP_DEFLATED
+        zi.external_attr = (0o100644 << 16)
+        return zi
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
-        for r, _, fs in os.walk(KIT):
-            for f in fs:
+        for r, ds, fs in os.walk(KIT):
+            ds.sort()
+            for f in sorted(fs):
                 p = os.path.join(r, f)
                 rel = os.path.relpath(p, KIT).replace(os.sep, '/')
                 if rel == 'offline-files.js':
                     # the double-click bundle: the map rides inside it too
                     txt = io.open(p, encoding='utf-8').read()
                     txt += 'window.SHL_FILES[%s] = %s;\n' % (json.dumps('map%d.json' % n), json.dumps(json.dumps(m, ensure_ascii=False)))
-                    z.writestr(top + rel, txt)
+                    z.writestr(entry(top + rel), txt)
                     continue
-                z.write(p, top + rel)
-        z.writestr(top + 'map%d.json' % n, json.dumps(m, ensure_ascii=False, indent=1))
-        z.writestr(top + 'README-MAP.md', README % {'n': n, 'name': m.get('name', '')})
+                with io.open(p, 'rb') as fh:
+                    z.writestr(entry(top + rel), fh.read())
+        z.writestr(entry(top + 'map%d.json' % n), json.dumps(m, ensure_ascii=False, indent=1))
+        z.writestr(entry(top + 'README-MAP.md'), README % {'n': n, 'name': m.get('name', '')})
     print('  SmartHomeLeague-Map%d.zip  %.1f MB  (%s)' % (n, os.path.getsize(out) / 1e6, m.get('name', '')))
     return out
 
