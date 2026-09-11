@@ -33,6 +33,18 @@ def stamp_build():
     if not sha:
         print('  (no git sha - leaving the build stamp alone)')
         return
+    # A release with NOTHING to commit must not re-stamp. The stamp is written
+    # before the commit, so it always carries the PARENT sha -- and rewriting it
+    # is itself a change, which makes a commit, which moves HEAD, which makes the
+    # next release rewrite it again. On a clean tree that loop runs forever and
+    # pushes version.json ahead of the exe people actually downloaded, telling
+    # every team to update to a build that does not exist yet. Clean tree, no
+    # new content: whatever is stamped already describes what is built.
+    dirty = subprocess.run(['git', 'status', '--porcelain'], cwd=ROOT,
+                           capture_output=True, text=True).stdout.strip()
+    if not dirty:
+        print('  (nothing changed - build stamp left at whatever is committed)')
+        return
     ap = os.path.join(ROOT, 'tools', 'app.py')
     a = io.open(ap, encoding='utf-8').read()
     a2 = re.sub(r"^BUILD = '[^']*'", "BUILD = '" + sha + "'", a, count=1, flags=re.M)
