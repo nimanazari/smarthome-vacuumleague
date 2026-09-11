@@ -20,7 +20,7 @@
   'use strict';
   root.LEAGUE_MANIFEST = [
     {
-      id: 'vacuum', divisions: ['fs', 'u14', 'u19'],
+      id: 'vacuum', divisions: ['fs', 'u14', 'u19', 'superteam'],
       // `pre:` loads BEFORE league.js — the maps, one file each
       pre: ['maps/house.js', 'maps/rooms.js', 'maps/grown.js', 'maps/grown-rooms.js', 'maps/open.js', 'maps/standard.js'],
       extra: ['fs/kit.js', 'u14/kit.js'],
