@@ -13,12 +13,14 @@
 #  جای ثابتی کنار دیوار، در همه‌ی مسابقه‌ها همان‌جا.
 #
 #  Park ON the pad and it refills at +25% per second.
-#  An EMPTY battery STOPS the robot dead, right where it
-#  stands, for the rest of the match - so the real skill
-#  is leaving for the dock in time, every time.
-#  روی پد پارک کن: ۲۵٪ در ثانیه پر می‌شود. باتریِ صفر یعنی ربات
-#  همان‌جا تا آخر مسابقه خاموش می‌ماند — مهارتِ واقعی این است که
-#  هر بار «به‌موقع» راهیِ ایستگاه شوی.
+#  An EMPTY battery does not kill the robot - it LIMPS, at
+#  15% speed. You can still drag yourself to the pad, but a
+#  crawl across the house costs you most of the match, so the
+#  real skill is leaving for the dock in time, every time.
+#  روی پد پارک کن: ۲۵٪ در ثانیه پر می‌شود. باتریِ صفر ربات را
+#  خاموش نمی‌کند — با ۱۵٪ سرعت می‌خزد. یعنی هنوز می‌توانی خودت را
+#  به پد برسانی، ولی خزیدن در طول خانه بیشترِ مسابقه‌ات را می‌خورد؛
+#  مهارتِ واقعی این است که هر بار «به‌موقع» راهیِ ایستگاه شوی.
 #
 #  The 10 s "stuck" watchdog is paused while you charge, but it
 #  is back the moment you hit 100% - so do not camp on the pad.

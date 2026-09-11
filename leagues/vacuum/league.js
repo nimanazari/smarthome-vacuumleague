@@ -167,8 +167,9 @@
       rb.battery = Math.max(0, rb.battery - (idle + (c.drive - idle) * effort) * dt);
     }
 
-    // a FLAT battery is final: speed multiplier 0 — the robot stands where it
-    // died until the end of the match (the referee's hand can still move it)
+    // a FLAT battery is not final: the pack returns BATTERY.limp (0.15), so the
+    // robot crawls at 15% and can still drag itself onto the pad — see the
+    // battery model at the top of this file
     speedMul(rb) { return this.pack ? this.pack.speedMul(rb) : 1; }
 
     /* ---------------- the match ---------------- */
