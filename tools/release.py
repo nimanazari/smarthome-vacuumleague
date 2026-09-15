@@ -47,6 +47,10 @@ def stamp_build():
         return
     ap = os.path.join(ROOT, 'tools', 'app.py')
     a = io.open(ap, encoding='utf-8').read()
+    # the release NAME lives in app.py too, so the exe and the site can never
+    # disagree about what this version is called
+    m = re.search(r"^VERSION = '([^']*)'", a, flags=re.M)
+    version = m.group(1) if m else ''
     a2 = re.sub(r"^BUILD = '[^']*'", "BUILD = '" + sha + "'", a, count=1, flags=re.M)
     if a2 != a:
         io.open(ap, 'w', encoding='utf-8').write(a2)
@@ -54,12 +58,14 @@ def stamp_build():
     site = os.path.normpath(os.path.join(
         ROOT, '..', 'schedule', 'schedule', 'public', 'downloads', 'version.json'))
     if os.path.isdir(os.path.dirname(site)):
-        payload = ('{' + chr(10) + '  "build": "' + sha + '",' + chr(10)
+        payload = ('{' + chr(10)
+                   + ('  "version": "' + version + '",' + chr(10) if version else '')
+                   + '  "build": "' + sha + '",' + chr(10)
                    + '  "page": "https://smarthomeleague.ir/getting-started",' + chr(10)
                    + '  "note": "Rules, lessons and the app are all current on the website."' + chr(10)
                    + '}' + chr(10))
         io.open(site, 'w', encoding='utf-8').write(payload)
-        print('  version.json published', sha)
+        print('  version.json published', (version + ' / ' if version else '') + sha)
 
 stamp_build()
 

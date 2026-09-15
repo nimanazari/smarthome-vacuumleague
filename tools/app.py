@@ -35,9 +35,12 @@ import urllib.request
 import webbrowser
 import zipfile
 
-# The build this app was made from. tools/release stamps it; the site
-# publishes the current one at /downloads/version.json.
-BUILD = '9d8bf38'
+# What this release is CALLED, and the commit it was built from. The name is
+# what people say out loud ("2.0.4"); the build id is what the update check
+# actually compares, because two releases can share a name but never a commit.
+# tools/release.py stamps BUILD and publishes both at /downloads/version.json.
+VERSION = '2.0.4'
+BUILD = 'fdbae53'
 UPDATE_URL = 'https://smarthomeleague.ir/downloads/version.json'
 DOWNLOAD_PAGE = 'https://smarthomeleague.ir/getting-started'
 LOG = os.path.join(tempfile.gettempdir(), 'shl-log.txt')
@@ -158,7 +161,7 @@ def check_for_update():
     """Ask the site what the current build is. Quiet on every failure: a hall
     with no internet must still open the app."""
     try:
-        req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'SmartHomeLeague/' + BUILD})
+        req = urllib.request.Request(UPDATE_URL, headers={'User-Agent': 'SmartHomeLeague/' + VERSION + '+' + BUILD})
         with urllib.request.urlopen(req, timeout=6) as r:
             import json
             info = json.loads(r.read().decode('utf-8'))
@@ -170,8 +173,11 @@ def check_for_update():
         return
     log('a newer build is published: %s (this one is %s)' % (latest, BUILD))
     note = str(info.get('note') or '').strip()
+    # the site may name the new release; fall back to the bare build id
+    name = str(info.get('version') or '').strip()
+    theirs = (name + ' (build ' + latest + ')') if name else ('build ' + latest)
     msg = ('A newer version of the Smart Home League app is available.' + chr(10) + chr(10)
-           + 'You have build ' + BUILD + '; the current one is ' + latest + '.' + chr(10)
+           + 'You have ' + VERSION + ' (build ' + BUILD + '); the current one is ' + theirs + '.' + chr(10)
            + (note + chr(10) if note else '')
            + chr(10) + 'Open the download page now?' + chr(10) + chr(10)
            + 'You can keep playing with this version in the meantime.')

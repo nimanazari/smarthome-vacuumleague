@@ -87,6 +87,12 @@ python tools/make-kits.py
 `TeamKit/` تازه را زیپ کن و به تیم‌ها بده؛ `AdminKit/` مال خودت.
 """
 
+# Python leaves __pycache__ behind wherever a .py is imported or compiled, and
+# a compiled champion bot is still a champion bot: the name filter below only
+# looks at bots/champ_*.py, so a stray bots/__pycache__/champ_u19.pyc would sail
+# straight into the teams' kit. Nothing compiled belongs in a kit at all.
+JUNK = shutil.ignore_patterns('__pycache__', '*.pyc', '*.pyo')
+
 def clean(dst):
     if os.path.isdir(dst):
         shutil.rmtree(dst)
@@ -100,7 +106,7 @@ def copy_set(dst, files, dirs):
     for d in dirs:
         src = os.path.join(ROOT, d)
         if os.path.isdir(src):
-            shutil.copytree(src, os.path.join(dst, d))
+            shutil.copytree(src, os.path.join(dst, d), ignore=JUNK)
 
 def report(dst):
     n = sum(len(fs) for _, _, fs in os.walk(dst))
@@ -135,7 +141,7 @@ def build_admin():
             continue
         src = os.path.join(ROOT, name)
         if os.path.isdir(src):
-            shutil.copytree(src, os.path.join(dst, name))
+            shutil.copytree(src, os.path.join(dst, name), ignore=JUNK)
         else:
             shutil.copy2(src, os.path.join(dst, name))
     io.open(os.path.join(dst, 'ADMIN-README.md'), 'w', encoding='utf-8').write(ADMIN_README)
@@ -178,6 +184,14 @@ def build_team():
     h = h.replace("'relocBlue', 'lockBtn', 'dlBaseBtn'", "'relocBlue', 'dlBaseBtn'")
     io.open(idx, 'w', encoding='utf-8').write(h)
 
+    # last gate: a kit that still holds a champion solution - source or
+    # compiled - is a broken kit, and printing a warning nobody reads is not
+    # enough. Fail the build instead.
+    leaked = [os.path.join(r, f) for r, _, fs in os.walk(dst) for f in fs
+              if 'champ' in f.lower() or f.endswith(('.pyc', '.pyo'))]
+    if leaked:
+        raise SystemExit('TeamKit would ship ' + str(len(leaked)) + ' file(s) teams must not get:'
+                         + chr(10) + chr(10).join('  ' + p for p in leaked))
     io.open(os.path.join(dst, 'README.md'), 'w', encoding='utf-8').write(TEAM_README)
     build_offline(dst)
     report(dst)
