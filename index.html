@@ -2143,7 +2143,10 @@ if bumper == 1:            # something is in the way - goto will not dodge it!
             <tr><td><code>battery</code></td><td>how much charge is left, <code>0</code>–<code>100</code></td></tr>
             <tr><td><code>dockx</code> , <code>docky</code></td><td>the station's position in cm, in the same (0,0)-bottom-left grid as <code>x</code> / <code>y</code>. Both are <code>-1</code> in FS and U14 (there is no station).</td></tr>
           </table>
-          <div class="gp" style="margin-top:14px"><b>&#128465; The dust bin — U19, ONE player only.</b> A real robot cannot
+          <div class="gp" style="margin-top:14px"><b>&#128465; The dust bin — switched OFF this season.</b> The emptying
+            station is not placed in the competition houses, so the bin never fills and <code>dumpx</code> /
+            <code>dumpy</code> read <code>-1</code>. The rule below is kept for the day it is turned back on.</div>
+          <div class="gp" style="margin-top:8px"><b>U19, ONE player only.</b> A real robot cannot
             clean a whole house on one bin-load. Yours holds <b>30 tiles</b>: fill it and the robot
             <b>cleans nothing at all</b> — it drives on, the floor stays dirty, the score stops — until it
             reaches the <b>emptying station</b>, which is its own machine, nowhere near the charging pad.
@@ -2161,10 +2164,10 @@ if dust &gt; 24 and state == 0:
     goto(dumpx, dumpy)         # the station's coordinates arrive as variables
 if state == 1 and dustfull == 0 and dust == 0:
     state = 0                  # emptied — back to cleaning</pre>
-          <div class="gp" style="margin-top:8px"><b>An empty battery is the end of the road</b> — at <b>0%</b> the robot stops dead,
-            right where it stands, and cleans nothing for the rest of the match. The whole game is deciding
-            <b>when</b> to break off and charge: leave it too late and the robot dies in the middle of the floor
-            while the rival keeps working.</div>
+          <div class="gp" style="margin-top:8px"><b>An empty battery does not kill the robot — it LIMPS</b> — at <b>0%</b> it keeps
+            going at <b>15 % speed</b>, so it can still drag itself to the pad. That crawl is the punishment: half a
+            house at a crawl costs you most of the match while the rival keeps working. The whole game is deciding
+            <b>when</b> to break off and charge, early enough that you never crawl.</div>
           <pre class="gcode"># go charge when the battery gets low, then go back to work
 if battery &lt; 30 and state == 0:
     state = 1
@@ -2183,13 +2186,13 @@ if bumper == 1:                # goto does not dodge - help it
     backward(1)
     state = 0</pre>
           <div class="gp" style="margin-top:8px"><b>The referee and the pad:</b> standing still normally gets you relocated after
-            10 seconds, but <b>not while you are charging</b> — the watchdog is paused as long as you are on the pad and
+            15 seconds, but <b>not while you are charging</b> — the watchdog is paused as long as you are on the pad and
             the battery is still climbing. The moment it hits 100&nbsp;% the normal rule is back, so <b>camping on the pad
             is not a strategy</b>: charge, then leave.</div>
           <div class="gp" style="margin-top:8px">A neat trick: <code>distto(dockx, docky)</code> tells you how far the pad is.
             The robot uses roughly 1.7&nbsp;% of battery per second at full speed and covers about 60&nbsp;cm
             in that second — so leave yourself a margin of at least
-            <code>distto(dockx, docky) / 30</code> percent of charge — plus a fat margin, because at 0% the robot stops for good.</div>
+            <code>distto(dockx, docky) / 30</code> percent of charge — plus a fat margin, because at 0% the robot does not die — it crawls at 15 % speed, and a crawl across the house costs more than the detour would have.</div>
         </div>
         <div class="gsec">
           <div class="gh">&#129455; Assistive Technology — guiding a person</div>
@@ -2296,8 +2299,8 @@ else:                          # turn AND drive toward them
           <table class="gt">
             <tr><td>Scoring</td><td><b>last touch wins</b> — drive over a tile and it becomes yours, even if the rival cleaned it first</td></tr>
             <tr><td>The rug</td><td>green, half speed, gives <b>no points</b> and cannot be cleaned</td></tr>
-            <tr><td>Stuck for 15 s</td><td>the referee's system moves you to a random spot and you <b>lose 5 tiles</b></td></tr>
-            <tr><td>Referee controls</td><td>in the <b>☰ menu</b> (top left): Relocate (also −5 tiles), Stop, End Game, and 2x game speed</td></tr>
+            <tr><td>Stuck for 15 s</td><td>the referee's system moves you to a <b>random tile at least 6 tiles away</b> and the fine climbs: <b>−5, then −10, then −12 tiles</b></td></tr>
+            <tr><td>Referee controls</td><td>in the <b>☰ menu</b> (top left): Relocate (the same climbing fine), Stop, End Game, and 2x game speed</td></tr>
             <tr><td>A draw</td><td>goes to <b>overtime</b>: +10 seconds, then +5 seconds each time until someone leads</td></tr>
           </table>
         </div>
@@ -2504,7 +2507,7 @@ else:                          # turn AND drive toward them
 
       <!-- U19 only: the battery rules, spelled out where the referee can see them -->
       <div class="finalrow" id="modeRow">
-        <span id="modeDesc">&#9889; <b>U19</b> — every robot runs on a <b>battery</b> (100 %, about 60 s of full-throttle driving). The <b>charging station</b> has a <b>fixed home</b> in the house and its coordinates are sent to both robots as <code>dockx</code> / <code>docky</code> (cm). Park on it to refill, then get back to work. At <b>0%</b> the robot <b>stops dead where it stands</b> — plan the trips home before it is too late.<br>&#128465; <b>One player only</b> — the <b>dust bin</b> holds <b>30 tiles</b>. Full means the robot cleans <b>nothing</b> until it drives to the <b>emptying station</b> (<code>dumpx</code> / <code>dumpy</code>), which stands apart from the charging pad: two errands, two trips.</span>
+        <span id="modeDesc">&#9889; <b>U19</b> — every robot runs on a <b>battery</b> (100 %, about 60 s of full-throttle driving). The <b>charging station</b> has a <b>fixed home</b> in the house and its coordinates are sent to both robots as <code>dockx</code> / <code>docky</code> (cm). Park on it to refill, then get back to work. At <b>0%</b> the robot does not die — it <b>limps at 15 % speed</b> until it reaches the pad, which costs most of the match, so plan the trips home before it is too late.</span>
       </div>
 
       <!-- FINAL only: the CAT erases painted tiles it walks over -->
@@ -2673,9 +2676,9 @@ else:                          # turn AND drive toward them
 #     dockx, docky     where the charging station is, in cm (same grid as x,y)
 #                      a FIXED home by the east shelf - the same every match
 #                      both are -1 in FS and U14 (there is no station)
-#     Park ON the pad to refill: +25% per second. An EMPTY battery STOPS the
-#     robot dead where it stands - it will not move again, so leave enough
-#     charge to get back!   Rule of thumb: keep more than
+#     Park ON the pad to refill: +25% per second. An EMPTY battery does NOT
+#     kill the robot - it LIMPS at 15% speed, which costs you most of the
+#     match, so leave enough charge to get back!   Rule of thumb: keep more than
 #         distto(dockx, docky) / 30   percent in the tank.
 #     Example:   if battery < 30:
 #                    goto(dockx, docky)  # go charge, then carry on
@@ -2900,9 +2903,9 @@ else:                            # 7) nothing in the way -> full speed ahead
 #     dockx, docky     where the charging station is, in cm (same grid as x,y)
 #                      a FIXED home by the east shelf - the same every match
 #                      both are -1 in FS and U14 (there is no station)
-#     Park ON the pad to refill: +25% per second. An EMPTY battery STOPS the
-#     robot dead where it stands - it will not move again, so leave enough
-#     charge to get back!   Rule of thumb: keep more than
+#     Park ON the pad to refill: +25% per second. An EMPTY battery does NOT
+#     kill the robot - it LIMPS at 15% speed, which costs you most of the
+#     match, so leave enough charge to get back!   Rule of thumb: keep more than
 #         distto(dockx, docky) / 30   percent in the tank.
 #     Example:   if battery < 30:
 #                    goto(dockx, docky)  # go charge, then carry on
@@ -4998,7 +5001,7 @@ else:                            # 7) nothing in the way -> full speed ahead
           t.reloc++; t.relocLost += lost || 0;
           logEvent('reloc', color, reason + (lost ? ' −' + lost : ''), t.lx, t.ly);
         }
-        const why = reason === 'stuck' ? T(' ۱۰ ثانیه گیر کرده بود ← جابه‌جا شد', ' was stuck 10s → relocated')
+        const why = reason === 'stuck' ? T(' ۱۵ ثانیه گیر کرده بود ← جابه‌جا شد', ' was stuck 15s → relocated')
           : reason === 'free' ? T(' توسط داور جابه‌جا شد (بدون جریمه)', ' moved by referee (no penalty)')
             : T(' توسط داور جابه‌جا شد', ' relocated by referee');
         showToast(who + why + (lost ? '  ·  -' + lost + T(' کاشی', ' tiles') : ''));
@@ -5595,10 +5598,10 @@ else:                            # 7) nothing in the way -> full speed ahead
       // ---- 2. the battery reached zero (U19 only): a dead robot scores nothing
       if (engine.dock && t.flat > 3) {
         add('bad',
-          'باتری تمام شد و ربات ' + Math.round(t.flat) + ' ثانیه مرده ایستاد. '
+          'باتری تمام شد و ربات ' + Math.round(t.flat) + ' ثانیه با ۱۵٪ سرعت خزید. '
           + 'زودتر راهی شارژ شو: قبل از حرکت حساب کن رسیدن به پد چقدر شارژ می‌خواهد و '
           + 'کمی حاشیه بگذار.',
-          'The battery hit zero and the robot stood dead for ' + Math.round(t.flat) + 's. '
+          'The battery hit zero and the robot crawled at 15% speed for ' + Math.round(t.flat) + 's. '
           + 'Leave for the dock earlier — work out what the trip costs, then add a margin.',
           '/sensors#battery', 'درس باتری و ایستگاه شارژ', 'The battery lesson');
       }

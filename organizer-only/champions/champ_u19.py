@@ -9,7 +9,7 @@
 #  (the dust-bin errand is kept but INERT while the dump rule is
 #  off - dumpx reads -1 and that branch never fires). The champion
 #  runs a real STATE MACHINE with two errands:
-#  U19 یعنی مدیریت منابع: باتری‌ای که در صفر برای همیشه می‌میرد و
+#  U19 یعنی مدیریت منابع: باتری‌ای که در صفر به خزیدن ۱۵٪ می‌افتد و
 #  (تک‌نفره) مخزنی که هر ۳۰ کاشی پر می‌شود. قهرمان یک ماشین حالت
 #  واقعی با دو مأموریت دارد:
 #

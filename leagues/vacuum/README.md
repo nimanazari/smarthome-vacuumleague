@@ -73,8 +73,8 @@ it". The page also has a ☀️/🌙 light–dark toggle.
 
 Stealing (`steal`) is on in all three — no division turns it off. The battery in
 U19 uses this league's own numbers, set in `BATTERY` in `league.js`: 100 % is about
-60 s of full-throttle driving, the pad refills 25 %/s, `limp: 0` means an empty
-battery stops the robot dead for the rest of the match, and the pad has a fixed
+60 s of full-throttle driving, the pad refills 25 %/s, `limp: 0.15` means an empty
+battery does not stop the robot — it crawls at 15 % speed until it reaches the pad, and the pad has a fixed
 home at (7.1875, 5.9375) — by the east shelf.
 
 The starter programs are **bilingual**: every English comment block carries its
