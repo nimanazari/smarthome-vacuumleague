@@ -2186,7 +2186,7 @@ if bumper == 1:                # goto does not dodge - help it
     backward(1)
     state = 0</pre>
           <div class="gp" style="margin-top:8px"><b>The referee and the pad:</b> standing still normally gets you relocated after
-            15 seconds, but <b>not while you are charging</b> — the watchdog is paused as long as you are on the pad and
+            10 seconds, but <b>not while you are charging</b> — the watchdog is paused as long as you are on the pad and
             the battery is still climbing. The moment it hits 100&nbsp;% the normal rule is back, so <b>camping on the pad
             is not a strategy</b>: charge, then leave.</div>
           <div class="gp" style="margin-top:8px">A neat trick: <code>distto(dockx, docky)</code> tells you how far the pad is.
@@ -2301,7 +2301,7 @@ else:                          # turn AND drive toward them
             <tr><td>The rug</td><td>green, half speed, gives <b>no points</b> and cannot be cleaned</td></tr>
             <tr><td>Stuck for 15 s</td><td>the referee's system moves you to a <b>random tile at least 6 tiles away</b> and the fine climbs: <b>−5, then −10, then −12 tiles</b></td></tr>
             <tr><td>Referee controls</td><td>in the <b>☰ menu</b> (top left): Relocate (the same climbing fine), Stop, End Game, and 2x game speed</td></tr>
-            <tr><td>A draw</td><td>goes to <b>overtime</b>: +10 seconds, then +5 seconds each time until someone leads</td></tr>
+            <tr><td>A draw</td><td>stands: no overtime. It is worth a point each in the table, and a drawn knockout game is replayed</td></tr>
           </table>
         </div>
         <div class="gsec">
@@ -5001,7 +5001,7 @@ else:                            # 7) nothing in the way -> full speed ahead
           t.reloc++; t.relocLost += lost || 0;
           logEvent('reloc', color, reason + (lost ? ' −' + lost : ''), t.lx, t.ly);
         }
-        const why = reason === 'stuck' ? T(' ۱۵ ثانیه گیر کرده بود ← جابه‌جا شد', ' was stuck 15s → relocated')
+        const why = reason === 'stuck' ? T(' ۱۰ ثانیه گیر کرده بود ← جابه‌جا شد', ' was stuck 10s → relocated')
           : reason === 'free' ? T(' توسط داور جابه‌جا شد (بدون جریمه)', ' moved by referee (no penalty)')
             : T(' توسط داور جابه‌جا شد', ' relocated by referee');
         showToast(who + why + (lost ? '  ·  -' + lost + T(' کاشی', ' tiles') : ''));
@@ -6024,6 +6024,11 @@ else:                            # 7) nothing in the way -> full speed ahead
           m.loserName = rec.winner === 'red' ? rec.blue : rec.red;
           cupAdvance(c); cupSave(c);
           rec.cup = cupPending;
+        } else if (m && !m.winner) {
+          // a drawn bracket game is REPLAYED (no overtime, no sudden death):
+          // the slot stays open, so the same fixture can simply be run again
+          showToast(T('مساوی شد — بازی حذفی دوباره اجرا می‌شود: همین مسابقه را از جدول جام دوباره شروع کن',
+            'A draw — a knockout game is replayed: start this same fixture again from the cup table'));
         }
         cupPending = null;
         startMatch._mustWin = false;

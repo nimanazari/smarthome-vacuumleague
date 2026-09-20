@@ -78,24 +78,29 @@ actual behaviour of the game engine: every number you read here is the number th
 Version 4.0 supersedes 3.1 — the relocation rule, the competition structure (Swiss and
 round-robin), draws and overtime, and every field number have been rewritten. Clauses of 3.1 that
 do not exist in the simulator — the <code>Cleaning % × K</code> formula, "Boost Stations",
-"GPS jamming" and "Light View" — <b>have been removed and are no longer in force</b>.</div>
+"GPS jamming" and "Light View" — <b>have been removed and are no longer in force</b>.
+What changed this season: every division now plays <b>180 s</b>, the stuck watchdog fires at
+<b>10 s</b>, the fine is a flat <b>2 tiles</b> with no fine at all below 10 tiles, and
+<b>overtime is gone</b>.</div>
 
 <h2>1 · The match at a glance</h2>
 <table>
 <tr><th>Topic</th><th>Rule</th></tr>
-<tr><td>Format</td><td><b>Two robots, head to head</b> in one house: red (Team 1) and blue (Team 2)</td></tr>
+<tr><td>Format</td><td><b>Two robots, head to head</b> in one house: Team 1 and Team 2. <b>Each team picks its own robot colour</b> (red and blue by default)</td></tr>
 <tr><td>Scoring</td><td>Every <b>floor tile</b> you drive over turns your colour and is worth <b>1 point</b></td></tr>
-<tr><td>Stealing</td><td><b>Last touch owns the tile</b> — driving over the rival's tile takes it from them</td></tr>
-<tr><td>Clock</td><td>FS <b>120 s</b> · U14 and U19 <b>180 s</b> · Super team <b>240 s</b></td></tr>
-<tr><td>Getting stuck</td><td><b>15 s</b> without progress → automatic relocation with a climbing fine of <b>5 / 10 / 12</b> tiles</td></tr>
-<tr><td>Draws</td><td>Overtime: <b>+10 s</b>, then five steps of <b>+5 s</b> — 35 s in all</td></tr>
+<tr><td>Who owns a tile</td><td><b>The last cleaning wins</b> — clean over the rival's tile and the tile becomes yours</td></tr>
+<tr><td>Clock</td><td><b>180 s</b> in all three divisions · the super-team clock is announced on match day</td></tr>
+<tr><td>Getting stuck</td><td><b>10 s</b> without progress → automatic relocation, <b>2 tiles</b>; no fine at all below 10 tiles</td></tr>
+<tr><td>Draws</td><td>No overtime. A draw is recorded and is worth <b>1 point</b> each in the table</td></tr>
 <tr><td>Winner</td><td>Whoever owns more tiles when the clock stops</td></tr>
-<tr><td>Language</td><td><code>Python</code> — fully autonomous; there is no manual control of any kind</td></tr>
+<tr><td>Language</td><td><code>Python</code></td></tr>
 </table>
 
 <h2>2 · The robot and its sensors</h2>
-<p>The robots are autonomous virtual vacuum cleaners, and they are <b>ready-made in all three
-divisions</b> — nobody builds a robot. A team picks a colour and writes the brain.</p>
+<p>All of it is a <b>simulation</b>: the robot, the house and the sensors are built into the
+simulator and are ready in all three divisions. A team does two things — <b>pick its robot's
+colour</b> and write that robot's Python code. The colour is appearance only; it changes no rule
+and no score. Red and blue are the defaults.</p>
 
 <h3>2.1 What the robot can do</h3>
 <ul>
@@ -132,7 +137,7 @@ navigation and a better score. A team is expected to make full use of every sens
 <div class="cap">Figure 4 — the official field seen from straight above</div>
 <ul>
   <li><b>3.1 The field:</b> a house of <b>22×22 tiles</b> at <b>62.5 cm</b> per tile (about 13.75 × 13.75 m): hall, kitchen, three bedrooms and a bathroom. <b>All three divisions play this same house</b>; what differs between them is the sensors and which rules are switched on, not the map.</li>
-  <li><b>3.2 Starting corners:</b> Team 1 (red) bottom-left, Team 2 (blue) top-right. The <b>in-game coin flip</b> before each match decides which team is Team 1.</li>
+  <li><b>3.2 Starting corners:</b> Team 1 bottom-left, Team 2 top-right. The <b>in-game coin flip</b> before each match decides which team is Team 1.</li>
   <li><b>3.3 What scores:</b> open floor only. <b>Rugs and the space under furniture are never counted.</b></li>
   <li><b>3.4 Rugs:</b> the <b>green</b> rug halves your speed and scores nothing. The <b>purple, orange and cyan</b> rugs are doorway markers only: full speed, no points.</li>
   <li><b>3.5 The door:</b> on every standard map <b>one</b> room has a door. <b>A door is not a wall:</b> distance sensors see straight through it, and it opens by itself the moment a robot reaches it — no pushing, no collision recorded. About <b>8 s</b> later, if no robot is in the frame, it closes again.</li>
@@ -145,30 +150,31 @@ navigation and a better score. A team is expected to make full use of every sens
 <h2>4 · Scoring, the end of a match, and draws</h2>
 <ol>
   <li>Every cleaned floor tile = <b>1 point</b>.</li>
-  <li><b>Last touch owns the tile:</b> driving over the rival's tile takes it from them. This is <b>on in all three divisions</b> and no division turns it off.</li>
+  <li><b>The last cleaning wins:</b> clean over the rival's tile and that tile becomes yours. This is <b>on in all three divisions</b>.</li>
   <li>The scoreboard also shows the house percentage: how much of the house has been cleaned.</li>
   <li>The match ends when the clock does; whoever owns more tiles wins.</li>
-  <li><b>A draw does not end the match.</b> Overtime is added in this ladder:</li>
+  <li><b>There is no overtime.</b> When the clock stops, that is the result. Level scores are recorded as a <b>draw</b>, worth <b>1 point</b> to each team in the table.</li>
 </ol>
-<div class="formula">+10 s , then +5 , +5 , +5 , +5 , +5 &nbsp;—&nbsp; six periods at most, 35 s in total</div>
-<p>If it is still level after all of that, the result stands as a <b>draw</b>. In <b>knockout</b>
-games a draw is not accepted: after the same ladder, <b>sudden death</b> continues in <b>+5 s</b>
-steps until one team goes ahead (§7.4). The referee's <b>End Game</b> grants no overtime — the
-result is final at that instant.</p>
+<div class="note"><b>A knockout game cannot be drawn, but no seconds are added either:</b> the
+match is <b>played again</b> — the same two teams, the same map, a fresh match — until one side
+wins. When the replay happens is the referee's call. The rule is deliberate: in a Swiss league we
+do not want the day's schedule bent out of shape by a handful of matches running long.</div>
 
 <h2>5 · Penalties and referee intervention</h2>
 <h3>5.1 Relocation — the core refereeing rule</h3>
 <table>
 <tr><th>Event</th><th>Condition</th><th>Cost</th></tr>
-<tr><td><b>Stuck (automatic)</b></td><td>The robot stays <b>15 s</b> inside a circle of <b>0.85 m</b> radius — spinning on the spot counts</td><td>It is moved to a <b>random</b> free tile anywhere in the house, at least <b>6 tiles</b> away from where it got stuck, plus the fine</td></tr>
+<tr><td><b>Stuck (automatic)</b></td><td>The robot stays <b>10 s</b> inside a circle of <b>0.85 m</b> radius — spinning on the spot counts</td><td>It is moved to a <b>random</b> free tile anywhere in the house, at least <b>6 tiles</b> away from where it got stuck, plus the fine</td></tr>
 <tr><td><b>Manual referee relocation</b></td><td>The Relocate button in the ☰ menu</td><td>Exactly the same fine</td></tr>
 </table>
-<p><b>The fine climbs, and is counted separately for each robot:</b></p>
-<div class="formula">first time −5 tiles &nbsp;·&nbsp; second time −10 tiles &nbsp;·&nbsp; third and every one after it −12 tiles</div>
+<p><b>The fine is one flat number, with a floor under it:</b></p>
+<div class="formula">every relocation −2 tiles &nbsp;·&nbsp; while the team owns fewer than 10 tiles, the fine is zero</div>
 <ul>
-  <li>These numbers are <b>the same in all three divisions</b>, and <b>there is no penalty-free relocation</b> — manual or automatic makes no difference.</li>
+  <li>These numbers are <b>the same in all three divisions</b>, and manual or automatic makes no difference.</li>
+  <li><b>The 10-tile floor</b> is there so that one early tangle does not pin a beginner to the bottom: until you own 10 tiles, a relocation is free.</li>
   <li>The fine always comes off the team's <b>own painted floor</b>: that many tiles turn white again and the score drops. A team that does not have that many tiles simply loses what it has.</li>
   <li><b>There is no cap on relocations</b> and a team does not have to "request" anything: the simulator's watchdog acts on its own and picks the destination itself. <b>The 3-relocation cap and the "−5 % of the total score" penalty from version 3.1 are withdrawn.</b></li>
+  <li><b>The climbing 5 / 10 / 12 fine is withdrawn too</b>, replaced by this flat 2 tiles.</li>
   <li><b>Two exceptions:</b> a robot that is <b>taking on charge</b> has its stuck clock paused — but it restarts the moment the battery is full, because <b>camping on the pad is not cleaning</b>; and a <b>low robot queueing beside the pad</b> is waiting in line, not stuck.</li>
   <li><b>A flat battery is not being stuck:</b> a crawling robot is neither moved nor fined.</li>
   <li>The landing spot is always a <b>fully open</b> tile and is generated from the match seed (§10.2) — so it is reproducible and can be checked in an appeal.</li>
@@ -188,15 +194,15 @@ the match time at which it was used.</p>
 <table>
 <tr><th></th><th>FS · First Step</th><th>U14 · Primary</th><th>U19 · Secondary</th></tr>
 <tr><td>Age group</td><td>8 – 11</td><td>11 – 14</td><td>14 – 19</td></tr>
-<tr><td>Match length</td><td><b>120 s</b></td><td><b>180 s</b></td><td><b>180 s</b></td></tr>
+<tr><td>Match length</td><td><b>180 s</b></td><td><b>180 s</b></td><td><b>180 s</b></td></tr>
 <tr><td>Cat and dog</td><td>off</td><td>on</td><td>on</td></tr>
 <tr><td>Water on the floor</td><td>off — no puddles on the map</td><td>off — no puddles on the map</td><td><b>on</b> — 10 % battery per entry</td></tr>
-<tr><td>Stealing tiles</td><td>on</td><td>on</td><td>on</td></tr>
-<tr><td>Relocation fine</td><td>5 / 10 / 12</td><td>5 / 10 / 12</td><td>5 / 10 / 12</td></tr>
+<tr><td>Last cleaning wins</td><td>on</td><td>on</td><td>on</td></tr>
+<tr><td>Relocation fine</td><td>2 tiles</td><td>2 tiles</td><td>2 tiles</td></tr>
 <tr><td>Battery and dock</td><td>off</td><td>off</td><td><b>on</b></td></tr>
 <tr><td>Dust bin</td><td>off</td><td>off</td><td>off (this season)</td></tr>
 <tr><td>Compass / GPS</td><td>no / no</td><td><b>yes</b> / no</td><td><b>yes</b> / <b>yes</b></td></tr>
-<tr><td>Robot building</td><td>none — ready-made</td><td>none — ready-made</td><td>none — ready-made</td></tr>
+<tr><td>The robot</td><td colspan="3" style="text-align:center">simulated and ready in all three divisions; the team picks its colour</td></tr>
 <tr><td>Writing the program</td><td>the 🤖 AI page and blocks</td><td>editor, blocks or 🤖 AI</td><td>the editor</td></tr>
 </table>
 
@@ -213,7 +219,7 @@ the match time at which it was used.</p>
 <div class="cap">Figure 6 — the U14 field: numbered rooms (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom) and the doorway marker rugs</div>
 <ul>
   <li>Everything FS has, plus the <b>compass</b> and a cat and dog on patrol.</li>
-  <li>A three-minute match with tile stealing — the tile you just cleaned is not yours until the whistle.</li>
+  <li>A three-minute match: the tile you just cleaned is not yours until the whistle, because the rival can clean over it.</li>
   <li><b>FINAL mode</b> may be switched on: the cat erases painted tiles.</li>
 </ul>
 
@@ -271,8 +277,8 @@ The round count never exceeds a full round-robin — past that, every game is a 
 <h3>7.3 The table, the points and the tiebreaks</h3>
 <table>
 <tr><th>Result</th><th>Table points</th></tr>
-<tr><td>Win (more tiles at the end of normal and overtime)</td><td><b>3</b></td></tr>
-<tr><td>Draw (still level after the full 35 s of overtime)</td><td><b>1</b></td></tr>
+<tr><td>Win (more tiles at the end of the 180 s)</td><td><b>3</b></td></tr>
+<tr><td>Draw</td><td><b>1</b></td></tr>
 <tr><td>Loss</td><td><b>0</b></td></tr>
 <tr><td>Bye</td><td><b>3</b> — with no tiles</td></tr>
 </table>
@@ -292,13 +298,14 @@ tiebreak. Teams level on every sporting criterion <b>share a rank</b>.</div>
 <h3>7.4 Playoffs and finals</h3>
 <ul>
   <li>Where a playoff is used, the top four teams meet as <b>1 v 4</b> and <b>2 v 3</b>, followed by the final and the third-place match. A top-8 playoff adds a quarter-final round in front.</li>
-  <li><b>A knockout game cannot be drawn:</b> after the overtime ladder of §4, <b>sudden death</b> continues in +5 s steps until one team goes ahead; only the referee's End Game can cut it short.</li>
+  <li><b>A drawn knockout game is replayed:</b> no seconds are added; the same two teams play a fresh match until there is a winner.</li>
   <li>In a round-robin without a playoff <b>the table decides the champion</b>; if the top two are level on tiebreaks 1 through 4 as well, a single-match final is played.</li>
 </ul>
 
 <h3>7.5 Fairness rules that hold in every format</h3>
 <ul>
   <li><b>One map per round:</b> every match of a round is played on the same map with the same settings.</li>
+  <li><b>No match ever runs past 180 s:</b> the day's schedule stays predictable and a Swiss round does not fall behind because of overtime.</li>
   <li><b>Corners by coin:</b> red/blue and bottom-left/top-right are decided by the in-game coin flip, never by table position. In a best-of-3 final the corners are swapped for the second game.</li>
   <li><b>The order of play is drawn:</b> in a round-robin the seats, the order of the rounds and the order of the matches within a round are all shuffled — the fixture list cannot be predicted in advance.</li>
   <li><b>Withdrawal:</b> a team that withdraws is taken off the table; the results its opponents already earned stay with them.</li>
@@ -312,13 +319,18 @@ the rounds</b>, and every field rule — relocation, fines, battery, water — i
 organiser announces before the event how many rounds there are and whether the worst one is dropped.</p>
 
 <h3>7.7 The super-team event (optional)</h3>
-<p>If time allows, teams join into "super teams" and solve a shared mission — announced on the day —
-in a <b>240-second</b> match. The winning super team receives a <b>certificate of honour</b>. The
-super-team result has no effect on the divisions' competition tables.</p>
+<p>If time allows, teams join into "super teams" and solve a shared mission. <b>The super team has
+no fixed match length</b>: both the mission and the length of the match are announced <b>on match
+day</b> (the number you see on the setup page is only a starting point, and the referee changes
+it). The winning super team receives a <b>certificate of honour</b>, and the result has no effect
+on the divisions' tables.</p>
 
 <h2>8 · Technical challenge, technical interview and the event total</h2>
-<p>A team's final standing at an event is built from three parts; the organiser announces the exact
-weight of each before the event:</p>
+<p>A team's final standing at an event is built from three parts:</p>
+<div class="note"><b>The technical challenge and the technical interview are not counted the same
+way every year.</b> In some years they carry <b>their own separate award</b> and stand outside the
+main competition; in others they feed <b>directly into the overall score</b>. Which of the two, and
+with what weight, is announced <b>before each event</b>.</div>
 <table>
 <tr><th>Part</th><th>What is measured</th></tr>
 <tr><td><b>8.1 Competition</b></td><td>The team's place in the table and playoff of §7</td></tr>
@@ -341,8 +353,8 @@ weight of each before the event:</p>
 </ul>
 <h3>9.3 Quarantine</h3>
 <ul>
-  <li>At the start of each quarantine the teams receive the full map for that round.</li>
-  <li>A set amount of time (it varies per event) is given for writing or fixing code in a controlled room.</li>
+  <li><b>The full map for a round is handed out about an hour before the match.</b></li>
+  <li>From that moment you have <b>45 minutes to an hour and a half</b> to write or fix your code on that map. The referee announces the exact figure for each round before quarantine starts.</li>
   <li>Inside quarantine no communication device (phone, tablet, smart watch, internet) and no outside source is allowed. Entering and leaving are forbidden.</li>
 </ul>
 <h3>9.4 Equipment and USB</h3>

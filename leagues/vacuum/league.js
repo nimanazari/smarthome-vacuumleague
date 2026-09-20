@@ -34,10 +34,18 @@
   // this file is loaded before the language is decided.
   const TR = (fa, en) => (root.LANG === 'fa' ? fa : en);
 
-  const PENALTY_TILES = [5, 10, 12];    // tiles lost on a robot's 1st, 2nd, 3rd+ relocation (manual or automatic)
+  // ONE FLAT FINE. Every relocation, manual or automatic, costs the same two
+  // tiles -- a climbing fine punished the team the house had already beaten.
+  const PENALTY_TILES = 2;    // tiles lost on every relocation (manual or automatic)
+  // ...and a team that has barely started cleaning is not fined at all: under
+  // PENALTY_FLOOR tiles the move is free, so an early bad bounce cannot put a
+  // beginner at zero and keep them there.
+  const PENALTY_FLOOR = 10;   // no fine while the team owns fewer tiles than this
   const WET_PENALTY = 2;      // tiles lost each time a robot drives onto a wet tile
-  // On a draw the match keeps going: +10s first, then +5s each time
-  const OVERTIME_STEPS = [10, 5, 5, 5, 5, 5];
+  // NO OVERTIME. A drawn match is a drawn match and scores a point each in the
+  // table; a drawn knockout game is REPLAYED, which is the referee's call, not
+  // the clock's. (A league that wants extra time can still set `overtime`.)
+  const OVERTIME_STEPS = [];
 
   // ---- battery model (U19) — the pack itself lives in robot-battery.js ----
   // An EMPTY battery no longer parks the robot for good: it LIMPS at a
@@ -276,12 +284,14 @@
     // Move a robot to a random free spot and take the penalty off its score.
     // `free` skips the tile penalty — the referee untangling a pile-up that
     // was nobody's fault should not have to fine somebody to do it.
-    // THE PENALTY CLIMBS: the first relocation of a robot costs 5 tiles, the
-    // second 10, the third and every one after it 12 — `rules.penalty` may be
-    // that list, or one number for a flat fine. Penalty-free moves do not count.
+    // THE FINE IS FLAT: every relocation costs `rules.penalty` tiles (2 by
+    // default), and none at all while the team is under the floor. A list is
+    // still accepted, for a division that wants a climbing fine back.
     nextPenalty(color) {
+      // a team still under the floor keeps everything it has
+      if ((this.scores[color] || 0) < (this.rules.penaltyFloor != null ? this.rules.penaltyFloor : PENALTY_FLOOR)) return 0;
       const p = this.rules.penalty;
-      const sched = Array.isArray(p) ? p : [p == null ? 5 : p];
+      const sched = Array.isArray(p) ? p : [p == null ? PENALTY_TILES : p];
       const n = (this.relocCount && this.relocCount[color]) || 0;
       return sched[Math.min(n, sched.length - 1)];
     }
@@ -540,7 +550,7 @@
 
   // Everything this league declares is exported, so each sub-league folder can
   // pull exactly what it needs without reaching into another league.
-  const api = { PENALTY_TILES, WET_PENALTY, OVERTIME_STEPS, BATTERY, VacuumMode, mk, HOUSE, ROOMS, GROWN, GROWN_ROOMS };
+  const api = { PENALTY_TILES, PENALTY_FLOOR, WET_PENALTY, OVERTIME_STEPS, BATTERY, VacuumMode, mk, HOUSE, ROOMS, GROWN, GROWN_ROOMS };
   root.VacuumLeague = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof self !== 'undefined' ? self : this);

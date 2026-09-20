@@ -286,15 +286,11 @@ class Engine {
       if (this.onOvertime) this.onOvertime(add, this.overtimeCount);
       return;
     }
-    // SUDDEN DEATH: a bracket game MUST produce a winner — once the normal
-    // overtime ladder is spent, a drawn cup match keeps extending +5 s at a
-    // time until somebody leads. Only the referee's End Game overrides it.
-    if (result === 'draw' && this.cfg.mustWin && !this._forceEnd) {
-      this.cfg.matchSeconds += 5;
-      this.overtimeCount++;
-      if (this.onOvertime) this.onOvertime(5, this.overtimeCount);
-      return;
-    }
+    // A DRAWN KNOCKOUT GAME IS REPLAYED. A bracket still needs a winner, but
+    // the clock is not the one who picks it: the match ends level, the slot
+    // stays open, and the referee runs the game again. `replayNeeded` is what
+    // the bracket reads to say so.
+    this.replayNeeded = !!(result === 'draw' && this.cfg.mustWin && !this._forceEnd);
     this.running = false; this.finished = true;
     this.winner = result;
   }

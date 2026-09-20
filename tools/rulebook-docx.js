@@ -32,7 +32,9 @@ const blocks = JSON.parse(fs.readFileSync(SRC, 'utf8'));
    first; Tahoma ships with every Windows and is the fallback Word reaches
    for, so a reader without Vazirmatn still sees correct Persian rather than
    boxes. */
-const FONT = RTL ? 'Vazirmatn' : 'Calibri';
+// One face for both editions. Vazirmatn carries Latin as well as Persian,
+// so the English book no longer looks like a different document.
+const FONT = 'Vazirmatn';
 const MONO = 'Consolas';
 const INK = '1a2230';
 const MUTED = '5a6675';
@@ -114,7 +116,7 @@ for (const b of blocks) {
   switch (b.k) {
     case 'title':
       kids.push(new Paragraph({
-        children: mk(b.r, { size: 52, bold: true, color: ACCENT, font: 'Calibri' }),
+        children: mk(b.r, { size: 52, bold: true, color: ACCENT, font: FONT }),
         alignment: AlignmentType.CENTER, spacing: { before: 900, after: 80 },
       }));
       break;
@@ -126,7 +128,7 @@ for (const b of blocks) {
       break;
     case 'author':
       kids.push(new Paragraph({
-        children: mk(b.r, { size: 20, color: MUTED, font: 'Calibri' }),
+        children: mk(b.r, { size: 20, color: MUTED, font: FONT }),
         alignment: AlignmentType.CENTER, spacing: { after: 500 },
       }));
       break;
@@ -239,7 +241,7 @@ const doc = new Document({
           alignment: AlignmentType.CENTER,
           children: [new TextRun({
             children: ['Smart Home League  ·  ', PageNumber.CURRENT],
-            size: 17, color: MUTED, font: 'Calibri',
+            size: 17, color: MUTED, font: FONT,
           })],
         })],
       }),

@@ -64,7 +64,7 @@ It **must** be served over HTTP. Opening `index.html` straight off the disk
 | | FS | U14 | U19 |
 |---|---|---|---|
 | ages | 8 – 11 | 11 – 14 | 14 – 19 |
-| match length | 120 s | 180 s | 180 s |
+| match length | 180 s | 180 s | 180 s |
 | cat + dog | off | on | on |
 | wet floor | off — and off every map | off | off |
 | relocate cost | 2 tiles | 5 tiles | 5 tiles |

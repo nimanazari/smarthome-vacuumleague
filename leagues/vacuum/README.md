@@ -3,7 +3,7 @@
 A cleaning race. Two robots share one house; every floor tile a robot drives over
 turns that robot's colour and is worth one point. Last touch wins a tile, so
 driving over the rival's tiles steals them back. The match ends on the clock, and
-the side owning more tiles wins. A draw keeps playing: +10 s, then +5 s at a time.
+the side owning more tiles wins. A draw stands as a draw — there is no overtime.
 
 Two things take tiles away again: the referee's relocate (a robot that has not
 moved for the stuck timeout is teleported and loses `penalty` tiles)
@@ -37,7 +37,7 @@ with SIX zones and 2-tile doorways: the hall/living (room 0), the kitchen
 | | FS | U14 | U19 |
 |---|---|---|---|
 | ages | 8 – 11 | 11 – 14 | 14 – 19 |
-| match length | 120 s | 180 s | 180 s |
+| match length | 180 s | 180 s | 180 s |
 | cat + dog (`pets`) | off | on | on |
 | wet floor (`wet`) | off — the puddles are mopped out of the map | off, likewise | off, likewise |
 | cleanable tiles | 431 | 427 | 427 |
