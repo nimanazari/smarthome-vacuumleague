@@ -53,344 +53,350 @@ a { color:#1d4ed8; text-decoration:underline; }
 <button class="printbtn" onclick="print()">🖨 Print / Save as PDF</button>
 <a class="langbtn" href="rulebook.html">نسخه‌ی فارسی</a>
 <div class="page">
-
 <div class="cover">
   <h1>Smart Home League</h1>
   <div class="sub">Official Rulebook — English Edition</div>
-  <span class="ver">VERSION 3.1 · FEBRUARY 2026</span>
+  <span class="ver">VERSION 4.0 · SEPTEMBER 2026</span>
   <div class="auth">Nima Nazari · Sina Zaker · Sina Nazari · Arshia Sadeghi</div>
   <img class="shot" id="shotHero" alt="Figure 1 — the official competition field" style="margin-top:18px">
-  <div class="cap">Figure 1 — The official competition field (rendered by the official simulator)</div>
+  <div class="cap">Figure 1 — the official competition field, rendered by the official simulator</div>
 </div>
 
 <h2>Abstract</h2>
 <p>The <b>Smart Home League</b> is an educational robotics competition that introduces students to
-the world of <b>smart homes and the Internet of Things (IoT)</b>: participants program autonomous
-robots inside a virtual smart home and learn what it takes to make a home "smart". Its goal is to
-develop <b>algorithmic thinking, programming, problem-solving and teamwork</b>.</p>
-<p>The league has several sub-leagues, and the <b>Smart Vacuum</b> is one of them — the sub-league
-whose rules this book describes. The Smart Home League runs at <b>FIRA</b> competitions and has so
-far been held at FIRA <b>Iran</b> and FIRA <b>Canada</b>.</p>
-<p>Everything runs <b>entirely virtually</b>, inside the league's own official simulator — the
-application delivered in your competition folder. The robot, the house, the sensors, the automatic
-refereeing and the match report all live in that single program. The robot must navigate several
-rooms on its own, avoid obstacles, manage its battery in U19, and clean as much of the house as it
-can. Alongside the matches, participants also take part in a <b>technical challenge</b> and a
-<b>technical interview</b>.</p>
-<h3>Key features</h3>
-<ul>
-  <li><b>Educational objectives:</b> algorithmic thinking and programming proficiency; hands-on
-  experience with smart-home automation and IoT concepts; teamwork and collaboration in a
-  competitive yet supportive setting.</li>
-  <li><b>Competition scope:</b> autonomous cleaning robots that navigate a home efficiently —
-  identifying rooms accurately, tracking cleaning progress, and avoiding obstacles.</li>
-  <li><b>Divisions:</b> First Step (newcomers) · U14 (Primary) · U19 (Secondary).</li>
-  <li><b>Programming language:</b> <b>Python</b>.</li>
-  <li><b>Environment:</b> the league's official simulator — on Windows and macOS, with nothing
-  else to install.</li>
-</ul>
+the world of the <b>smart home and the Internet of Things (IoT)</b>: competitors write programs for
+autonomous robots inside a virtual smart house. The goal is to build <b>algorithmic thinking,
+programming, problem solving and teamwork</b>. The league has several branches, and
+<b>Smart Vacuum</b> — the one this rulebook covers — is one of them. The Smart Home League runs
+within <b>FIRA</b> competitions and has been held at FIRA <b>Iran</b> and <b>Canada</b>.</p>
+<p>Everything runs <b>entirely virtually</b>, inside the league's own official simulator — the same
+program you received in your competition folder. The robot, the house, the sensors, the automatic
+refereeing and the match report all live in it. The robot must cross several rooms on its own,
+avoid obstacles, manage its battery in U19, and clean as much of the house as it can.</p>
+<div class="note"><b>This booklet is the final authority on the rules</b> and is written from the
+actual behaviour of the game engine: every number you read here is the number the code runs.
+Version 4.0 supersedes 3.1 — the relocation rule, the competition structure (Swiss and
+round-robin), draws and overtime, and every field number have been rewritten. Clauses of 3.1 that
+do not exist in the simulator — the <code>Cleaning % × K</code> formula, "Boost Stations",
+"GPS jamming" and "Light View" — <b>have been removed and are no longer in force</b>.</div>
 
-<h2>1 · Robots and Sensors</h2>
-<p>The robots are virtual autonomous vacuum robots. In every sub-league the robot is provided
-<b>ready-made</b>: teams select a team colour and write the control program only.</p>
-<h3>1.1 Robot features</h3>
+<h2>1 · The match at a glance</h2>
+<table>
+<tr><th>Topic</th><th>Rule</th></tr>
+<tr><td>Format</td><td><b>Two robots, head to head</b> in one house: red (Team 1) and blue (Team 2)</td></tr>
+<tr><td>Scoring</td><td>Every <b>floor tile</b> you drive over turns your colour and is worth <b>1 point</b></td></tr>
+<tr><td>Stealing</td><td><b>Last touch owns the tile</b> — driving over the rival's tile takes it from them</td></tr>
+<tr><td>Clock</td><td>FS <b>120 s</b> · U14 and U19 <b>180 s</b> · Super team <b>240 s</b></td></tr>
+<tr><td>Getting stuck</td><td><b>15 s</b> without progress → automatic relocation with a climbing fine of <b>5 / 10 / 12</b> tiles</td></tr>
+<tr><td>Draws</td><td>Overtime: <b>+10 s</b>, then five steps of <b>+5 s</b> — 35 s in all</td></tr>
+<tr><td>Winner</td><td>Whoever owns more tiles when the clock stops</td></tr>
+<tr><td>Language</td><td><code>Python</code> — fully autonomous; there is no manual control of any kind</td></tr>
+</table>
+
+<h2>2 · The robot and its sensors</h2>
+<p>The robots are autonomous virtual vacuum cleaners, and they are <b>ready-made in all three
+divisions</b> — nobody builds a robot. A team picks a colour and writes the brain.</p>
+
+<h3>2.1 What the robot can do</h3>
 <ul>
-  <li><b>Autonomous behaviour:</b> the robots operate autonomously, controlled exclusively by the
-  Python programs written by the participants; they execute tasks based on sensor inputs and the
-  team's algorithms.</li>
-  <li><b>Mobility:</b> equipped with two driven wheels, the robots move in all directions (forward,
-  backward, turning). Movement is controlled by setting velocity values for the left and right
-  wheels (<code>wheelleft</code> / <code>wheelright</code>).</li>
-  <li><b>Task-oriented design:</b> the robots are optimised for cleaning floor area within a
-  limited time frame; efficiency and collision avoidance are key to a high score.</li>
-  <li><b>Energy management (U19 only):</b> U19 robots include a simulated battery system;
-  participants must account for energy consumption in their algorithms.</li>
+  <li><b>Autonomy:</b> the robot runs on the team's own Python program and nothing else.</li>
+  <li><b>Driving:</b> by setting the left and right wheel speeds (<code>wheelleft</code> / <code>wheelright</code>, range −25..25): forward, backward, turn.</li>
+  <li><b>Ready-made moves:</b> <code>forward(s)</code>, <code>backward(s)</code>, <code>turnleft(s)</code>, <code>turnright(s)</code>, <code>stop(s)</code> — the number is real seconds.</li>
+  <li><b>Mission-driven design:</b> the most cleaning in a limited time; efficiency and avoiding collisions are what score.</li>
+  <li><b>Energy management (U19 only):</b> a simulated battery your algorithm has to account for.</li>
 </ul>
 
 <img class="shot" id="shotRobot" alt="Figure 2 — the competition robot">
-<div class="cap">Figure 2 — The competition robot on the official field</div>
-<h3>1.2 Sensors overview</h3>
+<div class="cap">Figure 2 — the competition robot on the official field</div>
+
+<h3>2.2 The sensors</h3>
 <img class="shot" id="shotSensors" alt="Figure 3 — sensor placement">
-<div class="cap">Figure 3 — Sensor placement: the three ultrasonic distance sensors (<code>front</code>, <code>frontleft</code>, <code>frontright</code>), the bumper ring in its two halves (<code>bumperfront</code> and <code>bumperback</code>) and the drive wheels</div>
+<div class="cap">Figure 3 — sensor placement: three ultrasonic distance sensors (<code>front</code>, <code>frontleft</code>, <code>frontright</code>), the bumper ring in two halves (<code>bumperfront</code> and <code>bumperback</code>) and the drive wheels</div>
 <table>
-<tr><th>Sensor</th><th>Function · variable names</th><th>Application</th><th>Leagues</th></tr>
-<tr><td><b>1.2.1 Distance sensors (Ultrasonic Sensor — US)</b></td>
-<td>Emit an ultrasonic pulse and measure its return time to compute distance. The robot carries
-<b>three</b> of them, acting as its eyes: <code>front</code> looks straight ahead,
-<code>frontleft</code> to the front-<b>left</b> and <code>frontright</code> to the
-front-<b>right</b> — all in centimetres (a smaller number means closer).</td>
-<td>Collision prevention; choosing a safe path.</td><td>All</td></tr>
-<tr><td><b>1.2.2 Bumper sensor</b></td>
-<td>Detects physical contact or immediate proximity to obstacles and reports it to the control
-program. Names: <code>bumper, bumperfront, bumperback</code> (0/1).</td>
-<td>Collision handling with walls and furniture; obstacle avoidance.</td><td>All</td></tr>
-<tr><td><b>1.2.3 Compass sensor</b></td>
-<td>Provides directional data relative to the virtual north as an angular value.
-Name: <code>heading</code> (0 = east, 90 = north, 180 = west, 270 = south).</td>
-<td>Maintaining direction; orienting toward a specific target.</td><td>U14 · U19</td></tr>
-<tr><td><b>1.2.4 Room number</b></td>
-<td>Each room carries a unique identifier; upon entry the robot reads the corresponding number in
-real time. Name: <code>room</code> (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom).</td>
-<td>Organised cleaning; following an optimised room-by-room path.</td><td>U14</td></tr>
-<tr><td><b>1.2.5 Room cleaning percentage</b></td>
-<td>Measures how much of each room has been cleaned, updated in real time.
-Names: <code>clean1 … clean5</code> (%).</td>
-<td>Tracking progress; leaving a finished room for the next one.</td><td>U14</td></tr>
-<tr><td><b>1.2.6 Colour sensor</b></td>
-<td>Measures the reflected RGB intensity beneath the robot and reports the surface colour.
-Name: <code>color</code>, with the predefined constants <code>white, green, purple, black, red, blue, orange, cyan</code>.</td>
-<td>Classifying floor markings; triggering behaviour on a detected colour.</td><td>All</td></tr>
-<tr><td><b>1.2.7 GPS sensor</b></td>
-<td>Reports the robot's precise coordinates. Names: <code>x, y</code> (cm), together with the
-navigation functions <code>goto(x, y)</code>, <code>distto(x, y)</code>, <code>angleto(x, y)</code>.</td>
-<td>Point-to-point navigation; route optimisation, including trips to the charging station.</td><td>U19</td></tr>
-<tr><td><b>1.2.8 Charging system</b></td>
-<td>Reports the remaining energy level. Names: <code>battery</code> (%), and the station
-coordinates <code>dockx, docky</code>, provided to both robots from the start of the match.</td>
-<td>Task prioritisation by available energy; recharge planning.</td><td>U19</td></tr>
+<tr><th>Sensor</th><th>What it does · code name</th><th>Divisions</th></tr>
+<tr><td><b>2.2.1 Distance (ultrasonic)</b></td><td>Sends a pulse and times its return: <code>front</code> straight ahead, <code>frontleft</code> ahead-left, <code>frontright</code> ahead-right — in centimetres, capped at 200 (smaller means closer)</td><td>All</td></tr>
+<tr><td><b>2.2.2 Bumper</b></td><td>Physical contact · <code>bumperfront</code>, <code>bumperback</code> and <code>bumper</code> ("either one") — 0 or 1</td><td>All</td></tr>
+<tr><td><b>2.2.3 Colour sensor</b></td><td>The floor just ahead · <code>color</code>: <code>white</code> uncleaned, <code>red</code>/<code>blue</code> owned by a robot, <code>green</code> the big rug, <code>purple</code>/<code>orange</code>/<code>cyan</code> doorway marker rugs, <code>black</code> wall or furniture</td><td>All</td></tr>
+<tr><td><b>2.2.4 Room number and clean-%</b></td><td><code>room</code> (0 hall · 1 kitchen · 2/3/4 bedrooms · 5 bathroom) and <code>clean1..clean5</code> — each room's percentage cleaned <b>by me</b></td><td>All</td></tr>
+<tr><td><b>2.2.5 Compass</b></td><td>The angle to virtual north · <code>heading</code> (0 right, 90 up, 180 left, 270 down)</td><td>U14 · U19</td></tr>
+<tr><td><b>2.2.6 Position (GPS)</b></td><td><code>x</code>, <code>y</code> in centimetres from the bottom-left corner, plus <code>goto(x,y)</code>, <code>atgoal</code>, <code>stopgoto()</code>, <code>distto</code>, <code>angleto</code> — <b>warning:</b> <code>goto</code> drives a straight line and does NOT dodge walls</td><td>U19</td></tr>
+<tr><td><b>2.2.7 Battery and dock</b></td><td><code>battery</code> (0..100) and the pad's fixed coordinates: <code>dockx</code>, <code>docky</code></td><td>U19</td></tr>
+<tr><td><b>2.2.8 The scoreboard</b></td><td><code>mytiles</code>, <code>rivaltiles</code>, <code>timeleft</code> — my tiles, the rival's tiles and the seconds left</td><td>All</td></tr>
+<tr><td><b>2.2.9 Memory between steps</b></td><td><code>timer</code>, <code>movetime</code>, <code>state</code>, <code>nextmove</code> — the program is called afresh every tick, so whatever must survive lives here</td><td>All</td></tr>
 </table>
-<div class="note"><b>1.3 Customisation.</b> Participants are expected to design algorithms that
-make full use of the sensors and motors provided. Creativity in combining sensor data — for
-example the compass together with the distance sensors — results in more efficient navigation
-and a higher score.</div>
+<p><b>2.3 Creativity is free:</b> combining sensor data (compass plus distance, say) leads to better
+navigation and a better score. A team is expected to make full use of every sensor and motor.</p>
 
-<h2>2 · Competition Environment</h2>
+<h2>3 · The competition house</h2>
+<img class="shot" id="shotTop" alt="the arena from straight above">
+<div class="cap">Figure 4 — the official field seen from straight above</div>
 <ul>
-  <li><b>2.1 The league's official simulator.</b> Matches run entirely virtually inside the
-  league's own simulator: the physics engine, every sensor, the automatic refereeing
-  (relocations, penalties, overtime) and the end-of-match report all live in that one
-  application.</li>
-  <li><b>2.2 Running it.</b> The folder you received contains two sub-folders, <b>Windows</b> and
-  <b>Mac</b>. Double-click <code>Smart Home League.exe</code> on Windows, or
-  <code>Smart Home League (Mac).command</code> on macOS. Nothing else needs to be installed.</li>
-  <li><b>2.3 Programming language.</b> <b>Python</b>. The base code, the sample robots and the
-  code-building helpers are inside the application itself (Base code and Helper on each
-  division's front page).</li>
-  <li><b>2.4 Learning material.</b> The in-app Tutorial is step-by-step and runnable; each
-  division also receives its own printed lesson booklet.</li>
+  <li><b>3.1 The field:</b> a house of <b>22×22 tiles</b> at <b>62.5 cm</b> per tile (about 13.75 × 13.75 m): hall, kitchen, three bedrooms and a bathroom. <b>All three divisions play this same house</b>; what differs between them is the sensors and which rules are switched on, not the map.</li>
+  <li><b>3.2 Starting corners:</b> Team 1 (red) bottom-left, Team 2 (blue) top-right. The <b>in-game coin flip</b> before each match decides which team is Team 1.</li>
+  <li><b>3.3 What scores:</b> open floor only. <b>Rugs and the space under furniture are never counted.</b></li>
+  <li><b>3.4 Rugs:</b> the <b>green</b> rug halves your speed and scores nothing. The <b>purple, orange and cyan</b> rugs are doorway markers only: full speed, no points.</li>
+  <li><b>3.5 The door:</b> on every standard map <b>one</b> room has a door. <b>A door is not a wall:</b> distance sensors see straight through it, and it opens by itself the moment a robot reaches it — no pushing, no collision recorded. About <b>8 s</b> later, if no robot is in the frame, it closes again.</li>
+  <li><b>3.6 Pets (U14 and U19):</b> a cat and a dog wander the house as <b>moving obstacles</b>; they are off in FS. In <b>FINAL mode</b> the cat erases painted tiles and takes the point back off their owner.</li>
+  <li><b>3.7 Water on the floor (U19 only):</b> four puddles — centred at <code>(6.88, 10.31)</code>, <code>(6.88, 3.44)</code>, <code>(11.56, 6.56)</code> and <code>(2.81, 7.19)</code>, each about one tile in radius — are <b>drawn on the floor from the first second</b> and appear on the printed map. Every <b>fresh entry</b> into water costs <b>10 % of the battery</b> (never tiles); standing in it costs nothing further. <b>FS and U14 have no water at all.</b></li>
+  <li><b>3.8 The charging pad (U19 only):</b> it has a fixed place on the map and its coordinates are given to both robots (<code>dockx</code>, <code>docky</code>).</li>
+  <li><b>3.9 Every object in the house is dynamic</b> and may move from one event to the next — but <b>within a round the map and the settings are identical for every team</b>.</li>
 </ul>
 
-<h2>3 · Game Structure</h2>
-<p>Teams must design algorithms that enable their robots to move safely and efficiently while
-detecting and avoiding walls, furniture, and other obstacles within the home. As the robot moves
-across the field, the surface it covers is considered cleaned, and the final score is primarily
-based on the <b>percentage of area successfully covered within the given time limit</b>. The
-competition is structured into three sub-leagues of increasing complexity.</p>
-<img class="shot" id="shotTop" alt="Figure 2 — the official field, orthographic top view">
-<div class="cap">Figure 4 — The official field, orthographic top view</div>
+<h2>4 · Scoring, the end of a match, and draws</h2>
+<ol>
+  <li>Every cleaned floor tile = <b>1 point</b>.</li>
+  <li><b>Last touch owns the tile:</b> driving over the rival's tile takes it from them. This is <b>on in all three divisions</b> and no division turns it off.</li>
+  <li>The scoreboard also shows the house percentage: how much of the house has been cleaned.</li>
+  <li>The match ends when the clock does; whoever owns more tiles wins.</li>
+  <li><b>A draw does not end the match.</b> Overtime is added in this ladder:</li>
+</ol>
+<div class="formula">+10 s , then +5 , +5 , +5 , +5 , +5 &nbsp;—&nbsp; six periods at most, 35 s in total</div>
+<p>If it is still level after all of that, the result stands as a <b>draw</b>. In <b>knockout</b>
+games a draw is not accepted: after the same ladder, <b>sudden death</b> continues in <b>+5 s</b>
+steps until one team goes ahead (§7.4). The referee's <b>End Game</b> grants no overtime — the
+result is final at that instant.</p>
 
-<h3>3.1 First Step sub-league</h3>
+<h2>5 · Penalties and referee intervention</h2>
+<h3>5.1 Relocation — the core refereeing rule</h3>
+<table>
+<tr><th>Event</th><th>Condition</th><th>Cost</th></tr>
+<tr><td><b>Stuck (automatic)</b></td><td>The robot stays <b>15 s</b> inside a circle of <b>0.85 m</b> radius — spinning on the spot counts</td><td>It is moved to a <b>random</b> free tile anywhere in the house, at least <b>6 tiles</b> away from where it got stuck, plus the fine</td></tr>
+<tr><td><b>Manual referee relocation</b></td><td>The Relocate button in the ☰ menu</td><td>Exactly the same fine</td></tr>
+</table>
+<p><b>The fine climbs, and is counted separately for each robot:</b></p>
+<div class="formula">first time −5 tiles &nbsp;·&nbsp; second time −10 tiles &nbsp;·&nbsp; third and every one after it −12 tiles</div>
+<ul>
+  <li>These numbers are <b>the same in all three divisions</b>, and <b>there is no penalty-free relocation</b> — manual or automatic makes no difference.</li>
+  <li>The fine always comes off the team's <b>own painted floor</b>: that many tiles turn white again and the score drops. A team that does not have that many tiles simply loses what it has.</li>
+  <li><b>There is no cap on relocations</b> and a team does not have to "request" anything: the simulator's watchdog acts on its own and picks the destination itself. <b>The 3-relocation cap and the "−5 % of the total score" penalty from version 3.1 are withdrawn.</b></li>
+  <li><b>Two exceptions:</b> a robot that is <b>taking on charge</b> has its stuck clock paused — but it restarts the moment the battery is full, because <b>camping on the pad is not cleaning</b>; and a <b>low robot queueing beside the pad</b> is waiting in line, not stuck.</li>
+  <li><b>A flat battery is not being stuck:</b> a crawling robot is neither moved nor fined.</li>
+  <li>The landing spot is always a <b>fully open</b> tile and is generated from the match seed (§10.2) — so it is reproducible and can be checked in an appeal.</li>
+</ul>
+<h3>5.2 The battery (U19 only)</h3>
+<ul>
+  <li><code>battery</code> starts at 100; driving flat out burns about <b>1.7 % per second</b> (100 % ≈ 60 s at full speed).</li>
+  <li>On the charging pad it refills at about <b>25 % per second</b>.</li>
+  <li>At <b>zero</b> the robot does not die, but it only <b>crawls at 15 % speed</b> — it can drag itself to the pad, though crawling across the house eats most of the time left. The referee will not rescue it; this is the game's own rule.</li>
+  <li><b>The dust bin and the emptying station are switched off for this season's matches</b> and the bin never fills.</li>
+</ul>
+<h3>5.3 The referee's other controls</h3>
+<p>Stop, End Game, Restart and 2× speed — all in the ☰ menu. Each is recorded in the report with
+the match time at which it was used.</p>
+
+<h2>6 · The three divisions</h2>
+<table>
+<tr><th></th><th>FS · First Step</th><th>U14 · Primary</th><th>U19 · Secondary</th></tr>
+<tr><td>Age group</td><td>8 – 11</td><td>11 – 14</td><td>14 – 19</td></tr>
+<tr><td>Match length</td><td><b>120 s</b></td><td><b>180 s</b></td><td><b>180 s</b></td></tr>
+<tr><td>Cat and dog</td><td>off</td><td>on</td><td>on</td></tr>
+<tr><td>Water on the floor</td><td>off — no puddles on the map</td><td>off — no puddles on the map</td><td><b>on</b> — 10 % battery per entry</td></tr>
+<tr><td>Stealing tiles</td><td>on</td><td>on</td><td>on</td></tr>
+<tr><td>Relocation fine</td><td>5 / 10 / 12</td><td>5 / 10 / 12</td><td>5 / 10 / 12</td></tr>
+<tr><td>Battery and dock</td><td>off</td><td>off</td><td><b>on</b></td></tr>
+<tr><td>Dust bin</td><td>off</td><td>off</td><td>off (this season)</td></tr>
+<tr><td>Compass / GPS</td><td>no / no</td><td><b>yes</b> / no</td><td><b>yes</b> / <b>yes</b></td></tr>
+<tr><td>Robot building</td><td>none — ready-made</td><td>none — ready-made</td><td>none — ready-made</td></tr>
+<tr><td>Writing the program</td><td>the 🤖 AI page and blocks</td><td>editor, blocks or 🤖 AI</td><td>the editor</td></tr>
+</table>
+
+<h3>6.1 FS · First Step (ages 8 – 11)</h3>
 <img class="shot" id="shotFS" alt="Figure 5 — the First Step field">
-<div class="cap">Figure 5 — The First Step field: coloured marker rugs (purple, orange, cyan) identify each doorway. <b>The house itself is exactly the U14 house</b> (Figure 6); what differs is the <b>sensors the robot carries</b> — First Step has no compass, U14 does — and that <b>U14’s rooms are numbered</b>, so its robot can read <code>room</code> and <code>clean1..clean5</code>. In First Step those numbers do not exist.</div>
+<div class="cap">Figure 5 — the First Step field: the U14 house with the puddles mopped up; the coloured marker rugs (purple, orange, cyan) mark each doorway.</div>
 <ul>
-  <li>The robot must autonomously navigate the field, avoid walls, furniture, and obstacles, and
-  maximise the cleaned surface within the time limit.</li>
-  <li>Scoring is based solely on the total cleaning percentage; no bonus elements are included.</li>
+  <li>A quiet house: no pets, no water, no battery.</li>
+  <li>The robot has six senses: three distance sensors, the bumper ring and the colour sensor — plus what the house reports (<code>room</code> and <code>clean1..clean5</code>). No compass, no GPS.</li>
 </ul>
-<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K)<br>K = scoring factor (for example K = 40)</div>
 
-<h3>3.2 U14 sub-league</h3>
-<ul>
-  <li>The objectives are identical to First Step; in addition, the robots are equipped with the
-  <b>colour sensor</b>, the <b>room number</b>, and the <b>room cleaning percentage</b> sensors.</li>
-  <li><b>Boost Stations.</b> One or more Boost Stations are placed on the field. Entering a Boost
-  Station area grants bonus points; each station grants its bonus <b>only once per robot</b> —
-  re-entering the same station yields no additional points.</li>
-  <li><b>Dynamic starting position.</b> The starting position may change in each round; within a
-  given round it is identical for all teams to ensure fairness.</li>
-  <li><b>Light View mode.</b> The field may be presented in Light View, in which only the general
-  structure of the environment is known in advance; the exact locations of walls, rooms, and Boost
-  Stations are not fully specified.</li>
-</ul>
+<h3>6.2 U14 · Primary (ages 11 – 14)</h3>
 <img class="shot" id="shotU14" alt="Figure 6 — the U14 field with room numbers">
-<div class="cap">Figure 6 — The U14 field: numbered rooms (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom) with doorway marker rugs</div>
-<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K) + (Number of Boost Activations × 4K)</div>
-
-<h3>3.3 U19 sub-league</h3>
+<div class="cap">Figure 6 — the U14 field: numbered rooms (0 hall, 1 kitchen, 2/3/4 bedrooms, 5 bathroom) and the doorway marker rugs</div>
 <ul>
-  <li>The primary objective remains unchanged; in addition, the robots operate under an advanced
-  <b>energy-management challenge</b>: each robot has a limited battery capacity that must be
-  managed efficiently throughout the match.</li>
-  <li><b>Charging stations.</b> Designated charging stations are placed on the field. The robot
-  must autonomously travel to a charging station when necessary; strategic timing of recharging is
-  essential for optimal cleaning performance.</li>
-  <li><b>Light View mode.</b> The map may be provided in Light View: only the general structure of
-  the house is known in advance, and the exact positions of walls, doors, charging stations, and
-  even the starting point may vary.</li>
-  <li><b>GPS disruptions.</b> Connection issues may occur in certain rooms; in such areas the GPS
-  sensor may become temporarily unavailable. Teams must design robust, adaptive algorithms that
-  handle partial map information and intermittent sensor disruption while balancing cleaning
-  efficiency against energy consumption.</li>
-  <li>The map and sensor conditions are fixed for all teams within a round and do not change
-  between matches of that round.</li>
+  <li>Everything FS has, plus the <b>compass</b> and a cat and dog on patrol.</li>
+  <li>A three-minute match with tile stealing — the tile you just cleaned is not yours until the whistle.</li>
+  <li><b>FINAL mode</b> may be switched on: the cat erases painted tiles.</li>
 </ul>
+
+<h3>6.3 U19 · Secondary (ages 14 – 19)</h3>
 <img class="shot" id="shotU19" alt="Figure 7 — the U19 field with the charging station">
-<div class="cap">Figure 7 — The U19 field: no doorway marker rugs (navigation is coordinate-based); the charging station is highlighted</div>
-<div class="formula">Final Score = (Cleaning Percentage × K) − (Number of Relocates × K)</div>
-<div class="note"><b>Simulator field rules (U19).</b> A battery at 0% does not terminate the
-robot: it continues at 15% speed and resumes charging if it reaches the pad. Queueing behind an
-occupied charging pad is legitimate: a low-battery robot waiting beside the pad is not considered
-stuck, whereas a fully charged robot occupying the pad is subject to the automatic 15-second
-relocation watchdog. Waste disposal is currently disabled.</div>
-
-<h3>3.4 Scoring</h3>
-<h4>3.4.1 Cleaning percentage</h4>
-<p>Points are awarded based on the percentage of cleaned surface. The objective is to cover as
-much of the environment as possible within the time limit; the value is computed automatically by
-the system.</p>
-<h4>3.4.2 Technical challenges</h4>
-<p>Participants are given specific tasks that test programming skill and creativity beyond
-standard robot behaviour. Examples include:</p>
+<div class="cap">Figure 7 — the U19 field: the puddles and the charging station are marked; navigation here is coordinate-driven.</div>
 <ul>
-  <li><b>Wall following:</b> the robot follows the perimeter of a room while maintaining a
-  consistent distance from the wall.</li>
-  <li><b>Room navigation:</b> travelling from Room A to Room Z, stopping for a specified duration
-  (for example, ten seconds) before proceeding.</li>
-  <li><b>Dynamic obstacle avoidance:</b> detecting and avoiding moving objects placed in the
-  environment.</li>
-</ul>
-<h4>3.4.3 Technical interview</h4>
-<ul>
-  <li><b>Understanding of the code:</b> participants must be able to explain every part of their
-  algorithm clearly.</li>
-  <li><b>Innovation and problem-solving:</b> creativity in addressing unique challenges.</li>
-  <li><b>Team collaboration:</b> how responsibilities and tasks were distributed within the team.</li>
-  <li><b>External libraries:</b> all team members must know what each external library used in
-  their algorithm does and how it works.</li>
-  <li><b>Extension tools:</b> all team members must be able to present and explain the source code
-  of every helping tool they use, if any.</li>
+  <li>Everything U14 has, plus <b>GPS</b>, a <b>real battery</b> and <b>water on the floor</b>.</li>
+  <li>Timing the trips to the pad is itself part of the strategy; the right way around the water is by coordinates.</li>
 </ul>
 
-<h2>4 · Rules and Guidelines</h2>
-<h3>4.1 General rules</h3>
-<ol>
-  <li>Teams must consist of <b>2–6 participants</b>.</li>
-  <li>Robots must operate autonomously, using the Python programs written by the participants.</li>
-  <li>All participants must adhere to the competition schedule and the instructions of the judges.</li>
-  <li>The judges' decisions are final and binding; any dispute must follow the official written
-  procedure and be submitted professionally.</li>
-  <li>Teams must respect other teams, the judges, and the organisers throughout the event.</li>
-  <li>Every object in the world is dynamic and may change or be repositioned during the
-  competition.</li>
-  <li>A team that changes its algorithm during the competition must inform the Technical
-  Committee; failure to do so subjects all team members to a rigorous technical interview or
-  disqualification.</li>
-  <li>The Technical Committee is not responsible for software issues within the teams; it only
-  ensures that at least one laptop per team can run the latest version of the Smart
-  Home software in the U14 and First Step sub-leagues.</li>
-  <li>The use of external helping software is not restricted; any such tool is subject to
-  section 3.4.3.</li>
-  <li>The use of external libraries is not restricted; such libraries are subject to
-  section 3.4.3.</li>
-</ol>
-
-<h3>4.2 Team requirements</h3>
-<h4>4.2.1 Code submission</h4>
+<h2>7 · Competition structure: how many teams, which format</h2>
+<p>A division is run in one of two official shapes, and the organiser announces which before it starts:</p>
 <ul>
-  <li>Teams must submit their source code at the exact designated time before their match, placing
-  the USB drive containing the files into the designated container at the submission point.</li>
-  <li>Late submission or incorrect naming on the USB drive incurs the penalties defined for the
-  event.</li>
-  <li><b>File naming.</b> Before each match the judges announce the required naming format,
-  typically comprising the round number, the team name, and the <code>.py</code> extension.
-  Example: the team <i>Sweeper</i> playing in Round 2 submits <code>R2-Sweeper.py</code>.</li>
-</ul>
-<h4>4.2.2 Quarantine rules</h4>
-<ul>
-  <li>Teams receive the full map of the round at the start of each quarantine.</li>
-  <li>Teams have a fixed period, which varies per event, to write or modify their code in a
-  controlled quarantine environment before their match.</li>
-  <li>During quarantine, no communication devices (phones, tablets, smart watches, internet
-  access) or external resources are permitted. Violations, including communication with
-  individuals outside the quarantine, result in penalties or disqualification. Entering or
-  leaving the environment is forbidden.</li>
-</ul>
-<h4>4.2.3 Equipment requirements</h4>
-<ul>
-  <li>Teams must bring power strips (multi-plugs) and laptops that are fully charged and
-  accompanied by a functional charger.</li>
-</ul>
-<h4>4.2.4 USB drive requirements</h4>
-<ul>
-  <li>USB drives used for submission must be formatted and ready for use; must match the team name
-  displayed on the scoreboard; must carry a clearly written label with the team's name; and must
-  contain only the code related to the round.</li>
-</ul>
-<h4>4.2.5 Mentor behaviour</h4>
-<ul>
-  <li>Mentors must not communicate with students during quarantine; violations result in
-  penalties, including disqualification of the team for that round.</li>
-  <li>Complaints and objections must be submitted in writing and professionally; unprofessional
-  behaviour may result in mentor suspension or team disqualification.</li>
+  <li><b>Head-to-head:</b> teams play each other in pairs and a table is formed — <b>Swiss</b>, a <b>single round-robin</b> or a <b>double round-robin</b>. This is the main shape of the competition.</li>
+  <li><b>Solo rounds:</b> each team plays alone in the house and its cleaning percentage is recorded; the sum of the rounds gives the ranking (§7.6).</li>
 </ul>
 
-<h3>4.3 Scoring system</h3>
-<ul>
-  <li><b>Scoring across rounds:</b> the scores from all rounds are accumulated; the total score is
-  the sum of the points earned across the rounds (the exact calculation may vary per event).</li>
-  <li><b>Cleaning percentage:</b> computed automatically by the system for each round.</li>
-  <li>Technical challenge and technical interview: refer to sections 3.4.2 and 3.4.3.</li>
-</ul>
-
-<h3>4.4 Relocation and restart rules</h3>
-<ol>
-  <li>Each team is allowed up to <b>3 relocation requests</b> per match (this may vary per
-  event).</li>
-  <li>Relocation is permitted only if the robot is stuck against a wall or trapped in a looped
-  position, as verified by the judges.</li>
-  <li>Teams must notify the judges immediately to request a relocation.</li>
-  <li><b>Special case.</b> If the robot sinks into the ground or its wheels become stuck owing to
-  a simulation issue, the team may request that the referee extract the robot at the same
-  position, or request a full match restart once, subject to the decision of the Technical
-  Committee.</li>
-</ol>
-<div class="note"><b>Automatic watchdog (simulator).</b> A robot that fails to progress beyond a
-small circle for <b>15 seconds</b> is automatically relocated to an open position with the
-applicable penalty. Exceptions: a robot taking on charge, and a low-battery robot queueing beside
-the charging pad.</div>
-
-<h3>4.5 Super Team event (optional)</h3>
-<p>If time permits, an optional Super Team event may be organised. Teams collaborate to form
-larger super teams and solve a shared task announced on the day of the competition; the tasks may
-differ from the standard challenges and are designed to test creativity and teamwork. The winning
-super team receives a certificate of achievement.</p>
-
-<h3>4.6 Penalties</h3>
+<h3>7.1 Which format for how many teams — the official table</h3>
+<p>One match takes about <b>8 to 10 minutes</b> of arena time (setting up, loading two programs, the
+match itself, recording the result), so one arena fits about <b>40 matches</b> in a competition
+day. A full round-robin needs <b>n×(n−1)÷2</b> matches, and that number is what draws the line: up
+to <b>8 teams</b> a full round-robin fits in a day and is <b>the fairest format there is</b>,
+because every team plays everyone and the draw has no influence on the result at all. From
+<b>9 teams</b> upward a round-robin no longer fits (9 teams = 36 matches, 12 = 66, 16 = 120), and
+<b>Swiss</b> is the right replacement: the number of matches stays fixed, nobody is eliminated, and
+from round two on every team meets an opponent <b>on its own level</b>.</p>
 <table>
-<tr><th>Violation</th><th>Consequence</th></tr>
-<tr><td>Unauthorised intervention in, or modification of, the server or game settings</td>
-<td>Severe penalties for the team in that round</td></tr>
-<tr><td>Late file submission</td><td>Loss of <b>5% of the score per minute</b> of delay (may vary per event)</td></tr>
-<tr><td>USB violations: name not matching the scoreboard; missing label; the drive contains
-viruses; the drive is not empty or includes irrelevant files</td>
-<td><b>Disqualification for the relevant round</b></td></tr>
-<tr><td>Exceeding the relocation limit</td><td>Each additional relocation beyond the allowed three:
-<b>5% deduction from the total score</b></td></tr>
+<tr><th>Teams</th><th>Official format</th><th>Matches per team</th><th>Total matches</th></tr>
+<tr><td><b>2</b></td><td>Best-of-3 final, corners swapped</td><td>3</td><td>3</td></tr>
+<tr><td><b>3</b></td><td><b>Double</b> round-robin</td><td>4</td><td>6</td></tr>
+<tr><td><b>4 – 6</b></td><td><b>Single</b> round-robin — the table crowns the champion</td><td>n−1 (3 – 5)</td><td>6 – 15</td></tr>
+<tr><td><b>7 – 8</b></td><td>Single round-robin if there are two arenas or two days; otherwise <b>4-round Swiss + semi-finals</b></td><td>6 or 7</td><td>21 – 28</td></tr>
+<tr><td><b>9 – 16</b></td><td><b>5-round Swiss</b> + a top-4 playoff</td><td>5 (+2)</td><td>25 – 44</td></tr>
+<tr><td><b>17 – 32</b></td><td><b>6-round Swiss</b> + a top-4 playoff</td><td>6 (+2)</td><td>55 – 100</td></tr>
+<tr><td><b>33 – 64</b></td><td><b>7-round Swiss</b> + a top-8 playoff</td><td>7 (+3)</td><td>122 – 231</td></tr>
+<tr><td><b>65 and up</b></td><td><b>8-round Swiss</b> + a top-8 playoff, or two separate groups with a shared final</td><td>8 (+3)</td><td>260 and up</td></tr>
+</table>
+<div class="note"><b>The general rule for Swiss rounds: ⌈log₂n⌉ + 1, and never fewer than 4.</b>
+With ⌈log₂n⌉ rounds exactly one unbeaten team is left standing; the extra round is what stops a
+single bad match from ending a team's whole event, and it makes the tiebreaks mean something. If
+the organiser enters no number, the software works out a safe minimum on its own; either way
+<b>the number announced at the start of the event is binding</b> and does not change mid-competition.
+The round count never exceeds a full round-robin — past that, every game is a rematch.</div>
+
+<h3>7.2 How the Swiss system works</h3>
+<ol>
+  <li><b>Round 1 is a genuine draw:</b> nobody has a record yet, so the slots are handed out by a cryptographic random draw and the table is folded once — the top half against the bottom half.</li>
+  <li><b>From round 2 the table does the drawing:</b> teams on equal points form a "score group", and each group is split down the middle — <b>winners meet winners, losers meet losers</b>. An odd group floats one team down into the next.</li>
+  <li><b>Nobody meets the same opponent twice.</b> This is held for as long as the mathematics allows: the system puts a heavy cost on any repeat and builds the cheapest possible round out of all the ones available. Only when the rounds outnumber the opponents a team has not yet met does a rematch become unavoidable.</li>
+  <li><b>An odd number of teams means a bye:</b> a bye counts as a <b>win</b> (3 points) but scores <b>no tiles</b>, so its tile difference is zero. The bye goes to the <b>lowest-placed team</b> that has not had one yet, and <b>no team gets a second bye</b> until every team has had one.</li>
+  <li>The next round is only drawn once <b>every result of the current round</b> has been entered.</li>
+</ol>
+
+<h3>7.3 The table, the points and the tiebreaks</h3>
+<table>
+<tr><th>Result</th><th>Table points</th></tr>
+<tr><td>Win (more tiles at the end of normal and overtime)</td><td><b>3</b></td></tr>
+<tr><td>Draw (still level after the full 35 s of overtime)</td><td><b>1</b></td></tr>
+<tr><td>Loss</td><td><b>0</b></td></tr>
+<tr><td>Bye</td><td><b>3</b> — with no tiles</td></tr>
+</table>
+<p><b>The tiebreaks, in exactly this order:</b></p>
+<ol>
+  <li>Table points</li>
+  <li><b>Tile difference</b> — tiles scored minus tiles conceded, across the whole competition</li>
+  <li><b>Tiles scored</b></li>
+  <li><b>Buchholz</b> — the sum of the points of the opponents you have played (Swiss only)</li>
+  <li>A draw by the referee, in front of both teams' supervisors</li>
+</ol>
+<div class="note"><b>Why Buchholz comes last:</b> in a Swiss that folds the table, the leader keeps
+being handed the weakest opponents. A <b>high</b> Buchholz therefore marks a team that has been
+near the bottom, not one that had a hard road — which is why it is not used as the primary
+tiebreak. Teams level on every sporting criterion <b>share a rank</b>.</div>
+
+<h3>7.4 Playoffs and finals</h3>
+<ul>
+  <li>Where a playoff is used, the top four teams meet as <b>1 v 4</b> and <b>2 v 3</b>, followed by the final and the third-place match. A top-8 playoff adds a quarter-final round in front.</li>
+  <li><b>A knockout game cannot be drawn:</b> after the overtime ladder of §4, <b>sudden death</b> continues in +5 s steps until one team goes ahead; only the referee's End Game can cut it short.</li>
+  <li>In a round-robin without a playoff <b>the table decides the champion</b>; if the top two are level on tiebreaks 1 through 4 as well, a single-match final is played.</li>
+</ul>
+
+<h3>7.5 Fairness rules that hold in every format</h3>
+<ul>
+  <li><b>One map per round:</b> every match of a round is played on the same map with the same settings.</li>
+  <li><b>Corners by coin:</b> red/blue and bottom-left/top-right are decided by the in-game coin flip, never by table position. In a best-of-3 final the corners are swapped for the second game.</li>
+  <li><b>The order of play is drawn:</b> in a round-robin the seats, the order of the rounds and the order of the matches within a round are all shuffled — the fixture list cannot be predicted in advance.</li>
+  <li><b>Withdrawal:</b> a team that withdraws is taken off the table; the results its opponents already earned stay with them.</li>
+  <li><b>Failing to appear:</b> a team not at the arena by the end of the referee's call loses that match.</li>
+</ul>
+
+<h3>7.6 Solo rounds (the second shape)</h3>
+<p>If an event is run in solo rounds instead of head to head, each team plays alone for several
+rounds and the <b>cleaning percentage of each round</b> is recorded. The ranking is the <b>sum of
+the rounds</b>, and every field rule — relocation, fines, battery, water — is exactly the same. The
+organiser announces before the event how many rounds there are and whether the worst one is dropped.</p>
+
+<h3>7.7 The super-team event (optional)</h3>
+<p>If time allows, teams join into "super teams" and solve a shared mission — announced on the day —
+in a <b>240-second</b> match. The winning super team receives a <b>certificate of honour</b>. The
+super-team result has no effect on the divisions' competition tables.</p>
+
+<h2>8 · Technical challenge, technical interview and the event total</h2>
+<p>A team's final standing at an event is built from three parts; the organiser announces the exact
+weight of each before the event:</p>
+<table>
+<tr><th>Part</th><th>What is measured</th></tr>
+<tr><td><b>8.1 Competition</b></td><td>The team's place in the table and playoff of §7</td></tr>
+<tr><td><b>8.2 Technical challenge</b></td><td>Missions separate from ordinary cleaning, to measure programming skill and creativity: <b>wall following</b> (around a room at a constant distance from the wall), <b>room-to-room navigation</b> (from room A to room Z with, say, a 10-second stop halfway) and <b>avoiding a moving obstacle</b></td></tr>
+<tr><td><b>8.3 Technical interview</b></td><td><b>Understanding the code</b> — every member must be able to explain every part of the algorithm clearly — innovation and problem solving, the division of work within the team, and <b>every library or helper tool</b> you used (helpers included) must be explainable by the team itself</td></tr>
 </table>
 
-<h3>4.7 Additional notes</h3>
+<h2>9 · Team requirements</h2>
+<h3>9.1 The team</h3>
 <ul>
-  <li>Teams must use only the official competition files and environments provided by the
-  organisers.</li>
-  <li>The judges' decisions are final and cannot be contested; a team that submits an objection in
-  an unprofessional or inappropriate manner may face suspension at the discretion of the judges.</li>
-  <li>Participants are encouraged to review the rules thoroughly and clarify any doubts before the
-  competition.</li>
+  <li><b>2 to 6 members</b> per team.</li>
+  <li>Robots run only on the team's own Python program, fully autonomously.</li>
+  <li>Following the competition schedule and the referees' instructions is mandatory; so is respect towards teams, referees and organisers throughout the event.</li>
+</ul>
+<h3>9.2 Handing in the code</h3>
+<ul>
+  <li>The source code must be handed in <b>exactly at the announced time</b> before the match; the USB stick goes into the container at the hand-in point.</li>
+  <li>The referee announces the <b>file-name format</b> before each match — usually the round number + team name + <code>.py</code>. Example: team "Sweeper" in round 2 → <code>R2-Sweeper.py</code></li>
+  <li>Being late, or naming the file wrongly, carries a penalty (§11).</li>
+</ul>
+<h3>9.3 Quarantine</h3>
+<ul>
+  <li>At the start of each quarantine the teams receive the full map for that round.</li>
+  <li>A set amount of time (it varies per event) is given for writing or fixing code in a controlled room.</li>
+  <li>Inside quarantine no communication device (phone, tablet, smart watch, internet) and no outside source is allowed. Entering and leaving are forbidden.</li>
+</ul>
+<h3>9.4 Equipment and USB</h3>
+<ul>
+  <li>A power strip and a fully charged laptop with a working charger.</li>
+  <li>A formatted, ready USB stick; the name on the stick must match the name on the scoreboard; a legible label with the team name; <b>only that round's code on it</b>.</li>
+</ul>
+<h3>9.5 Coach conduct</h3>
+<ul>
+  <li>A coach may not communicate with the students during quarantine; a breach is penalised up to disqualification from that round.</li>
+  <li>Appeals must be written and professional; unprofessional conduct means suspension of the coach or disqualification of the team.</li>
 </ul>
 
-<h3>4.8 Contacting the Technical Committee</h3>
+<h2>10 · Official operation and the integrity of the result</h2>
+<ol>
+  <li><b>The official result comes from the referee's computer only.</b> The physics runs on a fixed 1/60 s step and does not depend on the monitor's frame rate; even so, the referee's station is the reference.</li>
+  <li><b>The match seed.</b> The referee may enter a numeric seed; left blank, a random one is generated and recorded. "Seed + map + the two code files" reproduces a match <b>exactly</b> — the destination of every relocation comes from that seed too.</li>
+  <li><b>Official mode (🔒).</b> Before every official game the referee enables Official mode with a PIN: live editing of the house, 2× speed, Shift+drag dragging and every way of swapping code are locked. This is the <b>code freeze</b>.</li>
+  <li><b>Code identity.</b> On loading, the first 12 digits of the file's SHA-256 are shown beside its name and recorded; handling an appeal means comparing those two hashes.</li>
+  <li><b>The compute budget.</b> A program that repeatedly burns more than <b>15 ms per tick</b> gets a referee warning; a repeat is a <b>technical loss</b> of that game.</li>
+  <li><b>Program errors.</b> A runtime error zeroes that tick's wheels and is counted; a program that errors on more than <b>20 % of the ticks</b> is a technical loser at the referee's discretion.</li>
+  <li><b>False starts.</b> "Restart match" voids the countdown or the running game and starts the same settings afresh; a voided run is recorded nowhere.</li>
+  <li><b>Records and exports.</b> Every match is logged automatically in the match book (CSV export), and each match report — a heat-map PNG plus the full JSON event log — can be downloaded and attached to an appeal.</li>
+  <li><b>Changing the algorithm</b> during the event must be reported to the technical committee; otherwise expect a strict interview or even disqualification.</li>
+  <li>The technical committee is not responsible for teams' own software problems; it only guarantees that at least one laptop per team can run the latest league software.</li>
+  <li>External software and libraries are <b>allowed</b> — but they fall under the technical interview of §8.3.</li>
+</ol>
+
+<h2>11 · Disciplinary penalties</h2>
+<table>
+<tr><th>Offence</th><th>Consequence</th></tr>
+<tr><td>Unauthorised tampering with the server or the game settings</td><td>Technical loss of that round, up to removal from the event</td></tr>
+<tr><td>Handing the file in late</td><td><b>−5 % of the score per minute</b> late</td></tr>
+<tr><td>USB: name not matching the table, unlabelled, infected, or carrying unrelated files</td><td><b>Disqualification from that round</b></td></tr>
+<tr><td>Breaching quarantine (communication device, outside source, entering or leaving)</td><td>Penalty up to <b>removal from the event</b></td></tr>
+<tr><td>A coach communicating with the team in quarantine</td><td>Penalty up to disqualification from that round</td></tr>
+<tr><td>Failing to appear for a match</td><td>Loss of that match</td></tr>
+</table>
+<p><b>Closing notes:</b> only the organiser's official files and environments may be used · the
+referee's decision is final and appeals are accepted only through the official written route; an
+unprofessional appeal can lead to suspension · read the rules in full before the competition and
+ask about anything unclear early.</p>
+
+<h2>12 · Contacting the technical committee</h2>
 <ul>
-  <li><b>Discord:</b> a dedicated server for real-time announcements, technical queries, and
-  community discussion — <a href="https://discord.gg/Pf4ND7bbHR" target="_blank" rel="noopener">discord.gg/Pf4ND7bbHR</a></li>
-  <li><b>Telegram:</b> the official group for updates, reminders, and direct communication during
-  the competition — <a href="https://t.me/firasmarthome" target="_blank" rel="noopener">t.me/firasmarthome</a></li>
-  <li><b>Website:</b> the official Smart Home League website — rules and resources, tutorials and
-  guides, and downloads of the competition files and tools —
+  <li><b>Discord:</b> the dedicated server for live announcements, technical questions and discussion —
+  <a href="https://discord.gg/Pf4ND7bbHR" target="_blank" rel="noopener">discord.gg/Pf4ND7bbHR</a></li>
+  <li><b>Telegram:</b> the official group for fast news and direct contact during the event —
+  <a href="https://t.me/firasmarthome" target="_blank" rel="noopener">t.me/firasmarthome</a></li>
+  <li><b>Website:</b> the league's official site — rules, tutorials, downloads and tools —
   <a href="https://smarthomeleague.ir" target="_blank" rel="noopener">smarthomeleague.ir</a></li>
 </ul>
 
-<div class="cap" style="margin-top:22px">Smart Home League · Official Rulebook, Version 3.1 —
-in the event of any discrepancy, the official PDF document prevails.</div>
+<div class="cap" style="margin-top:22px">Smart Home League · Official Rulebook, version 4.0 — this text is the final authority and supersedes version 3.1.</div>
 </div>
 
 <script src="leagues/vacuum/maps/rooms.js"></script>
