@@ -39,8 +39,8 @@ import zipfile
 # what people say out loud ("2.0.4"); the build id is what the update check
 # actually compares, because two releases can share a name but never a commit.
 # tools/release.py stamps BUILD and publishes both at /downloads/version.json.
-VERSION = '2.0.4'
-BUILD = 'b51111f'
+VERSION = '2.1.0'
+BUILD = '3adbd06'
 UPDATE_URL = 'https://smarthomeleague.ir/downloads/version.json'
 DOWNLOAD_PAGE = 'https://smarthomeleague.ir/getting-started'
 LOG = os.path.join(tempfile.gettempdir(), 'shl-log.txt')
